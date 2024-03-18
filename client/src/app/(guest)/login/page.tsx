@@ -3,6 +3,13 @@ import LoginForm from "./partials/form";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth-options";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+    title: 'Login - Database Auditor',
+}
 
 export default async function Page() {
     const session = await getServerSession(authOptions);
@@ -24,6 +31,12 @@ export default async function Page() {
 
                 <CardContent>
                     <LoginForm />
+                    <div className="flex justify-end w-full">
+                        <Link href={"/register"} className={buttonVariants({
+                            variant: "link",
+                            className: "py-0"
+                        })}>Registrarse</Link>
+                    </div>
                 </CardContent>
 
             </Card>

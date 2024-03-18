@@ -8,6 +8,7 @@ export default withAuth(
   function middleware(req) {
     const path = req.nextUrl.pathname
     const user: any = req.nextauth.token
+    console.log(user)
 
     if (user && path === "/login") {
       return NextResponse.redirect(new URL("/", req.url))
@@ -30,6 +31,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|api/auth|login).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|api/auth|login|register).*)',
   ],
 }

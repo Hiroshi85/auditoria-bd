@@ -111,7 +111,7 @@ export default function RegisterFrom() {
                     {/* Submit */}
                     <Button type="submit" className="mt-3 w-full" disabled={form.formState.isSubmitting}>
                         {
-                            form.formState.isSubmitting ? "Cargando..." : "Iniciar sesión"
+                            form.formState.isSubmitting ? "Cargando..." : "Registrarse"
                         }
                     </Button>
 
