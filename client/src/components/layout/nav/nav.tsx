@@ -2,6 +2,7 @@ import { User, getServerSession } from "next-auth"
 import UserButton from "./user-button"
 import Image from "next/image"
 import { authOptions } from "@/server/auth-options"
+import NavRoutes from "./routes.nav"
 
 export default async function Nav() {
   const session = await getServerSession(authOptions)
@@ -11,6 +12,10 @@ export default async function Nav() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="font-bold text-xl">SISTEMA AUDITORIA</h1>
+          </div>
+
+          <div>
+            <NavRoutes />
           </div>
 
           <div>

@@ -8,8 +8,7 @@ export default withAuth(
   function middleware(req) {
     const path = req.nextUrl.pathname
     const user: any = req.nextauth.token
-    console.log(user)
-
+    
     if (user && path === "/login") {
       return NextResponse.redirect(new URL("/", req.url))
     }
