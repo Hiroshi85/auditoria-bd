@@ -49,7 +49,22 @@ export default function DatabaseConnectionForm() {
     })
 
     async function onSubmit(data: z.infer<typeof schema>) {
-        console.log("enviando datos...")
+        const toastId = toast.loading("Conectando...")
+        
+        const response = await dataConnection.saveConnection({
+            engine: data.engine as DatabaseConnectionsType,
+            name: data.name,
+            host: data.host,
+            port: data.port,
+            username: data.username,
+            password: data.password,
+        })
+
+        if (response.status) {
+            toast.success(response.message, { id: toastId })
+        }else {
+            toast.error(response.message, { id: toastId })
+        }
     }
 
     async function testConnections(data: z.infer<typeof schema>) {
@@ -173,7 +188,7 @@ export default function DatabaseConnectionForm() {
                     />
                 </div>
                 <div className="flex justify-end mt-3 gap-3">
-                    <Button type="button" variant="secondary" onClick={() => {
+                    <Button type="button" variant="secondary" disabled={testing} onClick={() => {
                         form.handleSubmit(testConnections)();
                     }}>
                         {
@@ -181,7 +196,7 @@ export default function DatabaseConnectionForm() {
                         }
                     </Button>
                     
-                    <Button type="submit">
+                    <Button type="submit" disabled={testing || form.formState.isSubmitting}>
                         {
                             form.formState.isSubmitting && !testing ? "Cargando..." : "Guardar"
                         }

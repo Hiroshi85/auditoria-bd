@@ -6,25 +6,13 @@ from rest_framework import status, exceptions
 from rest_framework.authtoken.models import Token
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import *
+from .models import *
+from cryptography.fernet import Fernet
+from decouple import config
 
 from sqlalchemy import create_engine
 
-# Create your views here.
-@api_view(['POST'])
-def test_connection(request):
-    serializer = DBConnectionSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    
-    body = serializer.data
-
-    engine = body['engine']
-    name = body['name']
-    host = body['host']
-    port = body['port']
-    username = body['username']
-    password = body['password']
-
-    # TODO: Test connection to database
+def try_connection(engine, name, host, port, username, password):
     driver = ""
     if engine == "mysql":
         driver = "mysql+mysqldb"
@@ -42,15 +30,61 @@ def test_connection(request):
         db = create_engine(connection_string)
         connection = db.connect()
         connection.close()
+        return True
     except Exception as e:
         print(e)
         raise exceptions.APIException(e.orig.args[1], code=400)
 
-    # get user
-    user = request.userdb
-    print(user.email)
+@api_view(['POST'])
+def test_connection(request):
+    serializer = DBConnectionSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    
+    body = serializer.data
+
+    engine = body['engine']
+    name = body['name']
+    host = body['host']
+    port = body['port']
+    username = body['username']
+    password = body['password']
+
+    try_connection(engine, name, host, port, username, password)
 
     return Response({
-        'message': 'Conexión exitosa!'
+        'message': '¡Conexión exitosa!'
     }, status=status.HTTP_200_OK)
     
+@api_view(['POST'])
+def save_connection(request):
+    serializer = DBConnectionSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    
+    body = serializer.data
+
+    engine = body['engine']
+    name = body['name']
+    host = body['host']
+    port = body['port']
+    username = body['username']
+    password = body['password']
+
+    try_connection(engine, name, host, port, username, password)
+
+    fernet = Fernet(key=config("SECRET_KEY").encode())
+
+    connection = DatabaseConnection(
+        engine=engine,
+        name=name,
+        host=host,
+        port=port,
+        username=username,
+        password=fernet.encrypt(password.encode()).decode(),
+        user=request.userdb
+    )
+
+    connection.save()
+
+    return Response({
+        'message': '¡Conexión guardada!'
+    }, status=status.HTTP_200_OK)

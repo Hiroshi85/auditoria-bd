@@ -13,6 +13,7 @@ interface ConnectionProviderProps {
     password: string
     status: "connected" | "disconnected" | "connecting"
     testConnections: (data: ConnectionProps) => Promise<{status: boolean, message:string}>
+    saveConnection: (data: ConnectionProps) => Promise<{status: boolean, message:string}>
 }
 
 interface ConnectionProps {
@@ -32,7 +33,8 @@ export const ConnectionDatabaseContext = createContext<ConnectionProviderProps>(
     username: "",
     password: "",
     status: "disconnected",
-    testConnections: async () => {return {status: false, message: ""}}
+    testConnections: async () => {return {status: false, message: ""}},
+    saveConnection: async () => {return {status: false, message: ""}}
 })
 
 
@@ -72,12 +74,38 @@ export function ConnectionDatabaseProvider({ children }: { children: React.React
             }
         }
     }
+
+    async function saveConnection(data: ConnectionProps) : Promise<{status: boolean, message:string}> {
+        try {
+            const response = await axios.post(`${API_HOST}/aud/save`, data,{
+                withCredentials: true
+            })
+            return {
+                status: true,
+                message: response.data.message as string
+            }
+        }catch (e: any) {
+
+            if (axios.isAxiosError(e)) {
+                return {
+                    status: false,
+                    message: e.response?.data.detail || "Ha ocurrido un error"
+                }
+            }
+            
+            return {
+                status: false,
+                message: "Ha ocurrido un error"
+            }
+        }
+    }
     
     return (
         <ConnectionDatabaseContext.Provider value={{
             ...connection,
             status,
-            testConnections
+            testConnections,
+            saveConnection
         }}>
             {children}
         </ConnectionDatabaseContext.Provider>
