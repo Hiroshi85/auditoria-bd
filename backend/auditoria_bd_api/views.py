@@ -116,7 +116,8 @@ def save_connection(request):
         port=port,
         username=username,
         password=fernet.encrypt(password.encode()).decode(),
-        user=request.userdb
+        user=request.userdb,
+        last_used=timezone.now()
     )
 
     connection.save()
@@ -128,9 +129,11 @@ def save_connection(request):
 
 @api_view(['GET'])
 def get_last_connection(request):
-    connection = DatabaseConnection.objects.filter(user=request.userdb).order_by('last_used').first()
+    connection = DatabaseConnection.objects.filter(user=request.userdb).order_by('-last_used').first()
     if not connection:
         return Response({}, status=status.HTTP_404_NOT_FOUND)
+    
+    print(connection.name)
     
     # Decrypt password
     fernet = Fernet(key=config("SECRET_KEY").encode())
