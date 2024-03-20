@@ -9,6 +9,7 @@ from .serializers import *
 from .models import *
 from cryptography.fernet import Fernet
 from decouple import config
+from django.utils import timezone
 
 from sqlalchemy import create_engine
 
@@ -73,6 +74,28 @@ def save_connection(request):
 
     fernet = Fernet(key=config("SECRET_KEY").encode())
 
+    # check if connection already exists
+    existing_connection = DatabaseConnection.objects.filter(
+        engine=engine,
+        name=name,
+        host=host,
+        port=port,
+        username=username,
+        user=request.userdb
+    )
+
+    if existing_connection.exists():
+        # Update password asn last used
+        existing_connection.update(
+            password=fernet.encrypt(password.encode()).decode(),
+            last_used=timezone.now()
+        )
+
+        return Response({
+            'message': '¡Conexión ya guardada!',
+            'id': existing_connection.first().id,
+        }, status=status.HTTP_200_OK)
+
     connection = DatabaseConnection(
         engine=engine,
         name=name,
@@ -86,5 +109,22 @@ def save_connection(request):
     connection.save()
 
     return Response({
-        'message': '¡Conexión guardada!'
+        'message': '¡Conexión guardada!',
+        'id': connection.id,
     }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_last_connection(request):
+    print(request.userdb)
+    print("aaaa")
+    connection = DatabaseConnection.objects.filter(user=request.userdb).order_by('last_used').first()
+    if connection:
+        return Response({
+            'engine': connection.engine,
+            'name': connection.name,
+            'host': connection.host,
+            'port': connection.port,
+            'username': connection.username,
+            'id': connection.id
+        }, status=status.HTTP_200_OK)
+    return Response({}, status=status.HTTP_404_NOT_FOUND)

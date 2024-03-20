@@ -10,3 +10,5 @@ class DatabaseConnection(models.Model):
     password = models.TextField()
 
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+
+    last_used = models.DateTimeField(auto_now=True)

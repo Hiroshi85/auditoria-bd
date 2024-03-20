@@ -44,7 +44,7 @@ export default function DatabaseConnectionForm() {
             host: dataConnection.host,
             port: dataConnection.port,
             username: dataConnection.username,
-            password: dataConnection.password,
+            password: "",
         },
     })
 
