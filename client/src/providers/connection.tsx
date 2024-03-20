@@ -5,6 +5,7 @@ import axios, { AxiosError } from "axios";
 import { API_HOST } from "@/constants/server";
 
 interface ConnectionProviderProps {
+    id: number,
     engine: DatabaseConnectionsType
     name: string
     host: string
@@ -34,6 +35,7 @@ export interface ConnectionProvider {
 }
 
 export const ConnectionDatabaseContext = createContext<ConnectionProviderProps>({
+    id: 0,
     engine: "sqlserver",
     name: "",
     host: "",

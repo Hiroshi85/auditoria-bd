@@ -11,9 +11,9 @@ from cryptography.fernet import Fernet
 from decouple import config
 from django.utils import timezone
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 
-def try_connection(engine, name, host, port, username, password):
+def get_connection(engine, name, host, port, username, password):
     driver = ""
     if engine == "mysql":
         driver = "mysql+mysqldb"
@@ -27,8 +27,21 @@ def try_connection(engine, name, host, port, username, password):
     if engine == "sqlserver":
         connection_string += "?driver=ODBC+Driver+17+for+SQL+Server"
 
+    return create_engine(connection_string)
+
+def get_connection_by_id(id, user):
+    connection = DatabaseConnection.objects.filter(id=id, user=user).first()
+    if not connection:
+        raise exceptions.APIException('Conexión no encontrada', code=404)
+    
+    fernet = Fernet(key=config("SECRET_KEY").encode())
+    connection.password = fernet.decrypt(connection.password.encode()).decode()
+
+    return get_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, connection.password)
+
+def try_connection(engine, name, host, port, username, password):
     try:
-        db = create_engine(connection_string)
+        db = get_connection(engine, name, host, port, username, password)
         connection = db.connect()
         connection.close()
         return True
@@ -115,16 +128,37 @@ def save_connection(request):
 
 @api_view(['GET'])
 def get_last_connection(request):
-    print(request.userdb)
-    print("aaaa")
     connection = DatabaseConnection.objects.filter(user=request.userdb).order_by('last_used').first()
-    if connection:
-        return Response({
-            'engine': connection.engine,
-            'name': connection.name,
-            'host': connection.host,
-            'port': connection.port,
-            'username': connection.username,
-            'id': connection.id
-        }, status=status.HTTP_200_OK)
-    return Response({}, status=status.HTTP_404_NOT_FOUND)
+    if not connection:
+        return Response({}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Decrypt password
+    fernet = Fernet(key=config("SECRET_KEY").encode())
+    connection.password = fernet.decrypt(connection.password.encode()).decode()
+
+    # Test connection
+    try_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, connection.password)
+
+    return Response({
+        'engine': connection.engine,
+        'name': connection.name,
+        'host': connection.host,
+        'port': connection.port,
+        'username': connection.username,
+        'id': connection.id
+    }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_tables(request, id):
+    print(id)
+    db = get_connection_by_id(id, request.userdb)
+
+    metadata = MetaData()
+
+    metadata.reflect(bind=db)
+
+    tables = metadata.tables.keys()
+
+    return Response({
+        'tables': tables
+    }, status=status.HTTP_200_OK)
