@@ -29,6 +29,11 @@ export function TablesProvider({
     const [table, setTable] = useState(null as null | TableData)
 
     async function setCurrentTable(data: string) {
+        if (data == table?.name) {
+            setTable(null)
+            return
+        }
+        
         setTable({
             name: data,
             columns: []

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useConnectionDatabase } from "@/providers/connection"
 import { DatabaseConnections, DatabaseConnectionsType } from "@/types/database"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { set, useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -35,6 +36,7 @@ export default function DatabaseConnectionForm() {
     const [testing, setTesting] = useState(false)
 
     const dataConnection = useConnectionDatabase()
+    const router = useRouter()
 
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -65,6 +67,8 @@ export default function DatabaseConnectionForm() {
         }else {
             toast.error(response.message, { id: toastId })
         }
+
+        router.refresh()
     }
 
     async function testConnections(data: z.infer<typeof schema>) {

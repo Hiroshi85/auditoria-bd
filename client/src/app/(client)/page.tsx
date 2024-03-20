@@ -30,7 +30,7 @@ export default async function Page() {
             <div className="container mx-auto">
                 <div className="flex w-full">
 
-                    <div className="bg-accent rounded-md py-5 px-3 max-w-[250px] space-y-2 max-h-[calc(100dvh-100px)] overflow-y-auto">
+                    <div className="bg-accent rounded-md py-5 px-3 max-w-[250px] space-y-2 max-h-[calc(100dvh-200px)] overflow-y-auto">
 
                         {
                             data.tables.map((value, index) => {
@@ -42,7 +42,7 @@ export default async function Page() {
                         
                     </div>
 
-                    <div className="flex -1">
+                    <div className="flex-1">
                         <TableDetails />
                     </div>
 
