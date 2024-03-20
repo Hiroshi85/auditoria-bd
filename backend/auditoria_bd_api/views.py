@@ -4,6 +4,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.response import Response
 from rest_framework import status, exceptions
 from rest_framework.authtoken.models import Token
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import *
 
 from sqlalchemy import create_engine
@@ -44,6 +45,10 @@ def test_connection(request):
     except Exception as e:
         print(e)
         raise exceptions.APIException(e.orig.args[1], code=400)
+
+    # get user
+    user = request.userdb
+    print(user.email)
 
     return Response({
         'message': 'Conexión exitosa!'

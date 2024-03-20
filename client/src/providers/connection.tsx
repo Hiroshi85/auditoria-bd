@@ -50,7 +50,9 @@ export function ConnectionDatabaseProvider({ children }: { children: React.React
 
     async function testConnections(data : ConnectionProps): Promise<{status: boolean, message:string}> {
         try {
-            const response = await axios.post(`${API_HOST}/aud/test`, data)
+            const response = await axios.post(`${API_HOST}/aud/test`, data,{
+                withCredentials: true
+            })
             return {
                 status: true,
                 message: response.data.message as string
