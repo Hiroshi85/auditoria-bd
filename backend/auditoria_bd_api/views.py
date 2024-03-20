@@ -4,14 +4,17 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.response import Response
 from rest_framework import status, exceptions
 from rest_framework.authtoken.models import Token
-# from django.shortcuts import render
+from .serializers import *
 
 from sqlalchemy import create_engine
 
 # Create your views here.
 @api_view(['POST'])
 def test_connection(request):
-    body = request.data
+    serializer = DBConnectionSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    
+    body = serializer.data
 
     engine = body['engine']
     name = body['name']
