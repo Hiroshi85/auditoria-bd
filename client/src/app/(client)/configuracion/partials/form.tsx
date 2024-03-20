@@ -65,10 +65,10 @@ export default function DatabaseConnectionForm() {
             password: data.password,
         })
 
-        if (response) {
-            toast.success("Conexión exitosa", { id: toastId })
+        if (response.status) {
+            toast.success(response.message, { id: toastId })
         }else {
-            toast.error("No se pudo establecer la conexión", { id: toastId })
+            toast.error(response.message, { id: toastId })
         }
         setTesting(false)
     }

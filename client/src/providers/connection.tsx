@@ -1,7 +1,7 @@
 "use client"
 import { DatabaseConnectionsType } from "@/types/database";
 import { createContext, useContext, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { API_HOST } from "@/constants/server";
 
 interface ConnectionProviderProps {
@@ -12,7 +12,7 @@ interface ConnectionProviderProps {
     username: string
     password: string
     status: "connected" | "disconnected" | "connecting"
-    testConnections: (data: ConnectionProps) => Promise<boolean>
+    testConnections: (data: ConnectionProps) => Promise<{status: boolean, message:string}>
 }
 
 interface ConnectionProps {
@@ -32,7 +32,7 @@ export const ConnectionDatabaseContext = createContext<ConnectionProviderProps>(
     username: "",
     password: "",
     status: "disconnected",
-    testConnections: async () => false
+    testConnections: async () => {return {status: false, message: ""}}
 })
 
 
@@ -48,14 +48,27 @@ export function ConnectionDatabaseProvider({ children }: { children: React.React
 
     const [status, setStatus] = useState<"connected" | "disconnected" | "connecting">("disconnected")
 
-    async function testConnections(data : ConnectionProps): Promise<boolean> {
+    async function testConnections(data : ConnectionProps): Promise<{status: boolean, message:string}> {
         try {
             const response = await axios.post(`${API_HOST}/aud/test`, data)
-        }catch (e) {
-            return false
-        }
+            return {
+                status: true,
+                message: response.data.message as string
+            }
+        }catch (e: any) {
 
-        return true
+            if (axios.isAxiosError(e)) {
+                return {
+                    status: false,
+                    message: e.response?.data.detail || "Ha ocurrido un error"
+                }
+            }
+            
+            return {
+                status: false,
+                message: "Ha ocurrido un error"
+            }
+        }
     }
     
     return (

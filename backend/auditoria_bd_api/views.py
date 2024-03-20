@@ -43,7 +43,7 @@ def test_connection(request):
         connection.close()
     except Exception as e:
         print(e)
-        raise exceptions.APIException('No se pudo conectar a la base de datos', code=400)
+        raise exceptions.APIException(e.orig.args[1], code=400)
 
     return Response({
         'message': 'Conexión exitosa!'
