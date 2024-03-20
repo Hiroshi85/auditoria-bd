@@ -1,6 +1,8 @@
 "use client"
 import { DatabaseConnectionsType } from "@/types/database";
 import { createContext, useContext, useState } from "react";
+import axios from "axios";
+import { API_HOST } from "@/constants/server";
 
 interface ConnectionProviderProps {
     engine: DatabaseConnectionsType
@@ -47,17 +49,13 @@ export function ConnectionDatabaseProvider({ children }: { children: React.React
     const [status, setStatus] = useState<"connected" | "disconnected" | "connecting">("disconnected")
 
     async function testConnections(data : ConnectionProps): Promise<boolean> {
-        // TODO: implement the connection test
+        try {
+            const response = await axios.post(`${API_HOST}/aud/test`, data)
+        }catch (e) {
+            return false
+        }
 
-        setStatus("connecting")
-        
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                setStatus("connected")
-                setConnection(data)
-                resolve(true)
-            }, 2000)
-        })
+        return true
     }
     
     return (

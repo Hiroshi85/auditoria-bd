@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useConnectionDatabase } from "@/providers/connection"
 import { DatabaseConnections, DatabaseConnectionsType } from "@/types/database"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useState } from "react"
+import { set, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
@@ -28,10 +29,11 @@ const schema = z.object({
         .min(1, "El usuario debe tener al menos 1 caracter"),
     password: z
         .string()
-        .min(2, "La contraseña debe tener al menos 2 caracteres")
 })
 
 export default function DatabaseConnectionForm() {
+    const [testing, setTesting] = useState(false)
+
     const dataConnection = useConnectionDatabase()
 
     const form = useForm<z.infer<typeof schema>>({
@@ -47,6 +49,11 @@ export default function DatabaseConnectionForm() {
     })
 
     async function onSubmit(data: z.infer<typeof schema>) {
+        console.log("enviando datos...")
+    }
+
+    async function testConnections(data: z.infer<typeof schema>) {
+        setTesting(true)
         const toastId = toast.loading("Probando conexión...")
         
         const response = await dataConnection.testConnections({
@@ -63,6 +70,7 @@ export default function DatabaseConnectionForm() {
         }else {
             toast.error("No se pudo establecer la conexión", { id: toastId })
         }
+        setTesting(false)
     }
 
     return (
@@ -164,12 +172,21 @@ export default function DatabaseConnectionForm() {
                         )}
                     />
                 </div>
-                <div className="flex justify-end mt-3">
-                    <Button type="submit">
+                <div className="flex justify-end mt-3 gap-3">
+                    <Button type="button" variant="secondary" onClick={() => {
+                        form.handleSubmit(testConnections)();
+                    }}>
                         {
-                            form.formState.isSubmitting ? "Cargando..." : "Guardar"
+                            testing ? "Probando conexión..." : "Probar conexión"
                         }
                     </Button>
+                    
+                    <Button type="submit">
+                        {
+                            form.formState.isSubmitting && !testing ? "Cargando..." : "Guardar"
+                        }
+                    </Button>
+
                 </div>
             </form>
         </Form>
