@@ -165,3 +165,33 @@ def get_tables(request, id):
     return Response({
         'tables': tables
     }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_table_detail(request, id, name):
+    db = get_connection_by_id(id, request.userdb)
+
+    metadata = MetaData()
+
+    metadata.reflect(bind=db)
+
+    table = metadata.tables[name]
+
+    response = []
+
+    for column in table.columns:
+        response.append({
+            'name': column.name,
+            'type': str(column.type),
+            'nullable': column.nullable,
+            'unique': column.unique,
+            'default': column.default,
+            'primary_key': column.primary_key,
+            'foreign_key': [{'table':foreign.column.table.name,'column': foreign.column.name } for foreign in column.foreign_keys],
+            'autoincrement': column.autoincrement,
+            'constraints': column.constraints,
+            'key': 'PK' if column.primary_key else 'FK' if column.foreign_keys else ''
+        })
+
+    return Response({
+        'columns': response
+    }, status=status.HTTP_200_OK)
