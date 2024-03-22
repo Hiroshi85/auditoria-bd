@@ -9,6 +9,9 @@ class AuthMiddleware:
         if request.path.startswith('/auth'):
             # Skip the middleware for the /auth endpoint
             return self.get_response(request)
+        
+        if "api-token" not in request.COOKIES:
+            return HttpResponse('API Token not provided', status=401)
 
         token = request.COOKIES["api-token"]
 
