@@ -1,6 +1,9 @@
 import { Metadata } from "next"
 import DatabaseStatus from "./partials/status"
 import DatabaseConnectionForm from "./partials/form"
+import { Suspense } from "react"
+import ConnectionsView from "./partials/connections"
+import { Separator } from "@/components/ui/separator"
 
 export const metadata: Metadata = {
     title: 'Configuración - Database Auditor',
@@ -21,6 +24,16 @@ export default function Page() {
             </div>
             <div>
                 <DatabaseConnectionForm />
+            </div>
+
+            <Separator className="my-5"/>
+
+            <div>
+                <h3 className="font-bold text-xl mb-3">Conexiones realizadas</h3>
+
+                <Suspense fallback={<div>Cargando...</div>}>
+                    <ConnectionsView />
+                </Suspense>
             </div>
         </main>
     )

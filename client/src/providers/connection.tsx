@@ -14,6 +14,7 @@ interface ConnectionProviderProps {
     status: "connected" | "disconnected" | "connecting"
     testConnections: (data: ConnectionProps) => Promise<{status: boolean, message:string}>
     saveConnection: (data: ConnectionProps) => Promise<{status: boolean, message:string}>
+    setConnection: (data: ConnectionProvider) => void
 }
 
 interface ConnectionProps {
@@ -43,7 +44,8 @@ export const ConnectionDatabaseContext = createContext<ConnectionProviderProps>(
     username: "",
     status: "disconnected",
     testConnections: async () => {return {status: false, message: ""}},
-    saveConnection: async () => {return {status: false, message: ""}}
+    saveConnection: async () => {return {status: false, message: ""}},
+    setConnection: () => {}
 })
 
 
@@ -139,7 +141,8 @@ export function ConnectionDatabaseProvider({
             ...connection,
             status,
             testConnections,
-            saveConnection
+            saveConnection,
+            setConnection
         }}>
             {children}
         </ConnectionDatabaseContext.Provider>

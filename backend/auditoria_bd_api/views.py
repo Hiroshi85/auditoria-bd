@@ -13,6 +13,8 @@ from django.utils import timezone
 
 from sqlalchemy import create_engine, MetaData
 
+api_key = config("SECRET_KEY_VALUE_AAA").encode()
+
 def get_connection(engine, name, host, port, username, password):
     driver = ""
     if engine == "mysql":
@@ -34,10 +36,10 @@ def get_connection_by_id(id, user):
     if not connection:
         raise exceptions.APIException('Conexión no encontrada', code=404)
     
-    fernet = Fernet(key=config("SECRET_KEY").encode())
-    connection.password = fernet.decrypt(connection.password.encode()).decode()
+    fernet = Fernet(key=api_key)
+    password = fernet.decrypt(connection.password.encode()).decode()
 
-    return get_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, connection.password)
+    return get_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, password), connection
 
 def try_connection(engine, name, host, port, username, password):
     try:
@@ -85,7 +87,7 @@ def save_connection(request):
 
     try_connection(engine, name, host, port, username, password)
 
-    fernet = Fernet(key=config("SECRET_KEY").encode())
+    fernet = Fernet(key=api_key)
 
     # check if connection already exists
     existing_connection = DatabaseConnection.objects.filter(
@@ -101,8 +103,12 @@ def save_connection(request):
         # Update password asn last used
         existing_connection.update(
             password=fernet.encrypt(password.encode()).decode(),
+            current_used=True,
             last_used=timezone.now()
         )
+
+        # Set current_used to False for other connections
+        DatabaseConnection.objects.filter(user=request.userdb).exclude(id=existing_connection.first().id).update(current_used=False)
 
         return Response({
             'message': '¡Conexión ya guardada!',
@@ -129,17 +135,13 @@ def save_connection(request):
 
 @api_view(['GET'])
 def get_last_connection(request):
-    connection = DatabaseConnection.objects.filter(user=request.userdb).order_by('-last_used').first()
+    connection = DatabaseConnection.objects.filter(user=request.userdb,current_used=True).first()
     if not connection:
         return Response({}, status=status.HTTP_404_NOT_FOUND)
     
-    print(connection.name)
-    
-    # Decrypt password
-    fernet = Fernet(key=config("SECRET_KEY").encode())
+    fernet = Fernet(key=config("SECRET_KEY_VALUE_AAA").encode())
     connection.password = fernet.decrypt(connection.password.encode()).decode()
 
-    # Test connection
     try_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, connection.password)
 
     return Response({
@@ -154,7 +156,7 @@ def get_last_connection(request):
 @api_view(['GET'])
 def get_tables(request, id):
     print(id)
-    db = get_connection_by_id(id, request.userdb)
+    db, _ = get_connection_by_id(id, request.userdb)
 
     metadata = MetaData()
 
@@ -168,7 +170,7 @@ def get_tables(request, id):
 
 @api_view(['GET'])
 def get_table_detail(request, id, name):
-    db = get_connection_by_id(id, request.userdb)
+    db, _ = get_connection_by_id(id, request.userdb)
 
     metadata = MetaData()
 
@@ -195,3 +197,42 @@ def get_table_detail(request, id, name):
     return Response({
         'columns': response
     }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_user_connections(request):
+    connections = DatabaseConnection.objects.filter(user=request.userdb).order_by('-current_used').values('id', 'engine', 'name', 'host', 'port', 'username', 'last_used', 'current_used')
+
+    return Response({
+        'connections': list(connections)
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST', 'DELETE'])
+def connect_to_db(request, id):
+    if request.method == 'POST':
+        _, connection = get_connection_by_id(id, request.userdb)
+
+        connection.current_used = True
+        connection.save()
+
+        # Set current_used to False for other connections
+        DatabaseConnection.objects.filter(user=request.userdb).exclude(id=connection.id).update(current_used=False)
+
+        return Response({
+            'engine': connection.engine,
+            'name': connection.name,
+            'host': connection.host,
+            'port': connection.port,
+            'username': connection.username,
+            'id': connection.id
+        }, status=status.HTTP_200_OK)
+    
+    if request.method == 'DELETE':
+        connection = DatabaseConnection.objects.filter(id=id, user=request.userdb).first()
+        if not connection:
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
+        
+        connection.delete()
+
+        return Response({}, status=status.HTTP_200_OK)
+
