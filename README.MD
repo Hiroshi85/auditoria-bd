@@ -13,5 +13,5 @@ En windows, quizá funcione usando wsl
 ### Requisitos
 - python3.11
 - virtualenv
-- node 21
+- node 20
 - Llenar los archivos ```client/.env``` y ```backend/.env```
