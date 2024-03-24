@@ -2,54 +2,18 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 
 from rest_framework.response import Response
-from rest_framework import status, exceptions
-from rest_framework.authtoken.models import Token
-from django.views.decorators.csrf import csrf_exempt
-from .serializers import *
-from .models import *
+from rest_framework import status
+from ..serializers import DBConnectionSerializer
+from ..models import DatabaseConnection
 from cryptography.fernet import Fernet
 from decouple import config
 from django.utils import timezone
 
-from sqlalchemy import create_engine, MetaData
+from ..utils.conexiones import get_connection_by_id, try_connection
+
+from sqlalchemy import MetaData
 
 api_key = config("SECRET_KEY_VALUE_AAA").encode()
-
-def get_connection(engine, name, host, port, username, password):
-    driver = ""
-    if engine == "mysql":
-        driver = "mysql+mysqldb"
-    elif engine == "sqlserver":
-        driver = "mssql+pyodbc"
-    else:
-        raise exceptions.APIException('Motor de base de datos no soportado', code=400)
-
-    connection_string = f"{driver}://{username}:{password}@{host}:{port}/{name}"
-
-    if engine == "sqlserver":
-        connection_string += "?driver=ODBC+Driver+17+for+SQL+Server"
-
-    return create_engine(connection_string)
-
-def get_connection_by_id(id, user):
-    connection = DatabaseConnection.objects.filter(id=id, user=user).first()
-    if not connection:
-        raise exceptions.APIException('Conexión no encontrada', code=404)
-    
-    fernet = Fernet(key=api_key)
-    password = fernet.decrypt(connection.password.encode()).decode()
-
-    return get_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, password), connection
-
-def try_connection(engine, name, host, port, username, password):
-    try:
-        db = get_connection(engine, name, host, port, username, password)
-        connection = db.connect()
-        connection.close()
-        return True
-    except Exception as e:
-        print(e)
-        raise exceptions.APIException(e.orig.args[1], code=400)
 
 @api_view(['POST'])
 def test_connection(request):
@@ -205,7 +169,6 @@ def get_user_connections(request):
     return Response({
         'connections': list(connections)
     }, status=status.HTTP_200_OK)
-
 
 @api_view(['POST', 'DELETE'])
 def connect_to_db(request, id):
