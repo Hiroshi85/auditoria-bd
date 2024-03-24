@@ -4,7 +4,7 @@
 if [ ! -d "backend/venv" ]; then
     # Si no existe, crear el entorno virtual de Python (venv)
     echo "Creando entorno virtual de Python..."
-    python3 -m venv backend/venv
+    python3.11 -m venv backend/venv
 fi
 
 # Activar el entorno virtual de Python (venv)
