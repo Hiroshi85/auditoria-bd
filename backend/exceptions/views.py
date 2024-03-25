@@ -10,15 +10,13 @@ import pandas as pd
 def check_integer_sequence(dataframe, min, max):
     lista_auxilitar = set(range(min, max))
     flattened_values = dataframe.values.flatten()
-    # print(flattened_values)
+
     missing = [value for value in lista_auxilitar 
                if value not in flattened_values]
     
     duplicates = dataframe[dataframe.duplicated()].drop_duplicates()
-    print(flattened_values[:10])
     
     sequence = []
-    print(flattened_values[:10], list(range(min, max))[:10])
     for index, value in enumerate(lista_auxilitar): 
         if index >= len(flattened_values):
             sequence.append({'expected': value, 'found': None})
@@ -52,19 +50,15 @@ def sequence_exception(request, id):
     
     # select column from table
     cnn = db.connect()
-    stmt = select(column).where(column.isnot(None)).where(column <= 394)
+    stmt = select(column).where(column.isnot(None)).order_by(table.primary_key.columns.values()[0].description)
 
     if body['sort'] == 'yes': 
         stmt = stmt.order_by(column.description)
 
-    # result = cnn.execute(stmt)                 
-    values = [] 
-    for row in cnn.execute(stmt):
-        values.append(row[0])
+    result = cnn.execute(stmt)
     cnn.close()
-   
-    # values = [row[0] for row in result.fetchall()]
-    print(f'Values: {values[:10]}')
+    
+    values = [row[0] for row in result.fetchall()]
     df = pd.DataFrame(values)
 
 
