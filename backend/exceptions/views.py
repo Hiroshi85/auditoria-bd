@@ -84,6 +84,7 @@ def sequence_exception(request, id):
         # TODO check the sequence for alphanumeric values
             pass
         elif column.type.python_type == datetime.date or column.type.python_type == datetime.datetime: 
+            # freq = body['frequency'] if 'frequency' in body else 'D'
             # cast sequence to date
             date_sequence = pd.date_range(start=min_value, end=max_value, freq='D').strftime('%Y-%m-%d').tolist()
             date_sequence = [datetime.datetime.strptime(date, '%Y-%m-%d').date() for date in date_sequence]
