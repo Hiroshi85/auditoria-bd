@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 
 api_key = config("SECRET_KEY_VALUE_AAA").encode()
 
-def _get_connection(engine, name, host, port, username, password):
+def _get_engine(engine, name, host, port, username, password):
     driver = ""
     if engine == "mysql":
         driver = "mysql+mysqldb"
@@ -21,7 +21,8 @@ def _get_connection(engine, name, host, port, username, password):
     if engine == "sqlserver":
         connection_string += "?driver=ODBC+Driver+17+for+SQL+Server"
 
-    return create_engine(connection_string)
+    engine = create_engine(connection_string)
+    return engine
 
 def get_connection_by_id(id, user):
     connection = DatabaseConnection.objects.filter(id=id, user=user).first()
@@ -30,12 +31,13 @@ def get_connection_by_id(id, user):
     
     fernet = Fernet(key=api_key)
     password = fernet.decrypt(connection.password.encode()).decode()
-
-    return _get_connection(connection.engine, connection.name, connection.host, connection.port, connection.username, password), connection
+    
+    engine = _get_engine(connection.engine, connection.name, connection.host, connection.port, connection.username, password) 
+    return (engine, connection)
 
 def try_connection(engine, name, host, port, username, password):
     try:
-        db = _get_connection(engine, name, host, port, username, password)
+        db = _get_engine(engine, name, host, port, username, password)
         connection = db.connect()
         connection.close()
         return True

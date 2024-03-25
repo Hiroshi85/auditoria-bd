@@ -10,8 +10,7 @@ from decouple import config
 from django.utils import timezone
 
 from ..utils.conexiones import get_connection_by_id, try_connection
-
-from sqlalchemy import MetaData
+from ..utils import table_info
 
 api_key = config("SECRET_KEY_VALUE_AAA").encode()
 
@@ -122,11 +121,7 @@ def get_tables(request, id):
     print(id)
     db, _ = get_connection_by_id(id, request.userdb)
 
-    metadata = MetaData()
-
-    metadata.reflect(bind=db)
-
-    tables = metadata.tables.keys()
+    tables = table_info.get_table(db)
 
     return Response({
         'tables': tables
@@ -136,30 +131,10 @@ def get_tables(request, id):
 def get_table_detail(request, id, name):
     db, _ = get_connection_by_id(id, request.userdb)
 
-    metadata = MetaData()
-
-    metadata.reflect(bind=db)
-
-    table = metadata.tables[name]
-
-    response = []
-
-    for column in table.columns:
-        response.append({
-            'name': column.name,
-            'type': str(column.type),
-            'nullable': column.nullable,
-            'unique': column.unique,
-            'default': column.default,
-            'primary_key': column.primary_key,
-            'foreign_key': [{'table':foreign.column.table.name,'column': foreign.column.name } for foreign in column.foreign_keys],
-            'autoincrement': column.autoincrement,
-            'constraints': column.constraints,
-            'key': 'PK' if column.primary_key else 'FK' if column.foreign_keys else ''
-        })
+    tableColumns = table_info.get_table_detail(db, name)
 
     return Response({
-        'columns': response
+        'columns': tableColumns
     }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
