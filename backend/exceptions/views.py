@@ -1,23 +1,23 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import exceptions
 from .serializers import *
 
 from auditoria_bd_api.views import get_connection_by_id
 from sqlalchemy import MetaData, select, text
-
+import datetime
 import pandas as pd
 
-def check_integer_sequence(dataframe, min, max):
-    lista_auxilitar = set(range(min, max))
-    flattened_values = dataframe.values.flatten()
+def check_sequence_exception(data, sequence):
+    flattened_values = data.values.flatten()
 
-    missing = [value for value in lista_auxilitar 
+    missing = [value for value in sequence 
                if value not in flattened_values]
     
-    duplicates = dataframe[dataframe.duplicated()].drop_duplicates()
+    duplicates = data[data.duplicated()].drop_duplicates()
     
     sequence = []
-    for index, value in enumerate(lista_auxilitar): 
+    for index, value in enumerate(sequence): 
         if index >= len(flattened_values):
             sequence.append({'expected': value, 'found': None})
             continue
@@ -50,31 +50,48 @@ def sequence_exception(request, id):
     
     # select column from table
     cnn = db.connect()
-    stmt = select(column).where(column.isnot(None)).order_by(table.primary_key.columns.values()[0].description)
+    stmt = select(column).where(column.isnot(None))
 
     if body['sort'] == 'yes': 
         stmt = stmt.order_by(column.description)
+    else:
+        stmt = stmt.order_by(table.primary_key.columns.values()[0].description)
 
     result = cnn.execute(stmt)
     cnn.close()
     
     values = [row[0] for row in result.fetchall()]
-    df = pd.DataFrame(values)
 
+    df = pd.DataFrame(values)
+    
+    if column.type.python_type == datetime.datetime:
+        df = df.applymap(lambda x: x.date())
 
     min_value = body['min'] if 'min' in body else df.min().values[0]
     max_value = body['max'] if 'max' in body else df.max().values[0]    
 
+    print(f'Min: {min_value}, Max: {max_value}')
+    
+    missing, duplicates, sequence = [], [], []
+    
+    print(column.type.python_type)
+    
     if column.type.python_type == int:
-        missing, duplicates, sequence = check_integer_sequence(df, min_value, max_value + 1)
+        int_sequence = set(range(min_value, max_value + 1))
+        missing, duplicates, sequence = check_sequence_exception(df, int_sequence)
     else:
         if column.type.python_type == str:
-        # TODO check the sequence for other types varchar, dates, etc
+        # TODO check the sequence for alphanumeric values
             pass
-        pass
- 
+        elif column.type.python_type == datetime.date or column.type.python_type == datetime.datetime: 
+            # cast sequence to date
+            date_sequence = pd.date_range(start=min_value, end=max_value, freq='D').strftime('%Y-%m-%d').tolist()
+            date_sequence = [datetime.datetime.strptime(date, '%Y-%m-%d').date() for date in date_sequence]
 
-    
+            missing, duplicates, sequence = check_sequence_exception(df, date_sequence)
+        else:
+            raise exceptions.APIException(f'No se puede evaluar la secuencia en un campo de tipo {column.type}')
+            
     #TODO Save results in database
 
     if len(missing) == 0 and len(duplicates) == 0 and len(sequence) == 0:
