@@ -7,7 +7,7 @@ import { UseQueryResult, useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { createContext, useContext, useState } from "react"
 
-interface TableData{
+interface TableData {
     name: string,
     columns: Column[]
 }
@@ -39,7 +39,7 @@ export function TablesProvider({
             setTable(null)
             return
         }
-        
+
         setTable(data)
     }
 
@@ -56,11 +56,11 @@ export function TablesProvider({
 
 }
 
-function useTable(table: string | null, connectionId: number) {
+export function useTable(table: string | null, connectionId: number) {
     return useQuery({
         queryKey: ["table", table],
         queryFn: async () => {
-            const response = await axios.get(`${API_HOST}/aud/connection/${connectionId}/tables/${table}`, {withCredentials: true})
+            const response = await axios.get(`${API_HOST}/aud/connection/${connectionId}/tables/${table}`, { withCredentials: true })
             return response.data as TableDetailsResponse
         },
         enabled: table != null
