@@ -9,7 +9,7 @@ def get_table_names(db_engine):
 
 def get_table_detail(db_engine, table_name):
     metadata = MetaData()
-    metadata.reflect(bind=db_engine)
+    metadata.reflect(bind=db_engine, only=[table_name])
     table = metadata.tables[table_name]
     
     tableDetails = []
