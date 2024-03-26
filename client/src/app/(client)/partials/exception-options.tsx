@@ -1,7 +1,9 @@
 'use client'
 import Link from "next/link"
-
-const ExceptionOptions = () => {
+type Props = {
+    tableName: string
+}
+const ExceptionOptions = ({ tableName }: Props) => {
     const options = [
         {
             id: 1,
@@ -33,7 +35,10 @@ const ExceptionOptions = () => {
                 options.map((value) => {
                     return (
                         <Link
-                            href={value.route}
+                            href={{
+                                pathname: value.route,
+                                query: { table: tableName },
+                            }}
                             key={value.id} className="flex bg-white p-5 items-center gap-3 shadow-md rounded-lg h-24 cursor-pointer transition-all ease-in-out duration-300 hover:bg-accent">
                             <h3>
                                 {value.title}

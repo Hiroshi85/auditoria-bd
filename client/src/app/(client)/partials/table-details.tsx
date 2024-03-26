@@ -25,7 +25,7 @@ export default function TableDetails() {
                         <p>Cargando...</p>
                     ) : (
                         <div className="flex flex-col gap-5">
-                            <ExceptionOptions />
+                            <ExceptionOptions tableName={data.currentTable} />
                             <DataTable columns={columns} data={data.query.data?.columns as Column[]} />
                         </div>
                     )
