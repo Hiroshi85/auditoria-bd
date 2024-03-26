@@ -1,12 +1,12 @@
 from django.urls import path
-from . import views
+from .views import bd_view
 
 urlpatterns = [
-    path('test', view=views.test_connection), 
-    path('save', view=views.save_connection), 
-    path('get/last', view=views.get_last_connection),
-    path('get/all', view=views.get_user_connections),
-    path('connection/<int:id>/tables', view=views.get_tables),
-    path('connection/<int:id>/tables/<slug:name>', view=views.get_table_detail),
-    path('connection/<int:id>', view=views.connect_to_db),
+    path('test', view=bd_view.test_connection), 
+    path('save', view=bd_view.save_connection), 
+    path('get/last', view=bd_view.get_last_connection),
+    path('get/all', view=bd_view.get_user_connections),
+    path('connection/<int:id>/tables', view=bd_view.get_tables),
+    path('connection/<int:id>/tables/<slug:name>', view=bd_view.get_table_detail),
+    path('connection/<int:id>', view=bd_view.connect_to_db),
 ]
