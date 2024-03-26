@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import main, campos_exception_view
+from .views import field_view, sequence_view
 
 urlpatterns = [
-    path('campos/conexion/<int:id>', view=campos_exception_view.obtain_valores),
-    path('db/<int:id>/sequence', view=main.sequence_exception),
+    path('db/<int:id>/fields', view=field_view.obtain_valores),
+    path('db/<int:id>/sequence', view=sequence_view.sequence_exception),
 ]

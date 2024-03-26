@@ -121,7 +121,7 @@ def get_tables(request, id):
     print(id)
     db, _ = get_connection_by_id(id, request.userdb)
 
-    tables = table_info.get_table(db)
+    tables = table_info.get_table_names(db)
 
     return Response({
         'tables': tables

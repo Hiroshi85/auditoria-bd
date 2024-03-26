@@ -1,6 +1,6 @@
 from sqlalchemy import MetaData
 
-def get_table(db_engine):
+def get_table_names(db_engine):
     metadata = MetaData()
     metadata.reflect(bind=db_engine)
     tables = metadata.tables.keys()

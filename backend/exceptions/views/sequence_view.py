@@ -1,10 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import exceptions
-from .serializers import *
+from ..serializers import SequentialSerializer
 
-from auditoria_bd_api.views import get_connection_by_id
-from sqlalchemy import MetaData, select, text
+from auditoria_bd_api.utils.conexiones import get_connection_by_id
+from sqlalchemy import MetaData, select
 import datetime
 
 import pandas as pd
@@ -62,6 +62,7 @@ def sequence_exception(request, id):
 
     metadata = MetaData()
     metadata.reflect(bind=db)
+
     try:
         table = metadata.tables[table_name]
         column = table.columns[column_name]

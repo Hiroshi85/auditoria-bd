@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from sqlalchemy import MetaData, Table
-from auditoria_bd_api.utils import conexiones, table_info
+from auditoria_bd_api.utils import conexiones
 from rest_framework.decorators import api_view
 
 @api_view(['POST'])
