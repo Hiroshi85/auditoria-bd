@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from utils.secuenciales import *
+from ..utils.secuenciales import *
 from ..serializers import *
 
 from auditoria_bd_api.utils.conexiones import get_connection_by_id
