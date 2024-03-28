@@ -1,6 +1,5 @@
 "use client";
 
-import { set } from "react-hook-form";
 import TableElement from "./list-tables-element";
 import { ChangeEvent, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,7 @@ export default function ListTables({ tables }: { tables: string[] }) {
         onChange={(e) => filterTables(e)}
       />
       <div
-        className="bg-accent rounded-md py-5 px-3 max-h-[calc(100dvh-200px)] space-y-2 overflow-y-auto"
+        className="bg-accent rounded-md py-5 px-3 max-h-[calc(100dvh-240px)] space-y-2 overflow-y-auto"
         style={{ scrollbarGutter: "stable", scrollbarWidth: "thin" }}
       >
         {filteredTables.length > 0 ? (

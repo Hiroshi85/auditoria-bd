@@ -5,13 +5,6 @@ import { useTablesDB } from "./tables.context"
 import { cn } from "@/lib/utils"
 import { TableIcon } from "lucide-react"
 
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-  } from "@/components/ui/tooltip"
-
 export default function TableElement({
     table
 }:{
