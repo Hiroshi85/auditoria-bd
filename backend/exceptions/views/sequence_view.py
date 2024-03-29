@@ -9,7 +9,7 @@ import datetime
 import pandas as pd
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def integer_sequence_exception(request, id):
     serializer = IntegerSequentialSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -29,7 +29,7 @@ def integer_sequence_exception(request, id):
     return get_exception_response(missing, duplicates, sequence, min_value, max_value)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def alphanumeric_sequence_exception(request, id):
     serializer = StringSequencialSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -62,7 +62,7 @@ def alphanumeric_sequence_exception(request, id):
     return get_exception_response(missing, duplicates, sequence, min_value, max_value)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def date_sequence_exception(request, id):
     serializer = DateSequencialSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)

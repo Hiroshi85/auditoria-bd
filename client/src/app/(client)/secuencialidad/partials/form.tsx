@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
+import { SecuencialFormSchema } from "./schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -33,6 +34,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useSecuencia } from "../secuencia.context";
+import { VerificarSecuenciaRequest } from "@/types/excepciones/secuencias";
 
 type Props = {
   table: string;
@@ -41,24 +44,16 @@ type Props = {
 export default function SecuencialidadForm({ table }: Props) {
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
+  
+  const exceptionContext = useSecuencia();
 
-  const schema = z.object({
-    column: z.string().nonempty(),
-    example: z.string().optional(),
-    frequency: z.string(),
-    step: z.coerce.number(),
-    max: z.coerce.string().optional(),
-    min: z.coerce.string().optional(),
-    min_date: z.date().optional(),
-    max_date: z.date().optional(),
+  const form = useForm<z.infer<typeof SecuencialFormSchema>>({
+    resolver: zodResolver(SecuencialFormSchema),
   });
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError || !data) return <div>Error</div>;
+  if (isLoading) return <div>Cargando...</div>;
+  if (isError || !data)
+    return <div>No se pudieron cargar los datos del servidor</div>;
   //   console.log(data);
 
   const columns = data.columns.filter((column) =>
@@ -66,13 +61,26 @@ export default function SecuencialidadForm({ table }: Props) {
   );
 
   const watchColumn = form.watch("column");
+  
   const selectedColumn = columns.find((column) => column.name === watchColumn);
   const selectedType = selectedColumn?.python_type ?? "no type selected";
-
+  console.log(selectedType);
   // Add inputs based on the selected type
 
-  function onSubmit(values: z.infer<typeof schema>) {
-    console.log(values);
+  function onSubmit(values: z.infer<typeof SecuencialFormSchema>) {
+    // add table name to values
+    const reqData : VerificarSecuenciaRequest = {
+      table: table,  
+      column: values.column,
+      example: values.example,
+      min: selectedType === "date" ? values.min_date : values.min,
+      max: selectedType === "date" ? values.max_date : values.max,
+      step: values.step,
+      static: values.static,
+      frequency: values.frequency,
+      sort: "none"
+    }
+    exceptionContext.auditException(reqData, selectedType);
   }
 
   return (
@@ -183,7 +191,7 @@ export default function SecuencialidadForm({ table }: Props) {
           )}
 
           {/* Dates */}
-          {(selectedType === "date" || selectedType === "datetime") && (
+          {(selectedType === 'date' || selectedType === "datetime") && (
             <>
               <FormField
                 control={form.control}
@@ -197,7 +205,7 @@ export default function SecuencialidadForm({ table }: Props) {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Diaria" />
+                          <SelectValue placeholder="Seleccione una frecuencia" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -220,7 +228,10 @@ export default function SecuencialidadForm({ table }: Props) {
                 name="min_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col pt-[10px]">
-                    <FormLabel>Fecha mínima</FormLabel>
+                    <FormLabel className="flex justify-between">
+                      <span>Valor mínimo</span>
+                      <span className="text-gray-500">{"(Opcional)"}</span>
+                    </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -236,7 +247,7 @@ export default function SecuencialidadForm({ table }: Props) {
                                 locale: es,
                               })
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Elija una fecha</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -245,12 +256,15 @@ export default function SecuencialidadForm({ table }: Props) {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onSelect={field.onChange}
                           disabled={(date) =>
                             date > new Date() || date < new Date("1900-01-01")
                           }
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -265,7 +279,10 @@ export default function SecuencialidadForm({ table }: Props) {
                 name="max_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col pt-[10px]">
-                    <FormLabel>Fecha máxima</FormLabel>
+                    <FormLabel className="flex justify-between">
+                      <span>Valor máximo</span>
+                      <span className="text-gray-500">{"(Opcional)"}</span>
+                    </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -281,7 +298,7 @@ export default function SecuencialidadForm({ table }: Props) {
                                 locale: es,
                               })
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Elija una fecha</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -290,12 +307,16 @@ export default function SecuencialidadForm({ table }: Props) {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
                           onSelect={field.onChange}
+                          toYear={new Date().getFullYear()}
                           disabled={(date) =>
                             date > new Date() || date < new Date("1900-01-01")
                           }
                           initialFocus
+                          locale={es}
                         />
                       </PopoverContent>
                     </Popover>
@@ -308,7 +329,7 @@ export default function SecuencialidadForm({ table }: Props) {
             </>
           )}
         </div>
-        <Button type="submit">Ejecutar</Button>
+        <Button type="submit"> Ejecutar</Button>
       </form>
     </Form>
   );
