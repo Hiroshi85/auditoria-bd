@@ -161,25 +161,24 @@ def get_exception_response(
 
     # TODO save results in DB
 
-    if len(missing) == 0 and len(duplicates) == 0 and len(sequence) == 0:
-        return Response({
-            'result': 'ok',
-            'table': table,
-            'column': column,
-            'database': database_name,
-            'datetime_analysis': datetime_analysis,
-            'min': min_value,
-            'max': max_value,
-        }, status=200)
-
-    return Response({
-        'result': 'exception',
+    response_json = {
         'table': table,
         'column': column,
         'database': database_name,
         'datetime_analysis': datetime_analysis,
         'min': min_value,
         'max': max_value,
+    }
+
+    if len(missing) == 0 and len(duplicates) == 0 and len(sequence) == 0:
+        return Response({
+            'result': 'ok',
+            **response_json
+        }, status=200)
+
+    return Response({
+        'result': 'exception',
+        **response_json,
         'num_duplicates': len(duplicates),
         'duplicates': duplicates.values.flatten().tolist(),
         'num_missing': len(missing),

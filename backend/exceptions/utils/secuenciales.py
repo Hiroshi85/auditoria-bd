@@ -2,7 +2,7 @@
 from rest_framework import exceptions
 from sqlalchemy import MetaData, select
 import pandas as pd
-import itertools
+# import itertools
 import re
 
 def check_sequence_exception(data, sequence):
