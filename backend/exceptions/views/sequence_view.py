@@ -9,7 +9,7 @@ import datetime
 import pandas as pd
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def integer_sequence_exception(request, id):
     serializer = IntegerSequentialSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -22,14 +22,28 @@ def integer_sequence_exception(request, id):
 
     db, _ = get_connection_by_id(id, request.userdb)
     df = get_dataframe_values(db, table_name, column_name, sort)
+
+    if df.empty:
+        return get_exception_response(table=table_name,
+                                      column=column_name,
+                                      database_name=db.engine.url.database, error_result="No se encontraron valores en la columna seleccionada")
+
     min_value, max_value = get_min_max_values(body, df)
 
     int_sequence = set(range(min_value, max_value + 1, step))
     missing, duplicates, sequence = check_sequence_exception(df, int_sequence)
-    return get_exception_response(missing, duplicates, sequence, min_value, max_value)
+    return get_exception_response(
+        table=table_name,
+        column=column_name,
+        database_name=db.engine.url.database,
+        missing=missing,
+        duplicates=duplicates,
+        sequence=sequence,
+        min_value=min_value,
+        max_value=max_value)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def alphanumeric_sequence_exception(request, id):
     serializer = StringSequencialSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -45,8 +59,19 @@ def alphanumeric_sequence_exception(request, id):
     db, _ = get_connection_by_id(id, request.userdb)
     df = get_dataframe_values(db, table_name, column_name, sort)
 
+    if df.empty:
+        return get_exception_response(table=table_name,
+                                      column=column_name,
+                                      database_name=db.engine.url.database, error_result="No se ecnontraron valores en la columna seleccionada")
+
     letters, digits = get_letters(example), get_number(example)
     valid_Values = df[df.iloc[:, 0].str.contains(f'{letters}\d+$', na=False)]
+
+    if 'min' not in body or 'max' not in body:
+        if valid_Values.empty:
+            return get_exception_response(table=table_name,
+                                          column=column_name,
+                                          database_name=db.engine.url.database, error_result="No se encontraron valores válidos para determinar los valores máximos y mínimos en la secuencia de esta columna, por favor especifique los valores mínimos y máximos.")
 
     min_value, max_value = get_min_max_values(body, valid_Values)
 
@@ -54,15 +79,23 @@ def alphanumeric_sequence_exception(request, id):
         alphanumeric_sequence = [f'{letters}{str(val).zfill(len(digits))}'
                                  for val in range(int(get_number(min_value)), int(get_number(max_value)) + 1, step)]
     else:
-        # TODO implementar para secuencias dinámicas en letras y números (itertools)
+        # TODO implementar para secuencias dinámicas en letras y números (itertools) improbable
         pass
 
     missing, duplicates, sequence = check_sequence_exception(
         df, alphanumeric_sequence)
-    return get_exception_response(missing, duplicates, sequence, min_value, max_value)
+    return get_exception_response(
+        table=table_name,
+        column=column_name,
+        database_name=db.engine.url.database,
+        missing=missing,
+        duplicates=duplicates,
+        sequence=sequence,
+        min_value=min_value,
+        max_value=max_value)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def date_sequence_exception(request, id):
     serializer = DateSequencialSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -75,9 +108,14 @@ def date_sequence_exception(request, id):
     db, _ = get_connection_by_id(id, request.userdb)
     df = get_dataframe_values(db, table_name, column_name, sort)
 
+    if df.empty:
+        return get_exception_response(table=table_name,
+                                      column=column_name,
+                                      database_name=db.engine.url.database, error_result="No se encontraron valores en la columna seleccionada")
+
     if type(df.iloc[0, 0]) == pd.Timestamp:
         df = df.apply(lambda x: x.dt.date)
-        
+
     min_value, max_value = get_min_max_values(body, df)
 
     freq = body.get('frequency', 'D')
@@ -91,19 +129,55 @@ def date_sequence_exception(request, id):
 
     missing, duplicates, sequence = check_sequence_exception(df, date_sequence)
 
-    return get_exception_response(missing, duplicates, sequence, min_value, max_value)
+    return get_exception_response(
+        table=table_name,
+        column=column_name,
+        database_name=db.engine.url.database,
+        missing=missing,
+        duplicates=duplicates,
+        sequence=sequence,
+        min_value=min_value,
+        max_value=max_value)
 
 
-def get_exception_response(missing, duplicates, sequence, min_value, max_value):
+def get_exception_response(
+        table,
+        column,
+        database_name,
+        missing=[],
+        duplicates=[],
+        sequence=[],
+        min_value="N/A",
+        max_value="N/A",
+        error_result=""
+):
+    if error_result != "":
+        return Response({
+            'result': 'error',
+            'message': error_result
+        }, status=200)
+
+    datetime_analysis = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # TODO save results in DB
+
     if len(missing) == 0 and len(duplicates) == 0 and len(sequence) == 0:
         return Response({
             'result': 'ok',
+            'table': table,
+            'column': column,
+            'database': database_name,
+            'datetime_analysis': datetime_analysis,
             'min': min_value,
             'max': max_value,
         }, status=200)
 
     return Response({
         'result': 'exception',
+        'table': table,
+        'column': column,
+        'database': database_name,
+        'datetime_analysis': datetime_analysis,
         'min': min_value,
         'max': max_value,
         'num_duplicates': len(duplicates),
