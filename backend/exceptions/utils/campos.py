@@ -1,4 +1,5 @@
 from sqlalchemy.sql import null
+from sqlalchemy import func
 from datetime import datetime
 from .enums.secuenciales import Condicion, WhenNumerico, WhenCadena, WhenTiempo, WhenEnum, Tipo_Dato
 import re
@@ -15,12 +16,24 @@ def definir_condicion_general(campo, columna):
 def definir_condicion_where(campo, columna):
     tipo = columna["tipo"]
     id_condicion_where = columna["where"]["condicion_id"]
+    valor_1 = columna["where"]["valor_uno"]
 
     if(tipo == Tipo_Dato.NUMERICO.value):
-        return obtener_bool_numerico(campo, id_condicion_where, columna["where"]["valor_uno"], columna["where"]["valor_dos"])
+        valor_2 = columna["where"]["valor_dos"]
+        return obtener_bool_numerico(campo, id_condicion_where, valor_1, valor_2)
     
     if(tipo == Tipo_Dato.CADENA.value):
-        return obtener_bool_cadena()
+        id_condicion_long = columna["where"]["longitud"]["longitud_condicion_id"]
+        valor_long_1 = columna["where"]["longitud"]["valor_uno"]
+        valor_long_2 = columna["where"]["longitud"]["valor_dos"]
+        return obtener_bool_cadena(campo, id_condicion_where, valor_1, id_condicion_long, valor_long_1, valor_long_2)
+    
+    if(tipo == Tipo_Dato.TIEMPO.value):
+        valor_2 = columna["where"]["valor_dos"]
+        return obtener_bool_tiempo(campo, id_condicion_where, valor_1, valor_2)
+
+    if(tipo == Tipo_Dato.ENUM.value):
+        return obtener_bool_enum(campo, id_condicion_where, valor_1)
     
 def obtener_bool_numerico(campo, id_condicion_where, valor_uno, valor_dos):
     if(id_condicion_where == WhenNumerico.MAYOR.value):
@@ -52,7 +65,7 @@ def obtener_bool_cadena(campo, id_condicion_where, valor_uno, id_condicion_lengt
         return campo != valor_uno
 
     if(id_condicion_where == WhenCadena.CONTIENE.value):
-        return valor_uno in campo
+        return campo.like(f"%{valor_uno}%")
 
     if(id_condicion_where == WhenCadena.EMPIEZA_CON.value):
         return campo.startswith(valor_uno)
@@ -69,7 +82,7 @@ def obtener_bool_cadena(campo, id_condicion_where, valor_uno, id_condicion_lengt
         return bool(re.search(valor_uno, campo))
 
     if(id_condicion_where == WhenCadena.LONGITUD.value):
-        len_campo = len(campo)
+        len_campo = func.char_length(campo)
         return obtener_bool_numerico(len_campo, id_condicion_length, valor_uno_l, valor_dos_l)
 
 def obtener_bool_tiempo(campo, id_condicion_where, valor_uno, valor_dos):
