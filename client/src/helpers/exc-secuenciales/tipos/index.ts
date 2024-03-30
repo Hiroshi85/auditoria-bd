@@ -14,11 +14,9 @@ export function checkAlphanumericCoincidence(str1 : string, str2: string ){
     const regexp = /([a-zA-Z]?)(\d+)/;
     const match_1 = str1.match(regexp);
     const match_2 = str2.match(regexp);
-    console.log(match_1, match_2)
     if (match_1 != null && match_2 != null) {
         const [letters1, digits1] = [match_1[1], match_1[2]];
         const [letters2, digits2] = [match_2[1], match_2[2]];
-        console.log(letters1, digits1, letters2, digits2)
         if (letters1 !== letters2) 
             coincide = false;
 
@@ -26,7 +24,6 @@ export function checkAlphanumericCoincidence(str1 : string, str2: string ){
             coincide = false;
         }
     }
-    console.log(coincide)
     return coincide
 }
 
