@@ -44,43 +44,78 @@ type Props = {
 export default function SecuencialidadForm({ table }: Props) {
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
-  
-  const exceptionContext = useSecuencia();
+
+  const { 
+    selectedType, 
+    setColumnType, 
+    auditException, 
+    clearResults } = useSecuencia();
 
   const form = useForm<z.infer<typeof SecuencialFormSchema>>({
+    defaultValues: {
+      column: undefined,
+      column_type: "",
+      example: undefined,
+      min: "",
+      max: "",
+      step: 1,
+      static: true,
+      frequency: "D",
+      min_date: undefined,
+      max_date: undefined,
+    },
     resolver: zodResolver(SecuencialFormSchema),
   });
 
+  //TODO crear input skeletons
   if (isLoading) return <div>Cargando...</div>;
+
   if (isError || !data)
     return <div>No se pudieron cargar los datos del servidor</div>;
-  //   console.log(data);
 
   const columns = data.columns.filter((column) =>
     AllowedTypes.includes(column.python_type.toLowerCase())
   );
 
-  const watchColumn = form.watch("column");
-  
-  const selectedColumn = columns.find((column) => column.name === watchColumn);
-  const selectedType = selectedColumn?.python_type ?? "no type selected";
-  console.log(selectedType);
-  // Add inputs based on the selected type
+  form.watch((value, { name }) => {
+    if (name == "column") {
+      const selectedColumn = columns.find((col) => col.name === value.column);
+      if (selectedColumn === undefined) return;
+      const selectedType = selectedColumn.python_type;
+      setColumnType(selectedType);
+      clearResults();
+      form.reset({
+        column: value.column,
+        column_type: selectedType,
+        example: undefined,
+        min: "",
+        max: "",
+        step: 1,
+        static: true,
+        frequency: "D",
+        min_date: undefined,
+        max_date: undefined,
+      });
+    }
+  });
 
   function onSubmit(values: z.infer<typeof SecuencialFormSchema>) {
-    // add table name to values
-    const reqData : VerificarSecuenciaRequest = {
-      table: table,  
+    if (selectedType === null) return;
+    const min_value = values.min !== "" ? values.min : undefined;
+    const max_value = values.max !== "" ? values.max : undefined;
+    
+    const reqData: VerificarSecuenciaRequest = {
+      table: table,
       column: values.column,
       example: values.example,
-      min: selectedType === "date" ? values.min_date : values.min,
-      max: selectedType === "date" ? values.max_date : values.max,
+      min: selectedType === "date" ? values.min_date : min_value,
+      max: selectedType === "date" ? values.max_date : max_value,
       step: values.step,
       static: values.static,
       frequency: values.frequency,
-      sort: "none"
-    }
-    exceptionContext.auditException(reqData, selectedType);
+      sort: "none",
+    };
+    auditException(reqData, selectedType);
   }
 
   return (
@@ -146,7 +181,7 @@ export default function SecuencialidadForm({ table }: Props) {
                       <span className="text-gray-500">Opcional</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="1" type="number" min={1} {...field} />
+                      <Input placeholder="-" type="text" {...field} />
                     </FormControl>
                     <div className="min-h-[20px]">
                       <FormMessage />
@@ -160,11 +195,11 @@ export default function SecuencialidadForm({ table }: Props) {
                 render={({ field }) => (
                   <FormItem className="pt-[10px]">
                     <FormLabel className="flex justify-between">
-                      <span>Valor mínimo</span>
+                      <span>Valor máximo</span>
                       <span className="text-gray-500">Opcional</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="1" type="number" min={1} {...field} />
+                      <Input placeholder="-" type="text" {...field} />
                     </FormControl>
                     <div className="min-h-[20px]">
                       <FormMessage />
@@ -179,7 +214,7 @@ export default function SecuencialidadForm({ table }: Props) {
                   <FormItem>
                     <FormLabel>Paso</FormLabel>
                     <FormControl>
-                      <Input placeholder="1" type="number" min={1} {...field} />
+                      <Input placeholder="1" type="text" {...field} />
                     </FormControl>
                     <div className="min-h-[20px]">
                       <FormMessage />
@@ -191,7 +226,7 @@ export default function SecuencialidadForm({ table }: Props) {
           )}
 
           {/* Dates */}
-          {(selectedType === 'date' || selectedType === "datetime") && (
+          {(selectedType === "date" || selectedType === "datetime") && (
             <>
               <FormField
                 control={form.control}
