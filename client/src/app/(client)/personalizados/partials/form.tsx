@@ -1,6 +1,6 @@
 "use client";
 import { z } from "zod";
-import { PersonalizadasFormSchema } from "./schema";
+import { PersonalizadasFormSchema } from "./form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
@@ -21,8 +21,17 @@ import { Button } from "@/components/ui/button";
 
 import { useTable } from "../../partials/tables.context";
 import { useConnectionDatabase } from "@/providers/connection";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { LucidePanelTopOpen } from 'lucide-react' 
+import { useState } from "react";
 
 export default function CustomExceptionForm() {
+  const [columnsListOpen, setColumnsListOpen] = useState(false);
   const params = useSearchParams();
   const table = params.get("table") ?? "";
   const { id: connectionId } = useConnectionDatabase();
@@ -31,7 +40,7 @@ export default function CustomExceptionForm() {
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
     defaultValues: {
       task_name: "",
-      columns: [],
+      columns: "",
       conditions: "",
     },
     resolver: zodResolver(PersonalizadasFormSchema),
@@ -78,35 +87,46 @@ export default function CustomExceptionForm() {
             name="columns"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>SELECT</FormLabel>
+                <div className="flex gap-4">
+                  <FormLabel className="flex items-center">SELECT</FormLabel>
+                  <Popover open={columnsListOpen} onOpenChange={setColumnsListOpen}>
+                    <PopoverTrigger className="bg-accent rounded-md"><LucidePanelTopOpen /></PopoverTrigger>
+                    <PopoverContent>
+                      <ToggleGroup
+                        type="single"
+                        variant={"outline"}
+                        className="flex flex-wrap gap-1.5 justify-start"
+                        onValueChange={(value) => {
+                          form.setValue("columns", form.getValues("columns") + value);
+                          setColumnsListOpen(false);
+                        }}
+                      >
+                        {data?.columns.map((column) => (
+                          <ToggleGroupItem
+                            key={column.name}
+                            value={column.name}
+                            aria-label={`Toggle ${column.name}`}
+                          >
+                            {column.name}
+                          </ToggleGroupItem>
+                        ))}
+                      </ToggleGroup>
+                    </PopoverContent>
+                  </Popover>
+                </div>
                 <FormControl>
                   <div className="grid w-full gap-1.5">
-                    <ToggleGroup
-                      type="multiple"
-                      variant={"outline"}
-                      className="flex flex-wrap gap-1.5 justify-start"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <ToggleGroupItem value={"*"} aria-label={`Toggle *`}>
-                        {"*"}
-                      </ToggleGroupItem>
-                      {data?.columns.map((column) => (
-                        <ToggleGroupItem
-                          key={column.name}
-                          value={column.name}
-                          aria-label={`Toggle ${column.name}`}
-                        >
-                          {column.name}
-                        </ToggleGroupItem>
-                      ))}
-                    </ToggleGroup>
+                    <Textarea
+                      placeholder="*"
+                      className="h-[60px] font-mono"
+                      {...field}
+                    />
                     <p className="text-sm text-muted-foreground uppercase">
                       from {table}
                     </p>
                   </div>
                 </FormControl>
-                <div className="min-h-[20px]">
+                <div className="min-h-[0px]">
                   <FormMessage />
                 </div>
               </FormItem>
