@@ -55,7 +55,7 @@ export default function SecuencialidadForm({ table }: Props) {
     defaultValues: {
       column: undefined,
       column_type: "",
-      example: undefined,
+      example: "",
       min: "",
       max: "",
       step: 1,
@@ -87,7 +87,7 @@ export default function SecuencialidadForm({ table }: Props) {
       form.reset({
         column: value.column,
         column_type: selectedType,
-        example: undefined,
+        example: "",
         min: "",
         max: "",
         step: 1,
@@ -107,7 +107,7 @@ export default function SecuencialidadForm({ table }: Props) {
     const reqData: VerificarSecuenciaRequest = {
       table: table,
       column: values.column,
-      example: values.example,
+      example: values.example !== "" ? values.example : undefined,
       min: selectedType === "date" ? values.min_date : min_value,
       max: selectedType === "date" ? values.max_date : max_value,
       step: values.step,
