@@ -118,10 +118,6 @@ const IntegridadCamposForm = () => {
         form.setValue(`columnas.${index}.condicion_id`, condicion_id)
     }
 
-    const columnaYaExiste = (nombre: string) => {
-        return watchColumns.some((column) => column.nombre === nombre)
-    }
-
     const resetearAlCambiarColumna = (index: number) => {
         form.setValue(`columnas.${index}.condicion`, "")
         form.setValue(`columnas.${index}.condicion_id`, 0)
@@ -215,9 +211,6 @@ const IntegridadCamposForm = () => {
                                             <Select
                                                 {...field}
                                                 onValueChange={(value) => {
-                                                    if (columnaYaExiste(value)) {
-                                                        return
-                                                    }
                                                     resetearAlCambiarColumna(index)
                                                     field.onChange(value)
                                                     setTipoDeDato(value, index)
