@@ -25,7 +25,7 @@ def obtain_valores(request, id):
     condiciones_where = [objeto['condicion'] for objeto in condiciones]
 
     #Operacion para columna adicional con case para mostrar excepciones
-    expresiones_case = [ case((objeto['condicion'], f"{objeto['campo']} "), else_='') for objeto in condiciones]
+    expresiones_case = [ case((objeto['condicion'], f"{objeto['campo']},"), else_='') for objeto in condiciones]
 
     #Concatenar las expresiones de case
     columna_excepciones = func.concat(*expresiones_case).label('excepciones')
