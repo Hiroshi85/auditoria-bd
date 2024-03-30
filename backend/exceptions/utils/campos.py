@@ -1,6 +1,7 @@
 from sqlalchemy.sql import null
-import re
+from datetime import datetime
 from .enums.secuenciales import Condicion, WhenNumerico, WhenCadena, WhenTiempo, WhenEnum, Tipo_Dato
+import re
 
 def definir_condicion_general(campo, columna):
     id_condicion_general = columna["condicion_id"]
@@ -70,3 +71,40 @@ def obtener_bool_cadena(campo, id_condicion_where, valor_uno, id_condicion_lengt
     if(id_condicion_where == WhenCadena.LONGITUD.value):
         len_campo = len(campo)
         return obtener_bool_numerico(len_campo, id_condicion_length, valor_uno_l, valor_dos_l)
+
+def obtener_bool_tiempo(campo, id_condicion_where, valor_uno, valor_dos):
+    campo_dt = datetime.strptime(campo, '%Y-%m-%d %H:%M:%S')
+    valor_uno_date = datetime.strptime(valor_uno, '%Y-%m-%d').date()
+    valor_dos_date = datetime.strptime(valor_dos, '%Y-%m-%d').date()
+    valor_uno_time = datetime.strptime(valor_uno, '%H:%M').time()
+    valor_dos_time = datetime.strptime(valor_dos, '%H:%M').time()
+    
+    if(id_condicion_where == WhenTiempo.ANTES.value):
+        return campo_dt.date() < valor_uno_date
+
+    if(id_condicion_where == WhenTiempo.DESPUES.value):
+        return campo_dt.date()  > valor_uno_date
+
+    if(id_condicion_where == WhenTiempo.ENTRE.value):
+        return valor_uno_date <= campo_dt.date() <= valor_dos_date
+
+    if(id_condicion_where == WhenTiempo.IGUAL.value):
+        return campo_dt.date() == valor_uno_date
+
+    if(id_condicion_where == WhenTiempo.ENTRE_HORAS.value):
+        return valor_uno_time <= campo_dt.time() <= valor_dos_time
+
+    if(id_condicion_where == WhenTiempo.DIA_SEMANA.value):
+        return campo_dt.isoweekday() == valor_uno_date.isoweekday()
+
+    if(id_condicion_where == WhenTiempo.MES.value):
+        return campo_dt.month == valor_uno_date.month()
+
+    if(id_condicion_where == WhenTiempo.AÑO.value):
+        return campo_dt.year() == valor_uno_date.year()
+    
+def obtener_bool_enum(campo, id_condicion_where, valor_uno):
+    if(id_condicion_where == WhenEnum.ACEPTA.value):
+        lista_valores = valor_uno.split(",")
+        lista_valores_aceptados = [valor.strip() for valor in lista_valores]
+        return campo in lista_valores_aceptados
