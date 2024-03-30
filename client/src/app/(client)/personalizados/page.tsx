@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import CustomExceptionForm from "./partials/form";
+import CustomExceptionForm from "./partials/form/form";
 import CustomExceptionResults from "./partials/results";
 
 export const metadata: Metadata = {

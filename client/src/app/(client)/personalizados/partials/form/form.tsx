@@ -13,25 +13,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-import { useTable } from "../../partials/tables.context";
+import { useTable } from "../../../partials/tables.context";
 import { useConnectionDatabase } from "@/providers/connection";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
-import { LucidePanelTopOpen } from 'lucide-react' 
-import { useState } from "react";
+import ColumnSuggestions from "./column-suggestions";
 
 export default function CustomExceptionForm() {
-  const [columnsListOpen, setColumnsListOpen] = useState(false);
   const params = useSearchParams();
   const table = params.get("table") ?? "";
   const { id: connectionId } = useConnectionDatabase();
@@ -89,30 +80,7 @@ export default function CustomExceptionForm() {
               <FormItem className="w-full">
                 <div className="flex gap-4">
                   <FormLabel className="flex items-center">SELECT</FormLabel>
-                  <Popover open={columnsListOpen} onOpenChange={setColumnsListOpen}>
-                    <PopoverTrigger className="bg-accent rounded-md"><LucidePanelTopOpen /></PopoverTrigger>
-                    <PopoverContent>
-                      <ToggleGroup
-                        type="single"
-                        variant={"outline"}
-                        className="flex flex-wrap gap-1.5 justify-start"
-                        onValueChange={(value) => {
-                          form.setValue("columns", form.getValues("columns") + value);
-                          setColumnsListOpen(false);
-                        }}
-                      >
-                        {data?.columns.map((column) => (
-                          <ToggleGroupItem
-                            key={column.name}
-                            value={column.name}
-                            aria-label={`Toggle ${column.name}`}
-                          >
-                            {column.name}
-                          </ToggleGroupItem>
-                        ))}
-                      </ToggleGroup>
-                    </PopoverContent>
-                  </Popover>
+                   <ColumnSuggestions form={form} columns={data?.columns} />
                 </div>
                 <FormControl>
                   <div className="grid w-full gap-1.5">
