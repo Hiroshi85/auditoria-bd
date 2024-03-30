@@ -96,4 +96,14 @@ export const SecuencialFormSchema = z
         }
       }
     }
+
+    if(val.column_type === "int" || val.column_type === "str"){
+      if(!val.step){
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["step"],
+          message: "El campo paso es requerido",
+        });
+      }
+    }
   });
