@@ -12,22 +12,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CONDICIONES, CONDICIONES_ENUM } from "@/constants/integridad/campos/condiciones"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TIPOS_DE_DATOS } from "@/constants/integridad/campos/tipos-datos"
 import { obtenerTipoDatoSQL } from "@/helpers/tipos-datos"
 import { obtenerCondicionesDeLongitud, obtenerCondicionesDelTipo } from "@/helpers/condiciones"
 import { Input } from "@/components/ui/input"
 import { DIAS } from "@/constants/dias"
 import { MESES } from "@/constants/meses"
 import { ANIOS } from "@/constants/anios"
-
 const schema = z.object({
     columnas: z.array(z.object({
-        nombre: z.string(),
-        tipo: z.string(),
-        tipo_de_dato_id: z.number(),
-        tipo_de_dato: z.string(),
-        condicion_id: z.number(),
-        condicion: z.string(),
+        nombre: z.string().refine((value) => value !== "", { message: "Debe seleccionar columna" }),
+        tipo: z.string().refine((value) => ['numerico', 'cadena', 'tiempo', 'enum'].includes(value), { message: "Debe seleccionar columna" }),
+        tipo_de_dato_id: z.number().min(1, { message: "Debe seleccionar columna" }),
+        tipo_de_dato: z.string().refine((value) => value !== "", { message: "Debe seleccionar columna" }),
+        condicion_id: z.number().min(1, { message: "Debe seleccionar condicion" }),
+        condicion: z.string().refine((value) => value !== "", { message: "Debe seleccionar condicion" }),
         where: z.object({
             condicion_id: z.number(),
             nombre: z.string(),
@@ -36,11 +34,168 @@ const schema = z.object({
             longitud: z.object({
                 longitud_condicion_id: z.number(),
                 nombre: z.string(),
-                valor_uno: z.string(),
-                valor_dos: z.string(),
             })
         })
-    }))
+    }).superRefine((val, ctx) => {
+        // 1. Si la condicion_id es diferente de 0, entonces se deben validar los campos de where
+        if (val.condicion_id !== 0) {
+            if (val.condicion_id === CONDICIONES_ENUM.Where.id) {
+                if (val.where.condicion_id === 0) {
+                    return ctx.addIssue(
+                        {
+                            code: z.ZodIssueCode.custom,
+                            message: 'Debe seleccionar una condicion para el campo where',
+                            path: ['where', 'nombre']
+                        }
+                    )
+                }
+                if (val.where.nombre === 'longitud') {
+                    if (val.where.longitud.longitud_condicion_id === 0) {
+                        return ctx.addIssue(
+                            {
+                                code: z.ZodIssueCode.custom,
+                                message: 'Debe seleccionar una condicion de longitud',
+                                path: ['where', 'longitud', 'nombre']
+                            }
+                        )
+                    }
+                }
+                if (val.where.valor_uno === "") {
+                    return ctx.addIssue(
+                        {
+                            code: z.ZodIssueCode.custom,
+                            message: 'Debe ingresar un valor',
+                            path: ['where', 'valor_uno']
+                        }
+                    )
+                }
+
+                // si el tipo de dato es numerico
+                if (val.tipo === 'numerico') {
+                    if (isNaN(Number(val.where.valor_uno))) {
+                        return ctx.addIssue(
+                            {
+                                code: z.ZodIssueCode.custom,
+                                message: 'El valor debe ser numerico',
+                                path: ['where', 'valor_uno']
+                            }
+                        )
+                    }
+                }
+
+                // si el tipo de dato es tiempo
+                if (val.tipo === 'tiempo') {
+                    if (val.where.nombre === 'rangoHoras') {
+                        const [hora, minuto] = val.where.valor_uno.split(":")
+                        if (isNaN(Number(hora)) || isNaN(Number(minuto))) {
+                            return ctx.addIssue(
+                                {
+                                    code: z.ZodIssueCode.custom,
+                                    message: 'El valor debe ser de tipo tiempo',
+                                    path: ['where', 'valor_uno']
+                                }
+                            )
+                        }
+                    }
+                    if (val.where.nombre === 'entreFechas') {
+                        if (isNaN(Date.parse(val.where.valor_uno))) {
+                            return ctx.addIssue(
+                                {
+                                    code: z.ZodIssueCode.custom,
+                                    message: 'El valor debe ser de tipo fecha',
+                                    path: ['where', 'valor_uno']
+                                }
+                            )
+                        }
+                    }
+                }
+
+
+                if (val.where.nombre === 'entre' || val.where.nombre === 'entreFechas' || val.where.nombre === 'rangoHoras') {
+                    if (val.where.valor_dos === "") {
+                        return ctx.addIssue(
+                            {
+                                code: z.ZodIssueCode.custom,
+                                message: 'Debe ingresar un segundo valor',
+                                path: ['where', 'valor_dos']
+                            }
+                        )
+                    }
+                    // si el tipo de dato es numerico, entonces se debe validar que los valores sean numericos
+                    if (val.tipo === 'numerico') {
+                        if (isNaN(Number(val.where.valor_dos))) {
+                            return ctx.addIssue(
+                                {
+                                    code: z.ZodIssueCode.custom,
+                                    message: 'El valor debe ser numerico',
+                                    path: ['where', 'valor_dos']
+                                }
+                            )
+                        }
+                        // tambien validar que el valor uno sea menor que el valor dos
+                        if (Number(val.where.valor_uno) > Number(val.where.valor_dos)) {
+                            return ctx.addIssue(
+                                {
+                                    code: z.ZodIssueCode.custom,
+                                    message: 'El valor uno debe ser menor que el valor dos',
+                                    path: ['where', 'valor_uno']
+                                }
+                            )
+                        }
+                    }
+                    // si el tipo de dato es tiempo, entonces se debe validar que los valores sean de tipo tiempo
+                    if (val.tipo === 'tiempo') {
+                        if (val.where.nombre === 'rangoHoras') {
+                            const [hora_uno, minuto_uno] = val.where.valor_uno.split(":")
+                            const [hora_dos, minuto_dos] = val.where.valor_dos.split(":")
+                            if (isNaN(Number(hora_uno)) || isNaN(Number(minuto_uno))) {
+                                return ctx.addIssue(
+                                    {
+                                        code: z.ZodIssueCode.custom,
+                                        message: 'El valor debe ser de tipo tiempo',
+                                        path: ['where', 'valor_uno']
+                                    }
+                                )
+                            }
+                            if (isNaN(Number(hora_dos)) || isNaN(Number(minuto_dos))) {
+                                return ctx.addIssue(
+                                    {
+                                        code: z.ZodIssueCode.custom,
+                                        message: 'El valor debe ser de tipo tiempo',
+                                        path: ['where', 'valor_dos']
+                                    }
+                                )
+                            }
+                        }
+                        // si son fechas, entonces validar que sean fechas
+                        if (val.where.nombre === 'entreFechas') {
+                            if (isNaN(Date.parse(val.where.valor_dos))) {
+                                return ctx.addIssue(
+                                    {
+                                        code: z.ZodIssueCode.custom,
+                                        message: 'El valor debe ser de tipo fecha',
+                                        path: ['where', 'valor_dos']
+                                    }
+                                )
+                            }
+                            if (Date.parse(val.where.valor_uno) > Date.parse(val.where.valor_dos)) {
+                                return ctx.addIssue(
+                                    {
+                                        code: z.ZodIssueCode.custom,
+                                        message: 'El valor uno debe ser menor que el valor dos',
+                                        path: ['where', 'valor_uno']
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    })
+
+    ).nonempty(),
 })
 const IntegridadCamposForm = () => {
 
@@ -51,6 +206,7 @@ const IntegridadCamposForm = () => {
 
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
+        mode: 'onSubmit',
     })
     const { fields, append, remove } = useFieldArray({
         control: form.control,
@@ -61,11 +217,15 @@ const IntegridadCamposForm = () => {
     async function onSubmit(data: z.infer<typeof schema>) {
         try {
             console.log(data)
-            // await verificarIntegridadDeCamposRequest({ table, data })
+            // await verificarIntegridadDeCamposRequest({
+            //     data: data.columnas,
+            //     table
+            // })
         } catch (error) {
             console.error(error)
         }
     }
+
 
     const addNewField = () => {
         append({
@@ -83,8 +243,6 @@ const IntegridadCamposForm = () => {
                 longitud: {
                     longitud_condicion_id: 0,
                     nombre: "",
-                    valor_uno: "",
-                    valor_dos: "",
                 }
             }
         })
@@ -127,8 +285,6 @@ const IntegridadCamposForm = () => {
         form.setValue(`columnas.${index}.where.valor_dos`, "")
         form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, 0)
         form.setValue(`columnas.${index}.where.longitud.nombre`, "")
-        form.setValue(`columnas.${index}.where.longitud.valor_uno`, "")
-        form.setValue(`columnas.${index}.where.longitud.valor_dos`, "")
     }
 
     const resetearAlCambiarCondicion = (index: number) => {
@@ -138,19 +294,24 @@ const IntegridadCamposForm = () => {
         form.setValue(`columnas.${index}.where.valor_dos`, "")
         form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, 0)
         form.setValue(`columnas.${index}.where.longitud.nombre`, "")
-        form.setValue(`columnas.${index}.where.longitud.valor_uno`, "")
-        form.setValue(`columnas.${index}.where.longitud.valor_dos`, "")
     }
 
+    const setWhereCondicionIdGivenName = (name: string, index: number) => {
+        const tipo_de_dato = form.getValues(`columnas.${index}.tipo`) as 'numerico' | 'cadena' | 'tiempo' | 'enum'
+        const condicion_id = CONDICIONES[CONDICIONES_ENUM.Where.index]?.condicion?.[tipo_de_dato]?.find((condicion) => condicion.name === name)?.id ?? 0
+        form.setValue(`columnas.${index}.where.condicion_id`, condicion_id)
+    }
     const resetearAlCambiarCondicionWhere = (index: number) => {
         form.setValue(`columnas.${index}.where.valor_uno`, "")
         form.setValue(`columnas.${index}.where.valor_dos`, "")
         form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, 0)
         form.setValue(`columnas.${index}.where.longitud.nombre`, "")
-        form.setValue(`columnas.${index}.where.longitud.valor_uno`, "")
-        form.setValue(`columnas.${index}.where.longitud.valor_dos`, "")
     }
 
+    const setWhereLongitudCondicionIdGivenName = (name: string, index: number) => {
+        const condicion_id = obtenerCondicionesDeLongitud().find((condicion) => condicion.name === name)?.id ?? 0
+        form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, condicion_id)
+    }
 
     const obtenerTipoDeInputSegunTipoDeDato = (tipo_de_dato: string, name_condicion: string) => {
         if (tipo_de_dato === 'numerico') {
@@ -188,14 +349,19 @@ const IntegridadCamposForm = () => {
         return []
     }
 
+
     return (<main className="container mx-auto p-5">
         <h1 className="text-xl font-bold">Excepción de integridad de campos</h1>
         <h2 className="text-lg">Tabla {table}</h2>
 
-        <Form {...form}>
+        <Form {...form}
+
+        >
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                {form.formState.errors.columnas && <p className="text-red-500">{form.formState.errors.columnas.message}</p>}
                 {fields.map((item, index) => (
                     <div key={item.id} className="flex gap-3 items-center lg:items-end">
+                        {form.formState.errors.columnas?.[index] && <p className="text-red-500">{form.formState.errors.columnas?.[index]?.message}</p>}
                         <div className="flex gap-2 items-center min-w-32">
                             <Button type="button" onClick={() => remove(index)}><TrashIcon /></Button>
                             <span className="text-[8px] font-medium p-2 bg-emerald-200 rounded-full">{watchColumns[index].tipo_de_dato}</span>
@@ -209,7 +375,8 @@ const IntegridadCamposForm = () => {
                                         <FormItem>
                                             <FormLabel>Columna</FormLabel>
                                             <Select
-                                                {...field}
+                                                value={field.value}
+                                                name={field.name}
                                                 onValueChange={(value) => {
                                                     resetearAlCambiarColumna(index)
                                                     field.onChange(value)
@@ -218,7 +385,7 @@ const IntegridadCamposForm = () => {
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Seleccione campo" />
+                                                        <SelectValue onBlur={field.onBlur} ref={field.ref} placeholder="Seleccione campo" />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
@@ -241,8 +408,8 @@ const IntegridadCamposForm = () => {
                                         <FormItem>
                                             <FormLabel>Condicion</FormLabel>
                                             <Select
-                                                {...field}
                                                 value={field.value}
+                                                name={field.name}
                                                 onValueChange={(value) => {
                                                     field.onChange(value)
                                                     resetearAlCambiarCondicion(index)
@@ -252,7 +419,7 @@ const IntegridadCamposForm = () => {
                                             >
                                                 <FormControl>
                                                     <SelectTrigger className="w-full">
-                                                        <SelectValue
+                                                        <SelectValue onBlur={field.onBlur} ref={field.ref}
                                                             placeholder="Seleccione condicion" />
                                                     </SelectTrigger>
                                                 </FormControl>
@@ -279,17 +446,18 @@ const IntegridadCamposForm = () => {
                                                 <FormItem>
                                                     <FormLabel>Condicion</FormLabel>
                                                     <Select
-                                                        {...field}
+                                                        name={field.value}
                                                         value={field.value}
                                                         disabled={watchColumns[index]?.nombre === ""}
                                                         onValueChange={(value) => {
                                                             field.onChange(value)
                                                             resetearAlCambiarCondicionWhere(index)
+                                                            setWhereCondicionIdGivenName(value, index)
                                                         }}
                                                     >
                                                         <FormControl>
                                                             <SelectTrigger className="w-full">
-                                                                <SelectValue
+                                                                <SelectValue onBlur={field.onBlur} ref={field.ref}
                                                                     placeholder="Seleccione condicion" />
                                                             </SelectTrigger>
                                                         </FormControl>
@@ -318,16 +486,17 @@ const IntegridadCamposForm = () => {
                                                 <FormItem>
                                                     <FormLabel>Condicion</FormLabel>
                                                     <Select
-                                                        {...field}
+                                                        name={field.value}
                                                         value={field.value}
                                                         disabled={watchColumns[index]?.where.nombre !== "longitud"}
                                                         onValueChange={(value) => {
                                                             field.onChange(value)
+                                                            setWhereLongitudCondicionIdGivenName(value, index)
                                                         }}
                                                     >
                                                         <FormControl>
                                                             <SelectTrigger className="w-full">
-                                                                <SelectValue
+                                                                <SelectValue onBlur={field.onBlur} ref={field.ref}
                                                                     placeholder="Seleccione condicion" />
                                                             </SelectTrigger>
                                                         </FormControl>
@@ -401,7 +570,7 @@ const IntegridadCamposForm = () => {
                                                 <FormItem>
                                                     <FormLabel>Valor</FormLabel>
                                                     <Select
-                                                        {...field}
+                                                        name={field.value}
                                                         value={field.value}
                                                         onValueChange={(value) => {
                                                             field.onChange(value)
@@ -409,7 +578,7 @@ const IntegridadCamposForm = () => {
                                                     >
                                                         <FormControl>
                                                             <SelectTrigger className="w-full">
-                                                                <SelectValue
+                                                                <SelectValue onBlur={field.onBlur} ref={field.ref}
                                                                     placeholder="Seleccione" />
                                                             </SelectTrigger>
                                                         </FormControl>
