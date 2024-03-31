@@ -36,31 +36,19 @@ export const CONDICIONES: CondicionType[] = [
                 },
                 {
                     id: 2,
-                    name: 'menor',
-                    title: 'Menor a'
-                },
-                {
-                    id: 3,
-                    name: 'igual',
-                    title: 'Igual a'
-                },
-                {
-                    id: 4,
-                    name: 'entre',
-                    title: 'Entre'
-                },
-                {
-                    id: 5,
                     name: 'mayorIgual',
                     title: 'Mayor o igual a'
                 },
                 {
-                    id: 6,
+                    id: 3,
+                    name: 'menor',
+                    title: 'Menor a'
+                },
+                {
+                    id: 4,
                     name: 'menorIgual',
                     title: 'Menor o igual a'
-                }
-            ],
-            cadena: [
+                },
                 {
                     id: 5,
                     name: 'igual',
@@ -73,31 +61,48 @@ export const CONDICIONES: CondicionType[] = [
                 },
                 {
                     id: 7,
+                    name: 'entre',
+                    title: 'Entre'
+                },
+            ],
+            cadena: [
+                {
+                    id: 8,
+                    name: 'igual',
+                    title: 'Igual a'
+                },
+                {
+                    id: 9,
+                    name: 'diferente',
+                    title: 'Diferente a'
+                },
+                {
+                    id: 10,
                     name: 'contiene',
                     title: 'Contiene'
                 },
                 {
-                    id: 8,
+                    id: 11,
                     name: 'empieza',
                     title: 'Empieza con'
                 },
                 {
-                    id: 9,
+                    id: 12,
                     name: 'termina',
                     title: 'Termina con'
                 },
                 {
-                    id: 10,
+                    id: 13,
                     name: 'valores_aceptados',
                     title: 'Valores aceptados'
                 },
                 {
-                    id: 11,
+                    id: 14,
                     name: 'regex',
                     title: 'Expresión regular'
                 },
                 {
-                    id: 12,
+                    id: 15,
                     name: 'longitud',
                     title: 'Longitud',
                     condiciones: [
@@ -108,85 +113,90 @@ export const CONDICIONES: CondicionType[] = [
                         },
                         {
                             id: 2,
-                            name: 'menor',
-                            title: 'Menor a'
-                        },
-                        {
-                            id: 3,
-                            name: 'igual',
-                            title: 'Igual a'
-                        },
-                        {
-                            id: 4,
-                            name: 'entre',
-                            title: 'Entre'
-                        },
-                        {
-                            id: 5,
                             name: 'mayorIgual',
                             title: 'Mayor o igual a'
                         },
                         {
-                            id: 6,
+                            id: 3,
+                            name: 'menor',
+                            title: 'Menor a'
+                        },
+                        {
+                            id: 4,
                             name: 'menorIgual',
                             title: 'Menor o igual a'
-                        }
+                        },
+                        {
+                            id: 5,
+                            name: 'igual',
+                            title: 'Igual a'
+                        },
+                        {
+                            id: 6,
+                            name: 'diferente',
+                            title: 'Diferente a'
+                        },
+                        {
+                            id: 7,
+                            name: 'entre',
+                            title: 'Entre'
+                        },
                     ]
                 }
             ],
             tiempo: [
                 {
 
-                    id: 13,
+                    id: 16,
                     name: 'anterior',
                     title: 'Antes de'
                 },
                 {
 
-                    id: 14,
+                    id: 17,
                     name: 'posterior',
                     title: 'Después de'
                 },
                 {
 
-                    id: 15,
+                    id: 18,
                     name: 'entreFechas',
                     title: 'Entre Fechas'
                 },
                 {
 
-                    id: 16,
+                    id: 19,
                     name: 'igualFecha',
                     title: 'Igual a'
                 },
                 {
 
-                    id: 17,
+                    id: 20,
                     name: 'rangoHoras',
                     title: 'Rango de Horas'
                 },
                 {
 
-                    id: 18,
+                    id: 21,
                     name: 'diaSemana',
                     title: 'Día de Semana'
                 },
                 {
 
-                    id: 19,
+                    id: 22,
                     name: 'mes',
                     title: 'Mes'
                 },
                 {
 
-                    id: 20,
+                    id: 23,
                     name: 'año',
                     title: 'Año'
                 },
             ],
             enum: [
                 {
-                    id: 21,
+                    id: 24,
                     name: 'valores_aceptados',
                     title: 'Valores aceptados'
                 }
