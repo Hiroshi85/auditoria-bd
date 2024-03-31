@@ -4,7 +4,7 @@ import { usePersonalizadas } from "../personalizados.context";
 import { cn } from "@/lib/utils";
 import { DataTable } from "@/components/layout/table/table-details";
 import { useConnectionDatabase } from "@/providers/connection";
-
+import { Table2Icon } from "lucide-react";
 interface ResultsProps {
   children: React.ReactNode;
   className?: string;
@@ -69,6 +69,15 @@ export default function CustomExceptionResults() {
     </ResultContainer>
   ) : (
     <ResultContainer type="ok">
+      <header className="flex justify-between items-center space-x-2 space-y-3">
+        <div className=" flex items-center gap-2">
+          <Table2Icon size={20} />
+          {data.table}
+        </div>
+        <div>
+          {data.num_rows} filas en total {/* limitado a , data.page_size*/}
+        </div>
+      </header>
       <DataTable
         columns={data.data.headers.map((header: string) => ({
           accessorKey: header,

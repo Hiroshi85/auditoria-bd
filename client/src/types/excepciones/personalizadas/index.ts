@@ -17,6 +17,8 @@ export type PersonalizadaOKResponse = {
     result: "ok"
     query: string
     timestamp: string
+    table: string
+    num_rows: number
     data: {
         headers: [],
         rows: []

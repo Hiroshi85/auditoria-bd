@@ -45,8 +45,10 @@ def index(request, id):
 
     return Response({
         'result': 'ok',
+        'table': table,
         'task_name': task_name,
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'num_rows': len(data),
         'data': resultados
     })
