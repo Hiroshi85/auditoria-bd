@@ -8,13 +8,11 @@ interface ColumnaAVerificar {
     where?: {
         condicion_id: number;
         nombre: string;
-        valor_uno: number;
-        valor_dos: number;
+        valor_uno: string;
+        valor_dos?: string;
         longitud?: {
             longitud_condicion_id: number;
             nombre: string;
-            valor_uno: number;
-            valor_dos: number;
         }
     };
 
