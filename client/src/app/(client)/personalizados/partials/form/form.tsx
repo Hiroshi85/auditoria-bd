@@ -31,12 +31,12 @@ import { usePersonalizadas } from "../../personalizados.context";
 import { VerificarPersonalizadaRequest } from "@/types/excepciones/personalizadas";
 
 export default function CustomExceptionForm({ engine }: { engine: string }) {
-  const { auditException } = usePersonalizadas()
+  const { auditException, clearResults } = usePersonalizadas();
   const params = useSearchParams();
   const table = params.get("table") ?? "";
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
-  
+
   const tables = [table];
 
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
@@ -50,7 +50,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   if (isLoading) {
     return <p> Cargando... </p>;
   }
-  
+
   if (isError) {
     return <p className="text-center">Error al cargar la tabla</p>;
   }
@@ -83,16 +83,21 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
         callback(null, [...columnCompletions, ...tableCompletions]);
       },
     };
+    //clear old completers
+    editor.completers = editor.completers.filter(
+      (completer) => completer !== customCompleter
+    );
+
     editor.completers.push(customCompleter);
   };
 
   function onSubmit(data: z.infer<typeof PersonalizadasFormSchema>) {
-    const request : VerificarPersonalizadaRequest = {
+    const request: VerificarPersonalizadaRequest = {
       table: table,
       query: data.query,
-      task_name: data.task_name
-    } 
-    auditException(request)
+      task_name: data.task_name,
+    };
+    auditException(request);
   }
 
   return (
@@ -157,7 +162,19 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
           )}
         />
 
-        <Button type="submit">Ejecutar</Button>
+        <div className="flex gap-4">
+          <Button type="submit">Ejecutar</Button>
+          <Button
+            type="button"
+            onClick={() => {
+              form.reset();
+              form.clearErrors();
+              clearResults();
+            }}
+          >
+            Limpiar
+          </Button>
+        </div>
       </form>
     </Form>
   );

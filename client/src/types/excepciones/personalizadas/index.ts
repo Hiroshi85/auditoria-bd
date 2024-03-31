@@ -6,10 +6,12 @@ export type VerificarPersonalizadaRequest = {
 
 export type PersonalizadaErrorResponse = {
     result: "error"
-    message: string
-    error: string
     query: string
+    sql_error: string
+    error_code: string
+    instance_error: string
 }
+
 
 export type PersonalizadaOKResponse = {
     result: "ok"
