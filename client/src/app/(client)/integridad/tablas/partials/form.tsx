@@ -13,6 +13,7 @@ import { CircleArrowRightIcon, ListStartIcon, PlusIcon } from "lucide-react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { z } from "zod"
 import { AnimatePresence, motion } from "framer-motion"
+import SelectSearch from "@/components/ui/select-search"
 
 const formSchema = z.object({
     table: z.string(),
@@ -223,29 +224,26 @@ function ForeingData({
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Tabla</FormLabel>
-                        <Select onValueChange={(value) => {
-                            if (value == "") {
-                                form.setValue(`details.${index}.foreing_column`, null)
-                            }
-                            form.setValue(`details.${index}.foreing_column`, "")
-
-                            field.onChange(value)
-
-
-                        }} defaultValue={field.value as string}>
-                            <FormControl>
-                                <SelectTrigger className="w-[150px]">
-                                    <SelectValue placeholder="Seleccione campo..." />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {
-                                    tables.tables.map((table) => (
-                                        <SelectItem value={table} key={table}>{table}</SelectItem>
-                                    ))
+                        <SelectSearch
+                            options={tables.tables.map((table, index) => {
+                                console.log(index, "- ", table)
+                                return {
+                                    label: table,
+                                    value: table
                                 }
-                            </SelectContent>
-                        </Select>
+                            })}
+
+                            onChange={(value) => {
+                                if (value == "") {
+                                    form.setValue(`details.${index}.foreing_column`, null)
+                                }
+                                form.setValue(`details.${index}.foreing_column`, "")
+    
+                                field.onChange(value)
+                            }}
+                            initValue={field.value}
+                            placeholder={"Selecciona una tabla"}
+                        />
                     </FormItem>
 
                 )}

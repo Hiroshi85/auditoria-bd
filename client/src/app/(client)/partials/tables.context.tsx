@@ -63,7 +63,9 @@ export function useTable(table: string | null, connectionId: number) {
             const response = await axios.get(`${API_HOST}/aud/connection/${connectionId}/tables/${table}`, { withCredentials: true })
             return response.data as TableDetailsResponse
         },
-        enabled: table != null
+        enabled: table != null,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
     })
 }
 
