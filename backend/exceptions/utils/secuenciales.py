@@ -2,7 +2,7 @@
 from rest_framework import exceptions
 from sqlalchemy import MetaData, select
 import pandas as pd
-import itertools
+# import itertools
 import re
 
 def check_sequence_exception(data, sequence):
@@ -58,12 +58,14 @@ def get_dataframe_values(db, table_name, column_name, sort):
 
 
 def get_number(string):
-    number = re.search(r'\d+', string).group()
+    number = re.search(r'\d+', string)
+    number = number.group() if number else '0'
     return number
 
 
 def get_letters(string):
-    letter = re.search(r'[a-zA-Z]+', string).group()
+    letter = re.search(r'[a-zA-Z]+', string)
+    letter = letter.group() if letter else ''
     return letter
 
 def get_min_max_values(req_body, df):

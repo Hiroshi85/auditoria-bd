@@ -21,7 +21,7 @@ const ExceptionOptions = ({ tableName }: Props) => {
             route: '/integridad/tablas'
         },
         {
-            id: 3,
+            id: 4,
             title: 'Personalizados',
             route: '/personalizados'
         }
