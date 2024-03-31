@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import { getLastConnection } from "@/server/get-connection";
 import CustomExceptionForm from "./partials/form/form";
 import CustomExceptionResults from "./partials/results";
 
@@ -10,11 +11,12 @@ type Props = {
     searchParams: { table: string };
   };
 
-export default function Page(
+export default async function Page(
     { searchParams } : Props
 ) {
     const { table } = searchParams;
-
+    const lastConnection = await getLastConnection();
+    
     return (
         <section className="container space-y-5">
         <header>
@@ -25,7 +27,7 @@ export default function Page(
         </header>
 
         <article>
-         <CustomExceptionForm />
+         <CustomExceptionForm engine={lastConnection?.engine}/>
         </article>
 
         <article className="flex flex-col">

@@ -33,7 +33,7 @@ export default function ColumnSuggestions({
           className="flex flex-wrap gap-1.5 justify-start items-start h-[200px] overflow-y-scroll"
           style={{ scrollbarWidth: "thin" }}
           onValueChange={(value) => {
-            form.setValue("columns", form.getValues("columns") + value);
+            form.setValue("query", form.getValues("query") + value);
             setColumnsListOpen(false);
           }}
         >
