@@ -5,7 +5,7 @@ from .enums.secuenciales import Condicion, WhenNumerico, WhenCadena, WhenTiempo,
 import re
 
 def definir_condicion_general(campo, columna):
-    id_condicion_general = columna["condicion_id"]
+    id_condicion_general = int(columna["condicion_id"])
 
     if(id_condicion_general == Condicion.NOT_NULL.value):
         return campo != null()
@@ -15,7 +15,8 @@ def definir_condicion_general(campo, columna):
 
 def definir_condicion_where(campo, columna):
     tipo = columna["tipo"]
-    id_condicion_where = columna["where"]["condicion_id"]
+    id_condicion_where = int(columna["where"]["condicion_id"])
+
     valor_1 = columna["where"]["valor_uno"]
     valor_2 = columna["where"]["valor_dos"]
 
@@ -23,7 +24,7 @@ def definir_condicion_where(campo, columna):
         return obtener_bool_numerico(campo, id_condicion_where, valor_1, valor_2)
     
     if(tipo == Tipo_Dato.CADENA.value):
-        id_condicion_long = columna["where"]["longitud"]["longitud_condicion_id"]
+        id_condicion_long = int(columna["where"]["longitud"]["longitud_condicion_id"])
         return obtener_bool_cadena(campo, id_condicion_where, valor_1, valor_2, id_condicion_long)
     
     if(tipo == Tipo_Dato.TIEMPO.value):
@@ -52,7 +53,7 @@ def obtener_bool_numerico(campo, id_condicion_where, valor_uno, valor_dos):
         return campo != valor_uno
 
     if(id_condicion_where == WhenNumerico.ENTRE.value):
-        return  valor_uno <= campo <= valor_dos
+        return campo.between(valor_uno, valor_dos)
 
 def obtener_bool_cadena(campo, id_condicion_where, valor_uno, valor_dos, id_condicion_length):
     if(id_condicion_where == WhenCadena.IGUAL.value):
@@ -73,7 +74,7 @@ def obtener_bool_cadena(campo, id_condicion_where, valor_uno, valor_dos, id_cond
     if(id_condicion_where == WhenCadena.ACEPTA.value):
         lista_valores = valor_uno.split(",")
         lista_valores_aceptados = [valor.strip() for valor in lista_valores]
-        return campo in lista_valores_aceptados
+        return campo.in_(lista_valores_aceptados)
 
     if(id_condicion_where == WhenCadena.REGEX.value):
         return bool(re.search(valor_uno, campo))
