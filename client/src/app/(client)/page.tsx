@@ -6,7 +6,7 @@ import { TablesProvider } from "./partials/tables.context";
 import ListTables from "./partials/list-tables";
 import TableDetails from "./partials/table-details";
 
-interface TablesResponse {
+export interface TablesResponse {
   tables: string[];
 }
 
