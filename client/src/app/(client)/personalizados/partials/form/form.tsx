@@ -27,8 +27,11 @@ import "ace-builds/src-noconflict/mode-mysql";
 import "ace-builds/src-noconflict/mode-sqlserver";
 import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/ext-language_tools";
+import { usePersonalizadas } from "../../personalizados.context";
+import { VerificarPersonalizadaRequest } from "@/types/excepciones/personalizadas";
 
 export default function CustomExceptionForm({ engine }: { engine: string }) {
+  const { auditException } = usePersonalizadas()
   const params = useSearchParams();
   const table = params.get("table") ?? "";
   const { id: connectionId } = useConnectionDatabase();
@@ -47,6 +50,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   if (isLoading) {
     return <p> Cargando... </p>;
   }
+  
   if (isError) {
     return <p className="text-center">Error al cargar la tabla</p>;
   }
@@ -83,13 +87,18 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   };
 
   function onSubmit(data: z.infer<typeof PersonalizadasFormSchema>) {
-    console.log(data);
+    const request : VerificarPersonalizadaRequest = {
+      table: table,
+      query: data.query,
+      task_name: data.task_name
+    } 
+    auditException(request)
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
-        <div className="">
+        <div>
           <FormField
             control={form.control}
             name="task_name"
@@ -122,7 +131,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
               <FormControl>
                 <div className="grid w-full gap-1.5">
                   <AceEditor
-                    placeholder="SELECT * FROM TABLA WHERE CONDICIONES"
+                    placeholder={`SELECT * FROM ${table}`}
                     fontSize={14}
                     mode={engine === "mysql" ? "mysql" : "sqlserver"}
                     theme="tomorrow"
@@ -130,13 +139,14 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
                     height="200px"
                     className="rounded-md"
                     enableLiveAutocompletion={true}
+                    enableBasicAutocompletion={true}
                     editorProps={{ $blockScrolling: true }}
                     onLoad={onLoad}
                     {...field}
                   />
                   <p className="text-sm text-muted-foreground">
                     No está permitido INSERT, UPDATE, DROP, DELETE, TRUNCATE,
-                    ALTER, CREATE, EXECUTE, CALL GRANT
+                    ALTER, CREATE, EXECUTE, GRANT, etc.
                   </p>
                 </div>
               </FormControl>

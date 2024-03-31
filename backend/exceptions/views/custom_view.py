@@ -1,7 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from ..utils.personalizadas import formatResultResponse
 from ..serializrs.personalizadas.serializers import CustomExceptionSerializer
 from auditoria_bd_api.utils.conexiones import get_connection_by_id
 
@@ -17,34 +16,33 @@ def index(request, id):
     body = serializer.data
 
     table = body['table']
-    columns = body['columns']
-    conditions = body.get('conditions', None)
+    query = body['query']
     task_name = body['task_name']
 
     db, _ = get_connection_by_id(id, request.userdb)
 
-    select = f'SELECT {columns} FROM {table}'
-
-    if conditions:
-        select += f' {conditions}'
-
-    query = text(select)
-
+    query = text(query)
+ 
     with db.connect() as connection:
         try:
             result = connection.execute(query)
-            resultados = result.mappings().all()
+            headers = result.keys()
+            data = result.mappings().all()
         except Exception as e:
             error_message = str(e.orig.args[1])
-            query = str(e.statement) if hasattr(e, 'statement') else "No query information"
+            query = str(e.statement) if hasattr(
+                e, 'statement') else "No query information"
             return Response({
                 'result': "error",
-                'message': 'Error en la consulta SQL', 
-                'error': error_message, 
+                'message': 'Error en la consulta SQL',
+                'error': error_message,
                 'query': query
             })
 
-    resultados = formatResultResponse(resultados)
+    resultados = {
+        'headers': list(headers),
+        'rows': data
+    }
 
     return Response({
         'result': 'ok',
