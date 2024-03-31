@@ -1,4 +1,10 @@
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, Table
+
+def get_reflected_table(db_engine, table_name):
+    metadata = MetaData()
+    tabla_reflejada = Table(table_name, metadata, autoload_with=db_engine)
+
+    return tabla_reflejada
 
 def get_table_names(db_engine):
     metadata = MetaData()

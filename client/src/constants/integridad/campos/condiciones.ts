@@ -48,6 +48,16 @@ export const CONDICIONES: CondicionType[] = [
                     id: 4,
                     name: 'entre',
                     title: 'Entre'
+                },
+                {
+                    id: 5,
+                    name: 'mayorIgual',
+                    title: 'Mayor o igual a'
+                },
+                {
+                    id: 6,
+                    name: 'menorIgual',
+                    title: 'Menor o igual a'
                 }
             ],
             cadena: [
@@ -110,6 +120,16 @@ export const CONDICIONES: CondicionType[] = [
                             id: 4,
                             name: 'entre',
                             title: 'Entre'
+                        },
+                        {
+                            id: 5,
+                            name: 'mayorIgual',
+                            title: 'Mayor o igual a'
+                        },
+                        {
+                            id: 6,
+                            name: 'menorIgual',
+                            title: 'Menor o igual a'
                         }
                     ]
                 }
@@ -176,7 +196,19 @@ export const CONDICIONES: CondicionType[] = [
 ]
 
 export const CONDICIONES_ENUM = {
-    NoNulo: 1,
-    Unico: 2,
-    Where: 3,
+    NoNulo: {
+        id: 1,
+        name: 'No Nulo',
+        index: 0
+    },
+    Unico: {
+        id: 2,
+        name: 'Único',
+        index: 1
+    },
+    Where: {
+        id: 3,
+        name: 'Where',
+        index: 2
+    }
 }
