@@ -5,6 +5,7 @@ export const DatabaseConnections: readonly [string, ...string[]] = ["sqlserver",
 export interface Column {
     name: string
     type: string
+    python_type: string
     nullable: boolean
     unique: boolean | null
     default: boolean | null

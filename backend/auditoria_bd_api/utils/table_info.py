@@ -24,6 +24,7 @@ def get_table_detail(db_engine, table_name):
         tableDetails.append({
             'name': column.name,
             'type': str(column.type),
+            'python_type':  column.type.python_type.__name__,
             'nullable': column.nullable,
             'unique': column.unique,
             'default': column.default,
