@@ -2,7 +2,6 @@ from sqlalchemy.sql import null
 from sqlalchemy import func
 from datetime import datetime
 from .enums.secuenciales import Condicion, WhenNumerico, WhenCadena, WhenTiempo, WhenEnum, Tipo_Dato
-import re
 
 def definir_condicion_general(campo, columna):
     id_condicion_general = int(columna["condicion_id"])
@@ -77,7 +76,7 @@ def obtener_bool_cadena(campo, id_condicion_where, valor_uno, valor_dos, id_cond
         return campo.in_(lista_valores_aceptados)
 
     if(id_condicion_where == WhenCadena.REGEX.value):
-        return bool(re.search(valor_uno, campo))
+        return campo.regexp_match(valor_uno)
 
     if(id_condicion_where == WhenCadena.LONGITUD.value):
         len_campo = func.char_length(campo)
@@ -118,4 +117,4 @@ def obtener_bool_enum(campo, id_condicion_where, valor_uno):
     if(id_condicion_where == WhenEnum.ACEPTA.value):
         lista_valores = valor_uno.split(",")
         lista_valores_aceptados = [valor.strip() for valor in lista_valores]
-        return campo in lista_valores_aceptados
+        return campo.in_(lista_valores_aceptados)
