@@ -1,7 +1,7 @@
 from sqlalchemy.sql import null
 from sqlalchemy import func
 from datetime import datetime
-from .enums.secuenciales import Condicion, WhenNumerico, WhenCadena, WhenTiempo, WhenEnum, Tipo_Dato
+from ..enums.campos_condiciones import Condicion, WhenNumerico, WhenCadena, WhenTiempo, WhenEnum, Tipo_Dato
 
 def definir_condicion_general(campo, columna):
     id_condicion_general = int(columna["condicion_id"])
