@@ -5,6 +5,8 @@ import { TableDetailsResponse } from "@/types/database"
 import { Metadata } from "next"
 import IntegridadTablasForm from "./partials/form"
 import { TablesResponse } from "../../page"
+import TableExceptionProvider from "./partials/context"
+import ResultTableException from "./partials/results"
 
 export const metadata: Metadata = {
     title: 'Integridad Tablas - Database Auditor',
@@ -34,10 +36,17 @@ export default async function Page(props: {
                 <h2 className="text-2xl font-bold">Excepción de integridad de tablas</h2>
                 <p>Tabla {props.searchParams.table}</p>
             </div>
+            <TableExceptionProvider>
+                <div>
+                    <IntegridadTablasForm table={props.searchParams.table} details={columns.data as TableDetailsResponse} tables={tables.data as TablesResponse}/>
+                </div>
 
-            <div>
-                <IntegridadTablasForm table={props.searchParams.table} details={columns.data as TableDetailsResponse} tables={tables.data as TablesResponse}/>
-            </div>
+                <div className="mt-5">
+                    <ResultTableException />
+                </div>
+
+            </TableExceptionProvider>
+
         </div>
     )
 }

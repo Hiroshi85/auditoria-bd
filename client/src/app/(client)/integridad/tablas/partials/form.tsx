@@ -14,6 +14,7 @@ import { UseFormReturn, useForm } from "react-hook-form"
 import { z } from "zod"
 import { AnimatePresence, motion } from "framer-motion"
 import SelectSearch from "@/components/ui/select-search"
+import { useTableException } from "./context"
 
 const formSchema = z.object({
     table: z.string(),
@@ -44,11 +45,14 @@ export default function IntegridadTablasForm({
             details: []
         }
     })
+    const { id } = useConnectionDatabase()
+
+    const exception = useTableException()
 
     const watchColumns = form.watch('details')
 
     async function OnSubmit(data: z.infer<typeof formSchema>) {
-        console.log(data)
+        exception.auditException(data)
     }
 
 
@@ -177,7 +181,7 @@ export default function IntegridadTablasForm({
                 </Button>
 
                 <div className="mt-3">
-                    <Button type="submit">
+                    <Button type="submit" disabled={exception.query.isLoading}>
                         <CircleArrowRightIcon className="w-4 h-4 mr-1" />
                         Guardar
                     </Button>
@@ -226,7 +230,6 @@ function ForeingData({
                         <FormLabel>Tabla</FormLabel>
                         <SelectSearch
                             options={tables.tables.map((table, index) => {
-                                console.log(index, "- ", table)
                                 return {
                                     label: table,
                                     value: table
