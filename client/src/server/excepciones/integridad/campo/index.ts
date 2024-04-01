@@ -41,7 +41,4 @@ export async function verificarIntegridadDeCamposRequest(data: VerificarIntegrid
             data: null
         }
     }
-
-
-
 }

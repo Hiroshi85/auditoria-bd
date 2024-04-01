@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation"
 import { useFieldArray, useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { z } from "zod"
-import { verificarIntegridadDeCamposRequest } from "@/server/excepciones/integridad/campo"
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CONDICIONES, CONDICIONES_ENUM } from "@/constants/integridad/campos/condiciones"
@@ -18,9 +17,9 @@ import { Input } from "@/components/ui/input"
 import { DIAS } from "@/constants/dias"
 import { MESES } from "@/constants/meses"
 import { ANIOS } from "@/constants/anios"
-import { VerificarIntegridadDeCamposResponse } from "@/types/excepciones/integridad/campo"
-import { useState } from "react"
-import IntegridadCamposResults from "./results"
+import { VerificarIntegridadDeCamposRequest } from "@/types/excepciones/integridad/campo"
+import { useCamposContext } from "../campos.context"
+
 const schema = z.object({
     columnas: z.array(z.object({
         nombre: z.string().refine((value) => value !== "", { message: "Debe seleccionar columna" }),
@@ -211,7 +210,7 @@ const IntegridadCamposForm = () => {
     const table = params.get('table') ?? ""
     const { id: connectionId } = useConnectionDatabase()
     const { data, isError, isLoading } = useTable(table, connectionId)
-    const [response, setResponse] = useState<VerificarIntegridadDeCamposResponse | null>({ error: null, data: { results: responseExample, num_rows_exceptions: 44, table: 'persons' } })
+    const { auditException } = useCamposContext()
 
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -351,42 +350,37 @@ const IntegridadCamposForm = () => {
 
 
     async function onSubmit(data: z.infer<typeof schema>) {
-        try {
-            const response = await verificarIntegridadDeCamposRequest({
-                columnas: data.columnas,
-                table,
-                connectionId
-            })
-            setResponse(response)
-        } catch (error) {
-            console.error(error)
+        const requestData : VerificarIntegridadDeCamposRequest = {
+            columnas: data.columnas,
+            table,
+            connectionId
         }
+        auditException(requestData)
     }
 
-    return (<main className="container mx-auto p-5">
+    return (
+    <section>
         <h1 className="text-xl font-bold">Excepción de integridad de campos</h1>
         <h2 className="text-lg">Tabla {table}</h2>
 
-        <Form {...form}
-
-        >
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 flex flex-col">
                 {form.formState.errors.columnas && <p className="text-red-500">{form.formState.errors.columnas.message}</p>}
                 {fields.map((item, index) => (
-                    <div key={item.id} className="flex gap-3 items-center lg:items-end">
-                        {form.formState.errors.columnas?.[index] && <p className="text-red-500">{form.formState.errors.columnas?.[index]?.message}</p>}
-                        <div className="flex gap-2 items-center min-w-32">
-                            <Button type="button" onClick={() => remove(index)}><TrashIcon /></Button>
-                            <span className="text-[8px] font-medium p-2 bg-emerald-200 rounded-full">{watchColumns[index].tipo_de_dato}</span>
-                        </div>
-                        <div className=" gap-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                    <div key={item.id} className="flex items-start justify-start gap-x-2 py-2">
+                         <Button type="button" onClick={() => remove(index)} className="mt-[24px]"><TrashIcon /></Button>
+                         {form.formState.errors.columnas?.[index] && <p className="text-red-500">{form.formState.errors.columnas?.[index]?.message}</p>}
+                        <div className="gap-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                             <div className="">
                                 <FormField
                                     control={form.control}
                                     name={`columnas.${index}.nombre`}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Columna</FormLabel>
+                                            <div className="flex items-center justify-between">
+                                                <FormLabel>Columna</FormLabel>
+                                                <span className="text-[0.6rem] font-medium px-2 bg-emerald-200 rounded-full h-[15px]">{watchColumns[index].tipo_de_dato}</span>
+                                            </div>
                                             <Select
                                                 value={field.value}
                                                 name={field.name}
@@ -418,7 +412,7 @@ const IntegridadCamposForm = () => {
                                     control={form.control}
                                     name={`columnas.${index}.condicion`}
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex flex-col">
                                             <FormLabel>Condicion</FormLabel>
                                             <Select
                                                 value={field.value}
@@ -456,7 +450,7 @@ const IntegridadCamposForm = () => {
                                             control={form.control}
                                             name={`columnas.${index}.where.nombre`}
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="flex flex-col">
                                                     <FormLabel>Condicion</FormLabel>
                                                     <Select
                                                         name={field.value}
@@ -496,7 +490,7 @@ const IntegridadCamposForm = () => {
                                             control={form.control}
                                             name={`columnas.${index}.where.longitud.nombre`}
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="flex flex-col">
                                                     <FormLabel>Condicion</FormLabel>
                                                     <Select
                                                         name={field.value}
@@ -547,7 +541,7 @@ const IntegridadCamposForm = () => {
                                             control={form.control}
                                             name={`columnas.${index}.where.valor_uno`}
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="flex flex-col">
                                                     <FormLabel>Valor</FormLabel>
                                                     <FormControl                                                    >
                                                         <Input
@@ -580,7 +574,7 @@ const IntegridadCamposForm = () => {
                                             control={form.control}
                                             name={`columnas.${index}.where.valor_uno`}
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="flex flex-col">
                                                     <FormLabel>Valor</FormLabel>
                                                     <Select
                                                         name={field.value}
@@ -628,7 +622,7 @@ const IntegridadCamposForm = () => {
                                             control={form.control}
                                             name={`columnas.${index}.where.valor_dos`}
                                             render={({ field }) => (
-                                                <FormItem>
+                                                <FormItem className="flex flex-col">
                                                     <FormLabel>Valor</FormLabel>
                                                     <FormControl>
                                                         <Input
@@ -652,10 +646,12 @@ const IntegridadCamposForm = () => {
                 <Button
                     type="button"
                     onClick={addNewField}
+                    className="w-12"
                 >
                     <PlusIcon />
                 </Button>
-                <Button type="submit" className="mt-3 w-full" disabled={form.formState.isSubmitting}>
+
+                <Button type="submit" className="mt-3 w-fit" disabled={form.formState.isSubmitting}>
                     {
                         form.formState.isSubmitting ? "Cargando..." : "Ejecutar"
                     }
@@ -663,8 +659,7 @@ const IntegridadCamposForm = () => {
 
             </form>
         </Form>
-        {response && <IntegridadCamposResults response={response} />}
-    </main>)
+    </section>)
 }
 
 export default IntegridadCamposForm
