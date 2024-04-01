@@ -2,37 +2,15 @@
 import Spinner from "@/components/ui/spinner";
 import { usePersonalizadas } from "../personalizados.context";
 import { cn } from "@/lib/utils";
+import { ResultContainer } from "@/components/ui/result-container";
 import { DataTable } from "@/components/layout/table/table-details";
 import { useConnectionDatabase } from "@/providers/connection";
-
-interface ResultsProps {
-  children: React.ReactNode;
-  className?: string;
-  type?: "error" | "ok";
-}
+import { Table2Icon } from "lucide-react";
 
 export default function CustomExceptionResults() {
   const { query } = usePersonalizadas();
   const { data, isLoading, isError } = query;
   const connection = useConnectionDatabase();
-
-  function ResultContainer({ children, className, type }: ResultsProps) {
-    return (
-      <div
-        className={cn(
-          "flex flex-col bg-accent w-full rounded-lg p-4 border",
-          type === "ok"
-            ? "border-green-500 bg-white"
-            : type === "error"
-            ? "border-red-500 bg-red-200"
-            : "",
-          className
-        )}
-      >
-        {children}
-      </div>
-    );
-  }
 
   if (isLoading)
     return (
@@ -69,6 +47,15 @@ export default function CustomExceptionResults() {
     </ResultContainer>
   ) : (
     <ResultContainer type="ok">
+      <header className="flex justify-between items-center space-x-2 space-y-3">
+        <div className=" flex items-center gap-2">
+          <Table2Icon size={20} />
+          {data.table}
+        </div>
+        <div>
+          {data.num_rows} filas en total {/* limitado a , data.page_size*/}
+        </div>
+      </header>
       <DataTable
         columns={data.data.headers.map((header: string) => ({
           accessorKey: header,
