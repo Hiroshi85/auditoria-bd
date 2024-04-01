@@ -41,11 +41,14 @@ def get_dataframe_values(db, table_name, column_name, sort):
     
     cnn = db.connect()
     stmt = select(column).where(column.isnot(None))
+    
+    # validar si no tiene pk ordenar por la misma columna
+    pks = table.primary_key.columns.values()
 
-    if sort == 'asc':
+    if sort == 'asc' or not pks:
         stmt = stmt.order_by(column.description)
     else:
-        stmt = stmt.order_by(table.primary_key.columns.values()[0].description)
+        stmt = stmt.order_by(pks[0].description)
 
     result = cnn.execute(stmt)
     cnn.close()
