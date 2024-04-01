@@ -18,6 +18,9 @@ import { Input } from "@/components/ui/input"
 import { DIAS } from "@/constants/dias"
 import { MESES } from "@/constants/meses"
 import { ANIOS } from "@/constants/anios"
+import { VerificarIntegridadDeCamposResponse } from "@/types/excepciones/integridad/campo"
+import { useState } from "react"
+import IntegridadCamposResults from "./results"
 const schema = z.object({
     columnas: z.array(z.object({
         nombre: z.string().refine((value) => value !== "", { message: "Debe seleccionar columna" }),
@@ -195,14 +198,20 @@ const schema = z.object({
         }
     })
 
-    ).nonempty(),
+    ).nonempty({
+        message: "Debe agregar al menos una columna"
+    }),
 })
+
+const responseExample = [{ "id": 5, "type": "customers", "identity_document_type_id": "6", "number": "20429683581", "name": "CINEPLEX S.A", "trade_name": null, "internal_code": null, "barcode": null, "country_id": "PE", "nationality_id": null, "department_id": "15", "province_id": "1501", "district_id": "150122", "address_type_id": null, "address": "AV. JOSE LARCO NRO. 663 INT. 401", "condition": "HABIDO", "state": null, "email": null, "telephone": null, "accumulated_points": 0, "perception_agent": 0, "person_type_id": null, "contact": null, "comment": null, "percentage_perception": null, "enabled": 1, "website": null, "zone": null, "observation": null, "created_at": "2023-12-11T06:05:38", "updated_at": "2023-12-11T06:07:16", "status": 1, "credit_days": 0, "optional_email": null, "parent_id": 0, "zone_id": null, "seller_id": null, "has_discount": 0, "discount_type": "01", "discount_amount": 0, "edad": "", "excepciones": "number," }]
+
 const IntegridadCamposForm = () => {
 
     const params = useSearchParams()
     const table = params.get('table') ?? ""
     const { id: connectionId } = useConnectionDatabase()
     const { data, isError, isLoading } = useTable(table, connectionId)
+    const [response, setResponse] = useState<VerificarIntegridadDeCamposResponse | null>({ error: null, data: { results: responseExample, num_rows_exceptions: 44, table: 'persons' } })
 
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
@@ -214,17 +223,8 @@ const IntegridadCamposForm = () => {
     })
 
     const watchColumns = form.watch('columnas')
-    async function onSubmit(data: z.infer<typeof schema>) {
-        try {
-            console.log(data)
-            // await verificarIntegridadDeCamposRequest({
-            //     data: data.columnas,
-            //     table
-            // })
-        } catch (error) {
-            console.error(error)
-        }
-    }
+
+
 
 
     const addNewField = () => {
@@ -349,6 +349,19 @@ const IntegridadCamposForm = () => {
         return []
     }
 
+
+    async function onSubmit(data: z.infer<typeof schema>) {
+        try {
+            const response = await verificarIntegridadDeCamposRequest({
+                columnas: data.columnas,
+                table,
+                connectionId
+            })
+            setResponse(response)
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     return (<main className="container mx-auto p-5">
         <h1 className="text-xl font-bold">Excepción de integridad de campos</h1>
@@ -650,6 +663,7 @@ const IntegridadCamposForm = () => {
 
             </form>
         </Form>
+        {response && <IntegridadCamposResults response={response} />}
     </main>)
 }
 

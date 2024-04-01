@@ -1,14 +1,22 @@
 "use server"
 
+import { API_COOKIES } from "@/constants/cookies";
 import { API_HOST } from "@/constants/server";
-import { VerificarIntegridadDeCamposRequest } from "@/types/excepciones/integridad/campo";
+import { ensureError } from "@/lib/errors";
+import { getToken } from "@/server/token";
+import { VerificarIntegridadDeCamposRequest, VerificarIntegridadDeCamposResponse } from "@/types/excepciones/integridad/campo";
 
-export async function verificarIntegridadDeCamposRequest(data: VerificarIntegridadDeCamposRequest) {
+export async function verificarIntegridadDeCamposRequest(data: VerificarIntegridadDeCamposRequest): Promise<VerificarIntegridadDeCamposResponse> {
 
     try {
-        const response = await fetch(`${API_HOST}/exceptions/integridad/campo`, {
+        console.log(data)
+        const response = await fetch(`${API_HOST}/exceptions/db/${data.connectionId}/fields`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                Cookie: `${API_COOKIES}=${getToken()?.value}`
+
+            },
             body: JSON.stringify(data)
         })
 
@@ -27,8 +35,9 @@ export async function verificarIntegridadDeCamposRequest(data: VerificarIntegrid
         }
 
     } catch (e) {
+        const error = ensureError(e)
         return {
-            error: "Error verificando integridad de campos",
+            error: "Error verificando integridad de campos. " + error.message,
             data: null
         }
     }
