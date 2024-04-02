@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import bd_view
+from .views import bd_view, results_view
 
 urlpatterns = [
     path('test', view=bd_view.test_connection), 
@@ -9,4 +9,5 @@ urlpatterns = [
     path('connection/<int:id>/tables', view=bd_view.get_tables),
     path('connection/<int:id>/tables/<slug:name>', view=bd_view.get_table_detail),
     path('connection/<int:id>', view=bd_view.connect_to_db),
+    path('results', view=results_view.get_results_by_connection)
 ]

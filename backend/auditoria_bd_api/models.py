@@ -15,7 +15,7 @@ class DatabaseConnection(models.Model):
 
     current_used = models.BooleanField(default=False)
 
-class Results(models.Model):
+class Result(models.Model):
     table = models.CharField(max_length=256)
     results = models.TextField()
     connection = models.ForeignKey('DatabaseConnection', on_delete=models.CASCADE)
