@@ -177,11 +177,13 @@ def get_exception_response(
     }
 
     if len(missing) == 0 and len(duplicates) == 0 and len(sequence) == 0:
+        exception_was_raised = False
         final_response_json = {
             'result': 'ok',
             **response_json
         }
     else:
+        exception_was_raised = True
         final_response_json = {
             'result': 'exception',
             **response_json,
@@ -193,6 +195,6 @@ def get_exception_response(
             'sequence_errors': sequence,
         }
     
-    save_results(final_response_json, conn, TipoExcepcion.SECUENCIAL.value, table)
+    save_results(final_response_json, conn, TipoExcepcion.SECUENCIAL, table, exception_was_raised)
     
     return Response(final_response_json, status=200)

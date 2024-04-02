@@ -5,10 +5,10 @@ from rest_framework import status
 from auditoria_bd_api.models import Result
 
 @api_view(['GET'])
-def get_results_by_connection(request):
+def get_results_by_user(request):
     current_user = request.userdb
 
-    results = Result.objects.filter(connection__user=current_user).values('id', 'table', 'created_at', 'exception_type__id' ,'exception_type__description')
+    results = Result.objects.filter(connection__user=current_user).values('id', 'table', 'created_at', 'exception_ocurred', 'exception_type__id' ,'exception_type__description').order_by('id')
     results_list = []
 
     for result in results:
@@ -16,6 +16,7 @@ def get_results_by_connection(request):
             'id': result['id'],
             'table': result['table'],
             'created_at': result['created_at'],
+            'exception_ocurred': 1 if result['exception_ocurred'] else 0,
             'exception_id': result['exception_type__id'],
             'exception_description': result['exception_type__description']
         }

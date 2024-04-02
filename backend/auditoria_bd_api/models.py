@@ -20,4 +20,5 @@ class Result(models.Model):
     results = models.TextField()
     connection = models.ForeignKey('DatabaseConnection', on_delete=models.CASCADE)
     exception_type = models.ForeignKey('exceptions.ExceptionType', on_delete=models.CASCADE)
+    exception_ocurred = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
