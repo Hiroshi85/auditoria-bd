@@ -14,3 +14,10 @@ class DatabaseConnection(models.Model):
     last_used = models.DateTimeField(auto_now=True)
 
     current_used = models.BooleanField(default=False)
+
+class Result(models.Model):
+    table = models.CharField(max_length=256)
+    results = models.TextField()
+    connection = models.ForeignKey('DatabaseConnection', on_delete=models.CASCADE)
+    exception_type = models.ForeignKey('exceptions.ExceptionType', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)

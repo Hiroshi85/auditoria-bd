@@ -1,25 +1,32 @@
 from rest_framework.response import Response
-from sqlalchemy import not_, or_, func, case
-from auditoria_bd_api.utils import conexiones, table_info
+from sqlalchemy import not_, or_, func, case, select
+from auditoria_bd_api.utils import conexiones, table_info, results_operations
 from rest_framework.decorators import api_view
+
+from exceptions.models import ExceptionType
 from ..utils.campos.condiciones_bool import definir_condicion_general
 from ..utils.campos.build_condiciones_header import build_condiciones_header
 from datetime import datetime
+
+EXCEPTION_TYPE_INSTANCE = ExceptionType.objects.get(id=2)
 
 @api_view(['POST'])
 def obtain_valores(request, id):
     tabla_seleccionada = request.data["table"]
     columnas = request.data["columnas"]
 
-    db, _ = conexiones.get_connection_by_id(id, request.userdb)
+    db, conn = conexiones.get_connection_by_id(id, request.userdb)
     tabla = table_info.get_reflected_table(db, tabla_seleccionada)
 
     cantidad = 0
+    campos_select = []
     condiciones = []
+    resultados = []
     condiciones_header = {}
     
     for columna in columnas:
         campo = tabla.c[columna["nombre"]]
+        campos_select.append(campo)
         cond_columna = not_(definir_condicion_general(campo, columna))
         condicion_obj = {"condicion": cond_columna, "campo": columna["nombre"]}
         condiciones.append(condicion_obj)
@@ -31,18 +38,20 @@ def obtain_valores(request, id):
     #Para where
     condiciones_where = [objeto['condicion'] for objeto in condiciones]
 
+    # Para select
+    campos_select = list(tabla.primary_key.columns) + [tabla.c[objeto] for objeto in condiciones_header.keys()]
+
     #Operacion para columna adicional con case para mostrar excepciones
     expresiones_case = [ case((objeto['condicion'], f"{objeto['campo']},"), else_='') for objeto in condiciones]
 
     #Concatenar las expresiones de case
     columna_excepciones = func.concat(*expresiones_case).label('excepciones')
 
-    # Realizar una consulta simple
+    # Realizar la consulta
     with db.connect() as connection:
-        select_query = tabla.select().add_columns(columna_excepciones)
+        select_query = select(*campos_select).add_columns(columna_excepciones)
 
         query_final = select_query.where(or_(*condiciones_where))
-        print(query_final)
 
         result = connection.execute(query_final)
         fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -52,12 +61,16 @@ def obtain_valores(request, id):
 
     db_name = db.url.database
 
-    return Response({
+    response_dict = {
         'database': db_name,
         'table': tabla_seleccionada,
         'accessed_on': fecha_hora,
         'num_rows_exceptions': cantidad,
         'conditions': condiciones_header,
         'results': resultados
-    })
+    }
+
+    results_operations.save_results(response_dict, conn, EXCEPTION_TYPE_INSTANCE, tabla_seleccionada)
+
+    return Response(response_dict, status=200)
 
