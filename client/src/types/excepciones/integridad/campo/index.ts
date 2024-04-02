@@ -28,6 +28,18 @@ export type VerificarIntegridadDeCamposResponse = {
     data: {
         num_rows_exceptions: number;
         table: string;
+        database: string;
+        accessed_on: string;
+        conditions: {
+            [key: string]: {
+                condicion: 'Where' | 'No Nulo' | 'Único';
+                condicion_id: number;
+                condicion_where_id?: number;
+                valor_uno: string;
+                valor_dos?: string;
+                condicion_longitud?: number;
+            }[];
+        }
         results: {
             [key: string]: string | number | null;
         }[];

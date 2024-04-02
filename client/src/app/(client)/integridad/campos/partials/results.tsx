@@ -7,6 +7,7 @@ import { useCamposContext } from "../campos.context";
 import { ResultContainer } from "@/components/ui/result-container";
 import { Spinner } from "@/components/ui/spinner";
 import { Condicion } from "./conditions";
+import { obtenerStringDeCondicion } from "@/helpers/condiciones";
 
 interface Props {
   response: VerificarIntegridadDeCamposResponse;
@@ -65,11 +66,11 @@ const IntegridadCamposResults = () => {
         <div className="flex flex-wrap justify-between [&>div]:flex [&>div]:flex-wrap [&>div]:gap-x-3">
           <div>
             <span className="font-bold">Base de datos:</span>
-            <span>{data.data?.table}</span>
+            <span>{data.data?.database}</span>
           </div>
           <div>
             <span className="font-bold">Fecha Y Hora :</span>
-            <span>{new Date().toLocaleString()}</span>
+            <span>{data.data?.accessed_on}</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -81,21 +82,34 @@ const IntegridadCamposResults = () => {
           <div className="flex gap-4 overflow-x-scroll overflow-hidden snap-x pb-2"
             style={{ scrollbarWidth: "thin" }}
           >
-            <Condicion columna="Id" condiciones={["Longitud < 40", "Único"]} />
-            <Condicion columna="Sexo" condiciones={["Valores aceptados: M, F", "No nulo"]} />
-            <Condicion columna="Edad" condiciones={["Valor > 18", "xdadaw"]} />
-            <Condicion columna="Edad" condiciones={["Longitud < 40", "xd"]} />
-            <Condicion columna="created_at" condiciones={["Longitud < 40", "xd"]} />
-            <Condicion columna="updated_at" condiciones={["Longitud < 40", "xd"]} />
-            <Condicion columna="Id" condiciones={["Longitud < 40", "xd"]} />
-            <Condicion columna="Id" condiciones={["Longitud < 40", "xd"]} />
+            {
+              data && data.data && data.data.conditions &&
+              Object.keys(data.data.conditions).map((key) => {
+                const condicion = data.data?.conditions[key];
+                if (!condicion) return null;
+                return (
+                  <Condicion
+                    key={key}
+                    columna={key}
+                    condiciones={condicion.map((c) => obtenerStringDeCondicion(c))}
+                  />
+                );
+              }
+              )}
           </div>
         </div>
         {data.data && data.data.num_rows_exceptions > 0 && (
-          <DataTable
-            columns={columns(data.data.results)}
-            data={data.data.results}
-          />
+          <>
+            <p
+              className="font-medium"
+            >
+              Excepciones: {data.data.num_rows_exceptions}
+            </p>
+            <DataTable
+              columns={columns(data.data.results)}
+              data={data.data.results}
+            />
+          </>
         )}
         {data.data && data.data.num_rows_exceptions === 0 && (
           <p>No se encontraron excepciones</p>
