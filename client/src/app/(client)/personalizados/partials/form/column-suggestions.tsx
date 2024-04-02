@@ -26,7 +26,7 @@ export default function ColumnSuggestions({ form, columns }: Props) {
       <PopoverTrigger className="bg-accent rounded-md">
         <LucidePanelBottomOpen />
       </PopoverTrigger>
-      <PopoverContent className="w-[400px]" align="start" side="top">
+      <PopoverContent className="w-[450px]" align="start" side="top">
         <ToggleGroup
           type="single"
           variant={"outline"}
@@ -42,10 +42,10 @@ export default function ColumnSuggestions({ form, columns }: Props) {
               key={column.name}
               value={column.name}
               aria-label={`Toggle ${column.name}`}
-              className="relative min-w-[100px] overflow-visible"
+              className="relative min-w-[80px] overflow-visible"
             >
               {column.name}
-              <Badge className="absolute right-[-5px] top-[-8px] text-[0.55rem] py-0 h-[15px]">
+              <Badge className="absolute right-[-7px] top-[-9px] text-[0.55rem] py-0 h-[15px]">
                 {obtenerTipoDatoSQL(column.type)?.name ?? ""}
               </Badge>
             </ToggleGroupItem>

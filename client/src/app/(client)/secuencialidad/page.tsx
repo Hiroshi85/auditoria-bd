@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import SecuencialidadForm from "./partials/form";
+import SecuencialidadForm from "./partials/form/form";
 import { SecuencialProvider } from "./secuencia.context";
 import SeqExceptionResults from "./partials/results";
 

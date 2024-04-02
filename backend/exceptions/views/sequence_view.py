@@ -62,16 +62,16 @@ def alphanumeric_sequence_exception(request, id):
     if df.empty:
         return get_exception_response(table=table_name,
                                       column=column_name,
-                                      database_name=db.engine.url.database, error_result="No se ecnontraron valores en la columna seleccionada")
+                                      database_name=db.engine.url.database, error_result="No se encontraron valores en la columna seleccionada.")
 
     letters, digits = get_letters(example), get_number(example)
     valid_Values = df[df.iloc[:, 0].str.contains(f'{letters}\d+$', na=False)]
 
-    if 'min' not in body or 'max' not in body:
-        if valid_Values.empty:
-            return get_exception_response(table=table_name,
-                                          column=column_name,
-                                          database_name=db.engine.url.database, error_result="No se encontraron valores válidos para determinar los valores máximos y mínimos en la secuencia de esta columna, por favor especifique los valores mínimos y máximos.")
+    # if 'min' not in body or 'max' not in body:
+    if valid_Values.empty:
+        return get_exception_response(table=table_name,
+                                      column=column_name,
+                                      database_name=db.engine.url.database, error_result="No se encontraron valores válidos que coincidan con el ejemplo de secuencia.")
 
     min_value, max_value = get_min_max_values(body, valid_Values)
 
