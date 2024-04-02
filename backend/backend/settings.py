@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'auditoria_bd_api',
-    'corsheaders'
+    'corsheaders',
+    'exceptions'
 ]
 
 MIDDLEWARE = [
