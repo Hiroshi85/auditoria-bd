@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'auditoria_bd_api',
-    'corsheaders'
+    'corsheaders',
+    'exceptions'
 ]
 
 MIDDLEWARE = [
@@ -121,7 +122,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

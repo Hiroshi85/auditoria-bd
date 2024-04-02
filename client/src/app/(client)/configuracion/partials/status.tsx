@@ -7,6 +7,8 @@ export default function DatabaseStatus() {
     const { status } = useConnectionDatabase()
 
     return (
-        <Badge variant="outline">{status}</Badge>
+        <Badge variant={`${
+            status == "disconnected" ? "destructive" : "outline"
+        }`}>{status}</Badge>
     )
 }

@@ -1,31 +1,31 @@
-import { Metadata } from "next"
+import { Metadata } from "next";
+import { getLastConnection } from "@/server/get-connection";
 import CustomExceptionForm from "./partials/form/form";
 import CustomExceptionResults from "./partials/results";
+import { PersonalizadasProvider } from "./personalizados.context";
 
 export const metadata: Metadata = {
-    title: 'Personalizadas - Database Auditor',
-}
+  title: "Personalizadas - Database Auditor",
+};
 
 type Props = {
-    searchParams: { table: string };
-  };
+  searchParams: { table: string };
+};
 
-export default function Page(
-    { searchParams } : Props
-) {
-    const { table } = searchParams;
+export default async function Page({ searchParams }: Props) {
+  const { table } = searchParams;
+  const lastConnection = await getLastConnection();
 
-    return (
-        <section className="container space-y-5">
+  return (
+    <PersonalizadasProvider>
+      <section className="container space-y-5">
         <header>
-          <h1 className="text-3xl font-bold">
-            Excepciones personalizadas
-          </h1>
+          <h1 className="text-3xl font-bold">Excepciones personalizadas</h1>
           <h2 className="text-xl">{`Tabla ${table}`}</h2>
         </header>
 
         <article>
-         <CustomExceptionForm />
+          <CustomExceptionForm engine={lastConnection?.engine} />
         </article>
 
         <article className="flex flex-col">
@@ -33,5 +33,6 @@ export default function Page(
           <CustomExceptionResults />
         </article>
       </section>
-    )
+    </PersonalizadasProvider>
+  );
 }

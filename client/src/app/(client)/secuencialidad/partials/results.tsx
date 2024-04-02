@@ -13,39 +13,46 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ResultContainer } from "@/components/ui/result-container";
 
 export default function SeqExceptionResults() {
   const { query } = useSecuencia();
   const { data, isLoading, isError } = query;
 
   function getTabColor(array: any[]) {
-    return array.length > 0
-      && "text-red-600"
+    return array.length > 0 && "text-red-600";
+  }
+
+  if (isLoading) {
+    return (
+      <ResultContainer>
+        <Spinner className="mx-auto"/>
+      </ResultContainer>
+    )
+  }
+
+  if (isError){
+    return (
+      <ResultContainer type="error">
+        <p className="text-red txt-md">Error al cargar los resultados</p>
+      </ResultContainer>
+    )
+  }
+
+  if (!data) {
+    return (
+      <ResultContainer>
+        <p>Aquí se mostrarán los resultados de la ejecución</p>
+      </ResultContainer>
+    )
   }
 
   return (
-    <div
-      className={cn(
-        "flex flex-col bg-accent w-full rounded-lg p-4 border",
-        data && data.result === "ok"
-          ? "border-green-500"
-          : data?.result === "exception"
-          ? "border-red-500"
-          : ""
-      )}
-    >
-      {isLoading ? (
-        <div className="w-full h-[200px] grid place-content-center">
-          <Spinner />
-        </div>
-      ) : isError ? (
-        <p className="text-red txt-md">Error al cargar los resultados</p>
-      ) : !data ? (
-        <p>Aquí se mostrarán los resultados de la ejecución</p>
-      ) : data.result === "error" ? (
-        <p className="text-red txt-md">{data.message}</p>
+    <div>
+      { data.result === "error" ? (
+        <ResultContainer type="error" className="text-red txt-md">{data.message}</ResultContainer>
       ) : (
-        <div>
+        <ResultContainer type={data.result === "exception" ? "error" : "ok"}>
           <header className="space-y-4">
             <div className="flex flex-row justify-between">
               <div>
@@ -88,7 +95,7 @@ export default function SeqExceptionResults() {
           {data.result === "exception" && (
             <main>
               <Tabs defaultValue="missing">
-                <TabsList className="w-full mb-4 space-x-2">
+                <TabsList className="w-full mb-4 space-x-2 bg-transparent">
                   <TabsTrigger
                     value="missing"
                     className={cn(getTabColor(data.missing))}
@@ -150,7 +157,7 @@ export default function SeqExceptionResults() {
               </Tabs>
             </main>
           )}
-        </div>
+        </ResultContainer>
       )}
     </div>
   );
