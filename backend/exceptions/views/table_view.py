@@ -1,15 +1,16 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from auditoria_bd_api.utils import conexiones, table_info
+from auditoria_bd_api.utils import conexiones, table_info, results_operations
 from rest_framework import exceptions
 from sqlalchemy import and_, or_, func
+from ..utils.enums.tipo_excepcion import TipoExcepcion
 
 @api_view(['POST'])
 def index(request, id):
     tabla_seleccionada = request.data["table"]
     columnas = request.data["details"]
 
-    db, _ = conexiones.get_connection_by_id(id, request.userdb)
+    db, conn = conexiones.get_connection_by_id(id, request.userdb)
     tabla = table_info.get_reflected_table(db, tabla_seleccionada)
 
     connection = db.connect()
@@ -63,7 +64,11 @@ def index(request, id):
         
     connection.close()
 
-    return Response({
+    response_dict = {
         'table': tabla_seleccionada,
         'results': result_table,
-    })
+    }
+
+    results_operations.save_results(response_dict, conn, TipoExcepcion.TABLA.value, tabla_seleccionada)
+
+    return Response(response_dict)
