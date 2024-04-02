@@ -27,7 +27,7 @@ export function PersonalizadasProvider({
   const queryClient = useQueryClient()
 
   const query = useQuery({
-    queryKey: ["results", formData],
+    queryKey: ["results-custom", formData],
     queryFn: async () => {
         const response = await axios.post(
             `${API_HOST}/exceptions/db/${connection.id}/custom`,
@@ -38,6 +38,8 @@ export function PersonalizadasProvider({
         return response.data as PersonalizadaResponse;
     },
     enabled: !!formData,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   })
 
   function auditException(formData: VerificarPersonalizadaRequest){
@@ -47,7 +49,7 @@ export function PersonalizadasProvider({
 
   function clearResults(){
     setFormData(null);
-    queryClient.removeQueries({ queryKey :["results", formData]});
+    queryClient.removeQueries({ queryKey :["results-custom", formData]});
   }
 
 
