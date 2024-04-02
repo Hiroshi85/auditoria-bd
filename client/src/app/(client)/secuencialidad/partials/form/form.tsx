@@ -34,8 +34,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useSecuencia } from "../secuencia.context";
+import { useSecuencia } from "../../secuencia.context";
 import { VerificarSecuenciaRequest } from "@/types/excepciones/secuencias";
+import { obtenerTipoDatoSQL } from "@/helpers/tipos-datos";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 type Props = {
   table: string;
@@ -44,6 +47,7 @@ type Props = {
 export default function SecuencialidadForm({ table }: Props) {
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
+  const [ selectedSQLType, setSelectedSQLType ] = useState<string>("");
 
   const { 
     selectedType, 
@@ -68,10 +72,10 @@ export default function SecuencialidadForm({ table }: Props) {
   });
 
   //TODO crear input skeletons
-  if (isLoading) return <div>Cargando...</div>;
+  if (isLoading) return <div className="animate-pulse">Cargando ...</div>;
 
   if (isError || !data)
-    return <div>No se pudieron cargar los datos del servidor</div>;
+    return <div className="text-sm text-red-500">No se pudieron cargar los datos del servidor</div>;
 
   const columns = data.columns.filter((column) =>
     AllowedTypes.includes(column.python_type.toLowerCase())
@@ -82,6 +86,7 @@ export default function SecuencialidadForm({ table }: Props) {
       const selectedColumn = columns.find((col) => col.name === value.column);
       if (selectedColumn === undefined) return;
       const selectedType = selectedColumn.python_type;
+      setSelectedSQLType(obtenerTipoDatoSQL(selectedColumn.type)?.name || "");
       setColumnType(selectedType);
       clearResults();
       form.reset({
@@ -103,7 +108,7 @@ export default function SecuencialidadForm({ table }: Props) {
     if (selectedType === null) return;
     const min_value = values.min !== "" ? values.min : undefined;
     const max_value = values.max !== "" ? values.max : undefined;
-    
+
     const reqData: VerificarSecuenciaRequest = {
       table: table,
       column: values.column,
@@ -120,14 +125,19 @@ export default function SecuencialidadForm({ table }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-wrap items-start gap-x-4 [&>*]:h-[100px] [&>*]:w-full md:[&>*]:w-[24%] w-full">
           <FormField
             control={form.control}
             name="column"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Columna</FormLabel>
+                <div className="flex justify-between items-center py-0.5">
+                  <FormLabel>Columna</FormLabel>
+                  <Badge variant={"secondary"} className="text-[0.6rem] font-medium px-2">
+                    {selectedSQLType}
+                  </Badge>
+                </div>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}

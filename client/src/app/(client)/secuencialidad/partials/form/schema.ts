@@ -21,7 +21,39 @@ export const SecuencialFormSchema = z
   })
   .superRefine((val, ctx) => {
     if (val.column_type === "str") {
-      const regexp = /([a-zA-Z]+)(\d+)/;
+
+      if(val.min){
+        const num = getNumericPart(val.min);
+        if(num !== 0 && !num){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["min"],
+            message: "El valor mínimo debe contener al menos un número",
+          });
+        }
+      }
+
+      if(val.max){
+        const num = getNumericPart(val.max);
+        if(num !== 0 && !num){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["max"],
+            message: "El valor máximo debe contener al menos un número",
+          });
+        }
+      }
+
+      if(val.example){
+        const num = getNumericPart(val.example);
+        if(num !== 0 && !num){
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["example"],
+            message: "El valor de ejemplo debe contener al menos un número",
+          });
+        }
+      }
 
       if (!val.example) {
         ctx.addIssue({
@@ -58,7 +90,7 @@ export const SecuencialFormSchema = z
       if (val.min && val.max) {
         const min = getNumericPart(val.min);
         const max = getNumericPart(val.max);
-
+        
         if (min > max) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

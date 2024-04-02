@@ -16,7 +16,7 @@ export function ResultContainer({
         type === "ok"
           ? "border-green-500 bg-white"
           : type === "error"
-          ? "border-red-500 bg-red-200"
+          ? "border-red-500 bg-red-100"
           : "",
         className
       )}
