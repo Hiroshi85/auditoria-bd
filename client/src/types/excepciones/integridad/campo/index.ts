@@ -19,5 +19,17 @@ interface ColumnaAVerificar {
 }
 export interface VerificarIntegridadDeCamposRequest {
     table: string;
-    data: ColumnaAVerificar[];
+    connectionId: number;
+    columnas: ColumnaAVerificar[];
+}
+
+export type VerificarIntegridadDeCamposResponse = {
+    error: string | null;
+    data: {
+        num_rows_exceptions: number;
+        table: string;
+        results: {
+            [key: string]: string | number | null;
+        }[];
+    } | null;
 }
