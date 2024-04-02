@@ -20,6 +20,7 @@ def obtain_valores(request, id):
     cantidad = 0
     campos_select = []
     condiciones = []
+    condiciones_where = []
     resultados = []
     condiciones_header = {}
     
@@ -28,12 +29,21 @@ def obtain_valores(request, id):
         campos_select.append(campo)
         cond_columna = not_(definir_condicion_general(campo, columna))
         condicion_obj = {"condicion": cond_columna, "campo": columna["nombre"]}
+
+        #Para where
+        condiciones_where.append(cond_columna)
+
+        #Para case
         condiciones.append(condicion_obj)
         
+        #Para tener campos y sus condiciones
         cond_header = build_condiciones_header(columnas, columna["nombre"], condiciones_header)
         if(cond_header):
             condiciones_header[columna["nombre"]] = cond_header
-    
+        
+    #Para where
+    condiciones_where = [objeto['condicion'] for objeto in condiciones]
+
     #Para where
     condiciones_where = [objeto['condicion'] for objeto in condiciones]
 
@@ -59,6 +69,7 @@ def obtain_valores(request, id):
         cantidad = len(resultados)
 
     db_name = db.url.database
+    exception_was_raised = cantidad > 0
 
     response_dict = {
         'database': db_name,
@@ -69,7 +80,7 @@ def obtain_valores(request, id):
         'results': resultados
     }
     
-    results_operations.save_results(response_dict, conn, TipoExcepcion.CAMPOS.value, tabla_seleccionada)
+    results_operations.save_results(response_dict, conn, TipoExcepcion.CAMPOS, tabla_seleccionada, exception_was_raised)
 
     return Response(response_dict, status=200)
 
