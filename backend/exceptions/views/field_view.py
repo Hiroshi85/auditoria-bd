@@ -2,16 +2,15 @@ from rest_framework.response import Response
 from sqlalchemy import not_, or_, func, case, select
 from auditoria_bd_api.utils import conexiones, table_info, results_operations
 from rest_framework.decorators import api_view
+from ..utils.enums.tipo_excepcion import TipoExcepcion
 
-from exceptions.models import ExceptionType
 from ..utils.campos.condiciones_bool import definir_condicion_general
 from ..utils.campos.build_condiciones_header import build_condiciones_header
 from datetime import datetime
 
-EXCEPTION_TYPE_INSTANCE = ExceptionType.objects.get(id=2)
-
 @api_view(['POST'])
 def obtain_valores(request, id):
+
     tabla_seleccionada = request.data["table"]
     columnas = request.data["columnas"]
 
@@ -69,8 +68,8 @@ def obtain_valores(request, id):
         'conditions': condiciones_header,
         'results': resultados
     }
-
-    results_operations.save_results(response_dict, conn, EXCEPTION_TYPE_INSTANCE, tabla_seleccionada)
+    
+    results_operations.save_results(response_dict, conn, TipoExcepcion.CAMPOS.value, tabla_seleccionada)
 
     return Response(response_dict, status=200)
 

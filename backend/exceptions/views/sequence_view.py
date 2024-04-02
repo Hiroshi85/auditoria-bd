@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from exceptions.models import ExceptionType
+from exceptions.utils.enums.tipo_excepcion import TipoExcepcion
 from ..utils.secuenciales import *
 from ..serializers import *
 
@@ -10,8 +10,6 @@ from auditoria_bd_api.utils.results_operations import save_results
 import datetime
 
 import pandas as pd
-
-EXCEPTION_TYPE_INSTANCE = ExceptionType.objects.get(id=1)
 
 @api_view(['POST'])
 def integer_sequence_exception(request, id):
@@ -195,6 +193,6 @@ def get_exception_response(
             'sequence_errors': sequence,
         }
     
-    save_results(final_response_json, conn, EXCEPTION_TYPE_INSTANCE, table)
+    save_results(final_response_json, conn, TipoExcepcion.SECUENCIAL.value, table)
     
     return Response(final_response_json, status=200)
