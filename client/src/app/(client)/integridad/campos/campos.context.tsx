@@ -30,7 +30,7 @@ export function CamposProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["results", requestData],
+    queryKey: ["results-fields", requestData],
     queryFn: () =>
       verificarIntegridadDeCamposRequest({
         columnas: requestData?.columnas ?? [],
@@ -38,7 +38,10 @@ export function CamposProvider({ children }: { children: React.ReactNode }) {
         connectionId: connection.id,
       }),
     enabled: !!requestData,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
+  
 
   function auditException(requestData: VerificarIntegridadDeCamposRequest) {
     setRequestData(requestData);
@@ -46,7 +49,7 @@ export function CamposProvider({ children }: { children: React.ReactNode }) {
 
   function clearResults() {
     setRequestData(null);
-    queryClient.removeQueries({ queryKey: ["results", requestData] });
+    queryClient.removeQueries({ queryKey: ["results-fields", requestData] });
   }
 
   return (

@@ -64,11 +64,13 @@ def index(request, id):
         
     connection.close()
 
+    exception_was_raised = len(result_table) > 0
+
     response_dict = {
         'table': tabla_seleccionada,
         'results': result_table,
     }
 
-    results_operations.save_results(response_dict, conn, TipoExcepcion.TABLA.value, tabla_seleccionada)
+    results_operations.save_results(response_dict, conn, TipoExcepcion.TABLA, tabla_seleccionada, exception_was_raised)
 
     return Response(response_dict)

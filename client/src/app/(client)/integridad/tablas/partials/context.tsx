@@ -39,7 +39,7 @@ export default function TableExceptionProvider({
     }
 
     const query = useQuery({
-        queryKey: ["results", formData],
+        queryKey: ["results-tables", formData],
         queryFn: async () => {
             const response = await axios.post(
                 `${API_HOST}/exceptions/db/${connection.id}/tables`,

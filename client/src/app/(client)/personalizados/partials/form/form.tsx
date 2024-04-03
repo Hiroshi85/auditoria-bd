@@ -141,7 +141,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
                     mode={engine === "mysql" ? "mysql" : "sqlserver"}
                     theme="tomorrow"
                     width="100%"
-                    height="200px"
+                    height="250px"
                     className="rounded-md"
                     enableLiveAutocompletion={true}
                     enableBasicAutocompletion={true}

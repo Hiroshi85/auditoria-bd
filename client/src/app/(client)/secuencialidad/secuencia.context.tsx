@@ -40,7 +40,7 @@ export function SecuencialProvider({
   );
   const queryClient = useQueryClient();
   const query = useQuery({
-    queryKey: ["results", formData],
+    queryKey: ["results-sequence", formData],
     queryFn: async () => {
       const exc_type = getExceptionType(columnType);
       console.log("Enviando data:  ", formData);
@@ -58,11 +58,13 @@ export function SecuencialProvider({
       return response.data as SecuenciaResponse;
     },
     enabled: !!formData,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   function clearResults() {
     setFormData(null);
-    queryClient.removeQueries({queryKey: ["results", formData]});
+    queryClient.removeQueries({queryKey: ["results-sequence", formData]});
   }
 
   function auditException(formData: VerificarSecuenciaRequest, type: string) {
