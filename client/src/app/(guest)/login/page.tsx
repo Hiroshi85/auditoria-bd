@@ -31,12 +31,12 @@ export default async function Page() {
 
                 <CardContent>
                     <LoginForm />
-                    <div className="flex justify-end w-full">
+                    {/* <div className="flex justify-end w-full">
                         <Link href={"/register"} className={buttonVariants({
                             variant: "link",
                             className: "py-0"
                         })}>Registrarse</Link>
-                    </div>
+                    </div> */}
                 </CardContent>
 
             </Card>
