@@ -35,7 +35,6 @@ export default function CustomExceptionResults() {
     <ResultContainer type="error">
       <div className="space-y-2">
         <h2 className="text-lg font-bold text-red-500">Error</h2>
-        <p className="w-full bg-accent rounded-md px-2">{data.query}</p>
         <p>
           <strong className="uppercase">{connection.engine + " "}</strong>
           {data.instance_error}
@@ -43,6 +42,8 @@ export default function CustomExceptionResults() {
         <p className="txt-sm">
           # {data.error_code} - {data.sql_error}
         </p>
+        <h2 className="text-lg font-bold text-red-500">Query</h2>
+        <p className="w-full bg-white rounded-md px-4 py-2 font-mono text-muted-foreground">{data.query}</p>
       </div>
     </ResultContainer>
   ) : (

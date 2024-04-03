@@ -1,8 +1,11 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from exceptions.utils.enums.tipo_excepcion import TipoExcepcion
+
 from ..serializrs.personalizadas.serializers import CustomExceptionSerializer
 from auditoria_bd_api.utils.conexiones import get_connection_by_id
+from auditoria_bd_api.utils.results_operations import save_results
 
 import datetime
 from sqlalchemy import text
@@ -20,7 +23,7 @@ def index(request, id):
     query = body['query']
     task_name = body['task_name']
 
-    db, _ = get_connection_by_id(id, request.userdb)
+    db, conn = get_connection_by_id(id, request.userdb)
 
     query = text(query)
 
@@ -43,7 +46,9 @@ def index(request, id):
         'rows': data
     }
 
-    return Response({
+    exception_was_raised = len(data) > 0
+
+    response_dict = {
         'result': 'ok',
         'table': table,
         'task_name': task_name,
@@ -51,4 +56,8 @@ def index(request, id):
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'num_rows': len(data),
         'data': resultados
-    })
+    }
+
+    save_results(response_dict, conn, TipoExcepcion.PERSONALIZADO, table, exception_was_raised)
+
+    return Response(response_dict, 200)
