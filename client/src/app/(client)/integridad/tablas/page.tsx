@@ -9,7 +9,7 @@ import TableExceptionProvider from "./partials/context"
 import ResultTableException from "./partials/results"
 
 export const metadata: Metadata = {
-    title: 'Integridad Tablas - Database Auditor',
+    title: 'Integridad Tablas - Sistema Auditoría',
 }
 
 export default async function Page(props: {

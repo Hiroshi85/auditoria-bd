@@ -5,7 +5,7 @@ import IntegridadCamposResults from "./partials/results";
 import { CamposProvider } from "./campos.context";
 
 export const metadata: Metadata = {
-  title: "Integridad Campos - Database Auditor",
+  title: "Integridad Campos - Sistema Auditoria",
 };
 
 export default async function Page() {

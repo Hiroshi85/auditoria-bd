@@ -8,7 +8,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-    title: 'Login - Database Auditor',
+    title: 'Login - Sistema Auditoría',
 }
 
 export default async function Page() {
@@ -22,7 +22,7 @@ export default async function Page() {
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        Database Auditor
+                        SISTEMA AUDITORÍA
                     </CardTitle>
                     <CardDescription>
                         Sistema web de auditoría de base de datos MySQL y SQLServer

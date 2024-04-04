@@ -11,7 +11,7 @@ export default async function Nav() {
       <nav className="container py-2">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="font-bold text-xl">SISTEMA AUDITORIA</h1>
+            <h1 className="text-2xl font-semibold leading-none tracking-tight">SISTEMA AUDITORÍA</h1>
           </div>
 
           <div>

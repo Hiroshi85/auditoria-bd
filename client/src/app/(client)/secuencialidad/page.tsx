@@ -4,7 +4,7 @@ import { SecuencialProvider } from "./secuencia.context";
 import SeqExceptionResults from "./partials/results";
 
 export const metadata: Metadata = {
-  title: "Secuencialidad - Database Auditor",
+  title: "Secuencialidad - Sistema Auditoría",
 };
 
 type Props = {

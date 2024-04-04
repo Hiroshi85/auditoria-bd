@@ -14,7 +14,7 @@ const loginSchema = z.object({
         .string(),
     password: z
         .string()
-        .min(3, "La contraseña debe tener al menos 8 caracteres")
+        .min(3, "La contraseña debe tener al menos 3 caracteres")
         .max(100, "La contraseña debe tener menos de 100 caracteres"),
 })
 

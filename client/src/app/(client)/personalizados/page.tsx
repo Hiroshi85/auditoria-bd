@@ -6,7 +6,7 @@ import { PersonalizadasProvider } from "./personalizados.context";
 import CustomQueries from "./partials/custom-queries/list-container";
 
 export const metadata: Metadata = {
-  title: "Personalizadas - Database Auditor",
+  title: "Personalizadas - Sistema Auditoría",
 };
 
 type Props = {

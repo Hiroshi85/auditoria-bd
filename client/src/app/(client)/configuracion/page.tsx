@@ -6,7 +6,7 @@ import ConnectionsView from "./partials/connections"
 import { Separator } from "@/components/ui/separator"
 
 export const metadata: Metadata = {
-    title: 'Configuración - Database Auditor',
+    title: 'Configuración - Sistema Auditoría',
 }
 
 export default function Page() {
