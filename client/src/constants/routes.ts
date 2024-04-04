@@ -12,15 +12,10 @@ export const NAV_ROUTES: NavRoute[] = [
         href: "/",
         icon: GlobeIcon
     },
-    // {
-    //     label: "Resultados",
-    //     href: "/resultados",
-    //     icon: BarChart4Icon
-    // },
     {
-        label: "Reportes",
-        href: "/reportes",
-        icon: FileTextIcon
+        label: "Resultados",
+        href: "/resultados",
+        icon: BarChart4Icon
     },
     {
         label: "Configuración",
