@@ -6,6 +6,7 @@ urlpatterns = [
     path('db/<int:id>/tables', view=table_view.index),
     path('db/<int:id>/custom', view=custom_view.index),
     path('db/<int:id>/custom/queries/save', view=custom_view.save_query),
+    path('custom/queries/<int:id>/delete', view=custom_view.delete_query),
     path('db/<int:id>/custom/queries/get', view=custom_view.get_queries_by_user_id),
     path('db/<int:id>/sequence/numeric', view=sequence_view.integer_sequence_exception),
     path('db/<int:id>/sequence/alphanumeric', view=sequence_view.alphanumeric_sequence_exception),

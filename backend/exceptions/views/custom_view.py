@@ -23,7 +23,7 @@ def index(request, id):
 
     table = body['table']
     query = body['query']
-    task_name = body['task_name']
+    task_name = body['name']
 
     db, conn = get_connection_by_id(id, request.userdb)
 
@@ -53,7 +53,7 @@ def index(request, id):
     response_dict = {
         'result': 'ok',
         'table': table,
-        'task_name': task_name,
+        'name': task_name,
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'num_rows': len(data),
@@ -67,7 +67,22 @@ def index(request, id):
 @api_view(['GET'])
 def get_queries_by_user_id(request, id):
     queries = CustomQueries.objects.filter(user=request.userdb)
-    return Response(QueriesSerializer(queries, many=True).data , status=status.HTTP_200_OK)
+    response = {}
+    response = QueriesSerializer(queries, many=True).data
+    for query in response:
+        query['connection'] = queries.get(id=query['id']).connection.id
+
+    return Response(response , status=status.HTTP_200_OK)
+
+@api_view(['DELETE'])
+def delete_query(request, id):
+    try:
+        query = CustomQueries.objects.get(id=id)
+    except:
+        return Response({"Query no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+    query.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @api_view(['POST', 'PUT'])
 def save_query(request, id):
