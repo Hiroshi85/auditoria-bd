@@ -33,7 +33,11 @@ def index(request, id):
             primary_key_columns = tabla.primary_key.columns
 
             # Search for rows with null values in the foreign key column
-            columns_table_foreign_key = func.concat(*[tabla.c[column.name] for column in primary_key_columns]).label('primary_key')
+            if len(primary_key_columns) > 1:
+                columns_table_foreign_key = func.concat(*[tabla.c[column.name] for column in primary_key_columns]).label('primary_key')
+            else: 
+                columns_table_foreign_key = tabla.c[primary_key_columns[0].name].label('primary_key')
+
 
             query_null_foreing_key = tabla.select().with_only_columns(columns_table_foreign_key).where(tabla.c[columns_name].is_(None))
 
