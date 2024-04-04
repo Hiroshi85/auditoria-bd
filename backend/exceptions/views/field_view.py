@@ -54,7 +54,10 @@ def obtain_valores(request, id):
     expresiones_case = [ case((objeto['condicion'], f"{objeto['campo']},"), else_='') for objeto in condiciones]
 
     #Concatenar las expresiones de case
-    columna_excepciones = func.concat(*expresiones_case).label('excepciones')
+    if(len(expresiones_case) > 1):
+        columna_excepciones = func.concat(*expresiones_case).label('excepciones')
+    else:
+        columna_excepciones = expresiones_case[0].label('excepciones')
 
     # Realizar la consulta
     with db.connect() as connection:
