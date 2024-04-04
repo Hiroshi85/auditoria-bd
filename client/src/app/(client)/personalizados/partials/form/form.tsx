@@ -1,8 +1,6 @@
 "use client";
 import { z } from "zod";
 import { PersonalizadasFormSchema } from "./form-schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 import {
   Form,
@@ -30,22 +28,17 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import { usePersonalizadas } from "../../personalizados.context";
 import { VerificarPersonalizadaRequest } from "@/types/excepciones/personalizadas";
 
+import { SaveIcon, Paintbrush } from "lucide-react"
+
 export default function CustomExceptionForm({ engine }: { engine: string }) {
-  const { auditException, clearResults } = usePersonalizadas();
+  const { auditException, clearResults, form, saveQuery } = usePersonalizadas();
   const params = useSearchParams();
   const table = params.get("table") ?? "";
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
 
   const tables = [table];
-
-  const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
-    defaultValues: {
-      task_name: "",
-      query: "",
-    },
-    resolver: zodResolver(PersonalizadasFormSchema),
-  });
+  form.setValue("table", table);
 
   if (isLoading) {
     return <p> Cargando... </p>;
@@ -95,7 +88,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
     const request: VerificarPersonalizadaRequest = {
       table: table,
       query: data.query,
-      task_name: data.task_name,
+      name: data.task_name,
     };
     auditException(request);
   }
@@ -103,12 +96,11 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
-        <div>
           <FormField
             control={form.control}
             name="task_name"
             render={({ field }) => (
-              <FormItem className="w-fit">
+              <FormItem className="max-w-[500px]">
                 <FormLabel>Nombre de la tarea</FormLabel>
                 <FormControl>
                   <Input
@@ -123,7 +115,6 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
               </FormItem>
             )}
           />
-        </div>
         <FormField
           control={form.control}
           name="query"
@@ -164,15 +155,21 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
 
         <div className="flex gap-4">
           <Button type="submit">Ejecutar</Button>
+          <Button type="button" className="w-fit" onClick={
+            () => saveQuery.mutate()
+          }>
+            <SaveIcon size={16} />
+          </Button>
           <Button
             type="button"
+            className="w-fit"
             onClick={() => {
               form.reset();
               form.clearErrors();
               clearResults();
             }}
           >
-            Limpiar
+            <Paintbrush size={16} />
           </Button>
         </div>
       </form>
