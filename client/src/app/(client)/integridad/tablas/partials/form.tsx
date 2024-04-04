@@ -237,6 +237,7 @@ function ForeingData({
                             })}
 
                             onChange={(value) => {
+                                console.log(value)
                                 if (value == "") {
                                     form.setValue(`details.${index}.foreing_column`, null)
                                 }

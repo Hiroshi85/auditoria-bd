@@ -32,7 +32,6 @@ export default function SelectSearch({
 }: ISelectSearchOption) {
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState(initValue ?? "")
-    console.log("options", options)
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -49,7 +48,7 @@ export default function SelectSearch({
                         </span>
                         <span className={cn("max-w-40 overflow-hidden text-ellipsis")}>
                             {value
-                                ? options.find((option) => option.value === value)?.label
+                                ? options.find((option) => option.value.toLocaleLowerCase() === value.toLocaleLowerCase())?.label
                                 : (placeholder ?? "Selecciona una opción...")}
                         </span>
                         <CaretSortIcon className="ml-2 h-4 w-4 shrink opacity-50" />
@@ -68,7 +67,7 @@ export default function SelectSearch({
                                 onSelect={(currentValue) => {
                                     setValue(currentValue === value ? "" : currentValue)
                                     setOpen(false)
-                                    onChange?.(currentValue === value ? "" : currentValue)
+                                    onChange?.(option.label)
                                 }}
                             >
                                 {option.label}
