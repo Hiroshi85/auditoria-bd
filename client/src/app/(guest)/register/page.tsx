@@ -14,9 +14,10 @@ export const metadata: Metadata = {
 export default async function Page() {
     const session = await getServerSession(authOptions);
 
-    if (session) {
-        redirect("/");
-    }
+    // if (session) {
+    //     redirect("/");
+    // }
+    redirect("/login")
     return (
         <div className="w-full flex items-center justify-center h-dvh bg-accent">
             <Card>
