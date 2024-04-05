@@ -1,18 +1,20 @@
 from sqlalchemy.sql import null
-from sqlalchemy import func
+from sqlalchemy import Date, Time, func, extract, cast
 from datetime import datetime
+
+from exceptions.utils.enums.bd_engines import DbEngine
 from ..enums.campos_condiciones import Condicion, WhenNumerico, WhenCadena, WhenTiempo, WhenEnum, Tipo_Dato
 
-def definir_condicion_general(campo, columna):
+def definir_condicion_general(campo, columna, db_name):
     id_condicion_general = int(columna["condicion_id"])
 
     if(id_condicion_general == Condicion.NOT_NULL.value):
         return campo != null()
     
     if(id_condicion_general == Condicion.WHERE.value):
-        return definir_condicion_where(campo, columna)
+        return definir_condicion_where(campo, columna, db_name)
 
-def definir_condicion_where(campo, columna):
+def definir_condicion_where(campo, columna, db_name):
     tipo = columna["tipo"]
     id_condicion_where = int(columna["where"]["condicion_id"])
 
@@ -27,7 +29,7 @@ def definir_condicion_where(campo, columna):
         return obtener_bool_cadena(campo, id_condicion_where, valor_1, valor_2, id_condicion_long)
     
     if(tipo == Tipo_Dato.TIEMPO.value):
-        return obtener_bool_tiempo(campo, id_condicion_where, valor_1, valor_2)
+        return obtener_bool_tiempo(campo, id_condicion_where, valor_1, valor_2, db_name)
 
     if(tipo == Tipo_Dato.ENUM.value):
         return obtener_bool_enum(campo, id_condicion_where, valor_1)
@@ -82,36 +84,44 @@ def obtener_bool_cadena(campo, id_condicion_where, valor_uno, valor_dos, id_cond
         len_campo = func.char_length(campo)
         return obtener_bool_numerico(len_campo, id_condicion_length, valor_uno, valor_dos)
 
-def obtener_bool_tiempo(campo, id_condicion_where, valor_uno, valor_dos):
-    campo_dt = datetime.strptime(campo, '%Y-%m-%d %H:%M:%S')
-    valor_uno_date = datetime.strptime(valor_uno, '%Y-%m-%d').date()
-    valor_dos_date = datetime.strptime(valor_dos, '%Y-%m-%d').date()
-    valor_uno_time = datetime.strptime(valor_uno, '%H:%M').time()
-    valor_dos_time = datetime.strptime(valor_dos, '%H:%M').time()
-    
+def obtener_bool_tiempo(campo, id_condicion_where, valor_uno, valor_dos, db_name):
     if(id_condicion_where == WhenTiempo.ANTES.value):
-        return campo_dt.date() < valor_uno_date
+        valor_uno_date = str(datetime.strptime(valor_uno, '%Y-%m-%d').date())
+        return cast(campo, Date) < valor_uno_date
 
     if(id_condicion_where == WhenTiempo.DESPUES.value):
-        return campo_dt.date()  > valor_uno_date
+        valor_uno_date = str(datetime.strptime(valor_uno, '%Y-%m-%d').date())
+        return cast(campo, Date)  > valor_uno_date
 
     if(id_condicion_where == WhenTiempo.ENTRE.value):
-        return valor_uno_date <= campo_dt.date() <= valor_dos_date
+        valor_uno_date = str(datetime.strptime(valor_uno, '%Y-%m-%d').date())
+        valor_dos_date = str(datetime.strptime(valor_dos, '%Y-%m-%d').date())
+        return cast(campo, Date).between(valor_uno_date, valor_dos_date) 
 
     if(id_condicion_where == WhenTiempo.IGUAL.value):
-        return campo_dt.date() == valor_uno_date
+        valor_uno_date = str(datetime.strptime(valor_uno, '%Y-%m-%d').date())
+        return cast(campo, Date) == valor_uno_date
 
     if(id_condicion_where == WhenTiempo.ENTRE_HORAS.value):
-        return valor_uno_time <= campo_dt.time() <= valor_dos_time
+        valor_uno_time = str(datetime.strptime(valor_uno, '%H:%M').time())
+        valor_dos_time = str(datetime.strptime(valor_dos, '%H:%M').time())    
+        return cast(campo, Time).between(valor_uno_time, valor_dos_time)
 
     if(id_condicion_where == WhenTiempo.DIA_SEMANA.value):
-        return campo_dt.isoweekday() == valor_uno_date.isoweekday()
+        valor_uno_weekday = valor_uno
+        if(DbEngine.MYSQL.value == db_name):
+            valor = func.dayofweek(campo) == valor_uno_weekday
+        if(DbEngine.SQL_SERVER.value == db_name):
+            valor = extract('weekday', campo) == valor_uno_weekday
+        return valor
 
     if(id_condicion_where == WhenTiempo.MES.value):
-        return campo_dt.month == valor_uno_date.month()
+        valor_uno_month = valor_uno
+        return extract('month', campo) == valor_uno_month
 
     if(id_condicion_where == WhenTiempo.AÑO.value):
-        return campo_dt.year() == valor_uno_date.year()
+        valor_uno_year = valor_uno
+        return extract('year', campo) == valor_uno_year
     
 def obtener_bool_enum(campo, id_condicion_where, valor_uno):
     if(id_condicion_where == WhenEnum.ACEPTA.value):

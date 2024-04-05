@@ -27,7 +27,7 @@ def obtain_valores(request, id):
     for columna in columnas:
         campo = tabla.c[columna["nombre"]]
         campos_select.append(campo)
-        cond_columna = not_(definir_condicion_general(campo, columna))
+        cond_columna = not_(definir_condicion_general(campo, columna, db.name))
         condicion_obj = {"condicion": cond_columna, "campo": columna["nombre"]}
 
         #Para where
