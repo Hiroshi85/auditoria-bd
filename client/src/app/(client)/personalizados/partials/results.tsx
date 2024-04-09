@@ -32,7 +32,7 @@ export default function CustomExceptionResults() {
     );
 
   return data.result === "error" ? (
-    <ResultContainer type="error">
+    <ResultContainer type="danger">
       <div className="space-y-2">
         <h2 className="text-lg font-bold text-red-500">Error</h2>
         <p>

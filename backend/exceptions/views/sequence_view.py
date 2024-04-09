@@ -45,7 +45,7 @@ def integer_sequence_exception(request, id):
         max_value=max_value,
         conn=conn)
 
-
+# region alphanumeric execptions
 @api_view(['POST'])
 def alphanumeric_sequence_exception(request, id):
     serializer = StringSequencialSerializer(data=request.data)
@@ -57,7 +57,6 @@ def alphanumeric_sequence_exception(request, id):
     step = body.get('step', 1)
     sort = body.get('sort', 'no')
     example = body.get('example')
-    is_static = body.get('static', False)
 
     db, conn = get_connection_by_id(id, request.userdb)
     df = get_dataframe_values(db, table_name, column_name, sort)
@@ -68,25 +67,28 @@ def alphanumeric_sequence_exception(request, id):
                                       database_name=db.engine.url.database, error_result="No se encontraron valores en la columna seleccionada.")
 
     letters, digits = get_letters(example), get_number(example)
-    valid_Values = df[df.iloc[:, 0].str.contains(f'{letters}\d+$', na=False)]
-
-    # if 'min' not in body or 'max' not in body:
-    if valid_Values.empty:
+    
+    valid_values = df[df.iloc[:, 0].str.match(f'^{letters}\d+$', na=False)]
+    
+    if valid_values.empty:
+        min_found, max_found = get_min_max_values({}, df)
         return get_exception_response(table=table_name,
                                       column=column_name,
-                                      database_name=db.engine.url.database, error_result="No se encontraron valores válidos que coincidan con el ejemplo de secuencia.")
-
-    min_value, max_value = get_min_max_values(body, valid_Values)
-
-    if is_static:
-        alphanumeric_sequence = [f'{letters}{str(val).zfill(len(digits))}'
-                                 for val in range(int(get_number(min_value)), int(get_number(max_value)) + 1, step)]
+                                      database_name=db.engine.url.database, 
+                                      error_result="No se encontraron valores válidos que coincidan con el ejemplo de secuencia.",
+                                      min_value=min_found,
+                                      max_value=max_found)
+    if letters == '':
+        min_value, max_value = get_min_max_values(body, valid_values.map(int))
+        min_value, max_value = str(min_value), str(max_value)
     else:
-        # TODO implementar para secuencias dinámicas en letras y números (itertools) improbable
-        pass
+        min_value, max_value = get_min_max_values(body, valid_values)
+    
+    alphanumeric_sequence = [f'{letters}{str(val).zfill(len(digits))}'
+                                 for val in range(int(get_number(min_value)), int(get_number(max_value)) + 1, step)]
 
-    missing, duplicates, sequence = check_sequence_exception(
-        df, alphanumeric_sequence)
+    missing, duplicates, sequence = check_sequence_exception(df, alphanumeric_sequence)
+    
     return get_exception_response(
         table=table_name,
         column=column_name,
@@ -98,7 +100,7 @@ def alphanumeric_sequence_exception(request, id):
         max_value=max_value,
         conn = conn)
 
-
+# region date exceptions
 @api_view(['POST'])
 def date_sequence_exception(request, id):
     serializer = DateSequencialSerializer(data=request.data)
@@ -115,7 +117,9 @@ def date_sequence_exception(request, id):
     if df.empty:
         return get_exception_response(table=table_name,
                                       column=column_name,
-                                      database_name=db.engine.url.database, error_result="No se encontraron valores en la columna seleccionada", conn=conn)
+                                      database_name=db.engine.url.database, 
+                                      error_result="No se encontraron valores en la columna seleccionada", 
+                                      conn=conn)
 
     if type(df.iloc[0, 0]) == pd.Timestamp:
         df = df.apply(lambda x: x.dt.date)
@@ -144,7 +148,7 @@ def date_sequence_exception(request, id):
         max_value=max_value,
         conn=conn)
 
-
+# region exception response
 def get_exception_response(
         table,
         column,
@@ -152,20 +156,20 @@ def get_exception_response(
         missing=[],
         duplicates=[],
         sequence=[],
-        min_value="N/A",
-        max_value="N/A",
+        min_value="",
+        max_value="",
         error_result="",
         conn = None
 ):
     if error_result != "":
         return Response({
             'result': 'error',
-            'message': error_result
+            'message': error_result,
+            'min': min_value,
+            'max': max_value,
         }, status=200)
 
     datetime_analysis = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    # TODO save results in DB
 
     response_json = {
         'table': table,

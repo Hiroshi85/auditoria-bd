@@ -21,8 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { SecuencialFormSchema } from "./schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
@@ -53,23 +51,9 @@ export default function SecuencialidadForm({ table }: Props) {
     selectedType, 
     setColumnType, 
     auditException, 
-    clearResults } = useSecuencia();
+    clearResults, form} = useSecuencia();
 
-  const form = useForm<z.infer<typeof SecuencialFormSchema>>({
-    defaultValues: {
-      column: undefined,
-      column_type: "",
-      example: "",
-      min: "",
-      max: "",
-      step: 1,
-      static: true,
-      frequency: "D",
-      min_date: undefined,
-      max_date: undefined,
-    },
-    resolver: zodResolver(SecuencialFormSchema),
-  });
+  
 
   //TODO crear input skeletons
   if (isLoading) return <div className="animate-pulse">Cargando ...</div>;

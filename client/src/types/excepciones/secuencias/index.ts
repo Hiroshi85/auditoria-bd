@@ -41,7 +41,9 @@ export type SecuenciaOkResponse = {
 
 export type SecuenciaErrorResponse = {
     result: "error",
-    message: string
+    message: string,
+    min: string,
+    max: string
 }
 
 export type SecuenciaResponse = SecuenciaExceptionResponse | SecuenciaOkResponse | SecuenciaErrorResponse

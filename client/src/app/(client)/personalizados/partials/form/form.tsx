@@ -34,11 +34,13 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   const { auditException, clearResults, form, saveQuery } = usePersonalizadas();
   const params = useSearchParams();
   const table = params.get("table") ?? "";
+  
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
 
-  const tables = [table];
   form.setValue("table", table);
+  
+  const tables = [table];
 
   if (isLoading) {
     return <p> Cargando... </p>;

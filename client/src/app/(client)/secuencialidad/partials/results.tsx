@@ -14,9 +14,14 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ResultContainer } from "@/components/ui/result-container";
+import { InfoIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function SeqExceptionResults() {
-  const { query } = useSecuencia();
+  const params = useSearchParams()
+  
+  const table = params.get('table')
+  const { query, form } = useSecuencia();
   const { data, isLoading, isError } = query;
 
   function getTabColor(array: any[]) {
@@ -26,17 +31,17 @@ export default function SeqExceptionResults() {
   if (isLoading) {
     return (
       <ResultContainer>
-        <Spinner className="mx-auto"/>
+        <Spinner className="mx-auto" />
       </ResultContainer>
-    )
+    );
   }
 
-  if (isError){
+  if (isError) {
     return (
       <ResultContainer type="error">
         <p className="text-red txt-md">Error al cargar los resultados</p>
       </ResultContainer>
-    )
+    );
   }
 
   if (!data) {
@@ -44,13 +49,38 @@ export default function SeqExceptionResults() {
       <ResultContainer>
         <p>Aquí se mostrarán los resultados de la ejecución</p>
       </ResultContainer>
-    )
+    );
   }
 
   return (
     <div>
-      { data.result === "error" ? (
-        <ResultContainer type="error" className="text-red txt-md">{data.message}</ResultContainer>
+      {data.result === "error" ? (
+        <ResultContainer type="error" className="text-red txt-md">
+          <p className="text-destructive font-semibold">{data.message}</p>
+          {data.min && data.max && (
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex gap-4">
+                <InfoIcon className="mt-2" />
+                <div>
+                  <h2 className="text-blue-500 leading-tight font-bold">
+                    Registros encontrados
+                  </h2>
+                  <h3 className="text-sm leading-tight text-muted-foreground font-semibold">
+                    Intente con alguno de ellos como ejemplo de secuencia
+                  </h3>
+                  <div className="[&>p]:text-sm">
+                    <p>
+                      <strong>Valor mínimo:</strong> {data.min}
+                    </p>
+                    <p>
+                      <strong>Valor máximo:</strong> {data.max}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </ResultContainer>
       ) : (
         <ResultContainer type={data.result === "exception" ? "error" : "ok"}>
           <header className="space-y-4">
@@ -126,7 +156,11 @@ export default function SeqExceptionResults() {
                   className="flex flex-wrap gap-x-8 gap-y-8"
                 >
                   {data.duplicates.map((item) => {
-                    return <span key={item}>{item}</span>;
+                    return (
+                      <span key={item} className={"min-w-[60px]"}>
+                        {item}
+                      </span>
+                    );
                   })}
                 </TabsContent>
                 <TabsContent value="errors">
