@@ -23,6 +23,11 @@ export default function TableDetails() {
                 {
                     data.query.isLoading ? (
                         <p>Cargando...</p>
+                    ) : !data.query.data || data.query.isError ? (
+                        <div>
+                            <p>Error al cargar la tabla</p>
+                            <p>{data.query.error?.message}</p>
+                        </div>
                     ) : (
                         <div className="flex flex-col gap-5">
                             <ExceptionOptions tableName={data.currentTable} />
