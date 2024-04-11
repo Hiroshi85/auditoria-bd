@@ -63,7 +63,7 @@ def get_number(string):
 
 
 def get_letters(string):
-    letter = re.search(r'[^\d]+', string)
+    letter = re.search(r'^[^\d]+', string)
     letter = letter.group() if letter else ''
     return letter
 

@@ -71,7 +71,7 @@ def alphanumeric_sequence_exception(request, id):
 
     # si no hay letras, no estricto para evitar errores cuando se incrementan los dígitos 
     if letters == '':
-        valid_values = df[df.iloc[:, 0].str.match(f'^{letters}\d+$', na=False)]
+        valid_values = df[df.iloc[:, 0].str.match(f'^\d+$', na=False)]
     else:
         valid_values= df[df.iloc[:, 0].str.match(f'^{letters}\d{"{"+str(len(digits))+"}"}+$', na=False)]
     
