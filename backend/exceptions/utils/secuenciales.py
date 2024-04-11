@@ -49,8 +49,8 @@ def get_dataframe_values(db, table_name, column_name, sort):
             stmt = stmt.order_by(pks[0].description)
 
         result = cnn.execute(stmt)
-
-    values = result.scalars() 
+        values = result.fetchall()
+    
     df = pd.DataFrame(values)
    
     return df
