@@ -11,7 +11,7 @@ def get_results_by_user(request):
 
     results = Result.objects.filter(connection__user=current_user).values(
         'id', 'connection__name', 'table', 'created_at', 'exception_ocurred', 'exception_type__id' ,'exception_type__description'
-        ).order_by('id')
+        ).order_by('-created_at')
     
     results_list = []
 

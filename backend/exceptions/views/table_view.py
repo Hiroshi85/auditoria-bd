@@ -16,6 +16,7 @@ def index(request, id):
     connection = db.connect()
 
     result_table = []
+    exception_was_raised = False
 
     for columna in columnas:
         columns_name = columna.get('column_name', None)
@@ -61,14 +62,15 @@ def index(request, id):
             for row in not_found_results:
                 column_result["results"].append({"primary_key": row["primary_key"], "foreign_key": row["foreign_key"], "table_foreign_key": None})
 
+            if len(column_result["results"]) > 0:
+                exception_was_raised = True
+
             result_table.append(column_result)
 
         else:
             raise exceptions.APIException('Condición no controlada', code=400)
         
     connection.close()
-
-    exception_was_raised = len(result_table) > 0
 
     response_dict = {
         'table': tabla_seleccionada,
