@@ -37,26 +37,22 @@ def get_dataframe_values(db, table_name, column_name, sort):
     except KeyError:
         raise exceptions.APIException('Table or column not found', code=404)
 
-    # select column from table
-    
-    cnn = db.connect()
-    stmt = select(column).where(column.isnot(None))
-    
-    # validar si no tiene pk ordenar por la misma columna
-    pks = table.primary_key.columns.values()
+    with db.connect() as cnn:
+        stmt = select(column).where(column.isnot(None))
 
-    if sort == 'asc' or not pks:
-        stmt = stmt.order_by(column.description)
-    else:
-        stmt = stmt.order_by(pks[0].description)
+        # validar si no tiene pk ordenar por la misma columna
+        pks = table.primary_key.columns.values()
 
-    result = cnn.execute(stmt)
-    cnn.close()
-    
+        if sort == 'asc' or not pks:
+            stmt = stmt.order_by(column.description)
+        else:
+            stmt = stmt.order_by(pks[0].description)
 
-    values = [row[0] for row in result.fetchall()]
+        result = cnn.execute(stmt)
+
+    values = result.scalars() 
     df = pd.DataFrame(values)
-
+   
     return df
 
 
@@ -67,7 +63,7 @@ def get_number(string):
 
 
 def get_letters(string):
-    letter = re.search(r'[a-zA-Z]+', string)
+    letter = re.search(r'[^\d]+', string)
     letter = letter.group() if letter else ''
     return letter
 

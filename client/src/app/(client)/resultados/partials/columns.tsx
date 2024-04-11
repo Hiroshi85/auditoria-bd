@@ -106,7 +106,7 @@ export const columns: ColumnDef<Resultado>[] = [
         cell: ({ row }) => {
             const exception = row.getValue("exception_ocurred") as boolean
             return exception ? <span
-                className="bg-red-600 rounded-full text-white xp3 py-1 text-xs text-center"
+                className="bg-red-600 rounded-full text-white px-3 py-1 text-xs text-center"
             >
                 Errores encontrados
             </span> : <span

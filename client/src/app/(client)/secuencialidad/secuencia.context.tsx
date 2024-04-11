@@ -7,6 +7,7 @@ import {
   SecuenciaResponse,
   VerificarSecuenciaRequest,
 } from "@/types/excepciones/secuencias";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   UseQueryResult,
   useQuery,
@@ -14,7 +15,10 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import { createContext, useContext, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { SecuencialFormSchema } from "./partials/form/schema";
+import { z } from "zod";
 
 interface SecuenciaProviderProps {
   auditException: (formData: VerificarSecuenciaRequest, type: string) => void;
@@ -22,6 +26,7 @@ interface SecuenciaProviderProps {
   clearResults: () => void;
   selectedType: string | null;
   query: UseQueryResult<SecuenciaResponse, Error>;
+  form: ReturnType<typeof useForm<z.infer<typeof SecuencialFormSchema>>>;
 }
 
 const SecuenciaContext = createContext<SecuenciaProviderProps>(
@@ -39,6 +44,23 @@ export function SecuencialProvider({
     null
   );
   const queryClient = useQueryClient();
+  
+  const form = useForm<z.infer<typeof SecuencialFormSchema>>({
+    defaultValues: {
+      column: undefined,
+      column_type: "",
+      example: "",
+      min: "",
+      max: "",
+      step: 1,
+      static: true,
+      frequency: "D",
+      min_date: undefined,
+      max_date: undefined,
+    },
+    resolver: zodResolver(SecuencialFormSchema),
+  });
+  
   const query = useQuery({
     queryKey: ["results-sequence", formData],
     queryFn: async () => {
@@ -80,6 +102,7 @@ export function SecuencialProvider({
         auditException,
         clearResults,
         query,
+        form
       }}
     >
       {children}
