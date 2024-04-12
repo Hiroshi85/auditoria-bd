@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import bd_view, results_view
+from .views import bd_view, results_view, completions
 
 urlpatterns = [
     path('test', view=bd_view.test_connection), 
@@ -11,4 +11,5 @@ urlpatterns = [
     path('connection/<int:id>', view=bd_view.connect_to_db),
     path('results', view=results_view.get_results_by_user),
     path('results/<int:id>', view=results_view.get_result_by_id),
+    path('completions/<int:id>', view=completions.get_query_by_prompt),
 ]

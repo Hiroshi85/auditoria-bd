@@ -29,6 +29,7 @@ import { usePersonalizadas } from "../../personalizados.context";
 import { VerificarPersonalizadaRequest } from "@/types/excepciones/personalizadas";
 
 import { SaveIcon, Paintbrush } from "lucide-react"
+import EnterPromtp from "./prompt-select";
 
 export default function CustomExceptionForm({ engine }: { engine: string }) {
   const { auditException, clearResults, form, saveQuery } = usePersonalizadas();
@@ -125,6 +126,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
               <div className="flex gap-4">
                 <FormLabel className="flex items-center">Consulta</FormLabel>
                 <ColumnSuggestions form={form} columns={data?.columns} />
+                <EnterPromtp form={form}  />
               </div>
               <FormControl>
                 <div className="grid w-full gap-1.5">

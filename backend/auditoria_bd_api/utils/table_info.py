@@ -13,7 +13,7 @@ def get_table_names(db_engine):
 
     return tables
 
-def get_table_detail(db_engine, table_name):
+def get_table_detail(db_engine, table_name, basic=False):
     metadata = MetaData()
     metadata.reflect(bind=db_engine, only=[table_name])
     table = metadata.tables[table_name]
@@ -25,6 +25,14 @@ def get_table_detail(db_engine, table_name):
             python_type = column.type.python_type.__name__
         except:
             python_type = 'unknown'
+        
+        if basic:
+            tableDetails.append({
+                'name': column.name,
+                'type': str(column.type),
+                'key': 'PK' if column.primary_key else 'FK' if column.foreign_keys else ''
+            })
+            continue
 
         tableDetails.append({
             'name': column.name,
