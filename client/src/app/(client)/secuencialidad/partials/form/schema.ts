@@ -116,6 +116,24 @@ export const SecuencialFormSchema = z
     }
     // Validaciones int
     if (val.column_type === "int"){
+
+      
+      if(val.min && val.min.match('^[0-9]+$') === null){
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["min"],
+          message: "El valor mínimo debe ser un número entero",
+        });
+      }
+
+      if(val.max && val.max.match('^[0-9]+$') === null){
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["max"],
+          message: "El valor máximo debe ser un número entero",
+        });
+      }
+
       if (val.min && val.max) {
         const min = parseInt(val.min);
         const max = parseInt(val.max);
