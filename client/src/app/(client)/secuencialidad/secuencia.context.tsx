@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { API_HOST } from "@/constants/server";
 import { getExceptionType } from "@/helpers/exc-secuenciales/tipos";
@@ -10,7 +10,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   UseQueryResult,
-  useQuery,
+  useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
 import axios from "axios";
@@ -20,12 +20,30 @@ import { toast } from "sonner";
 import { SecuencialFormSchema } from "./partials/form/schema";
 import { z } from "zod";
 
+// Función para enviar la petición POST
+async function postSecuenciaRequest(formData: VerificarSecuenciaRequest, columnType: string, connectionId: number) {
+  const exc_type = getExceptionType(columnType);
+
+  if (exc_type === "") {
+    toast.error("Seleccione una columna válida");
+    throw new Error("Invalid column type");
+  }
+
+  const response = await axios.post(
+    `${API_HOST}/exceptions/db/${connectionId}/sequence/${exc_type}`,
+    formData,
+    { withCredentials: true }
+  );
+
+  return response.data as SecuenciaResponse;
+}
+
 interface SecuenciaProviderProps {
   auditException: (formData: VerificarSecuenciaRequest, type: string) => void;
   setColumnType: (type: string) => void;
   clearResults: () => void;
   selectedType: string | null;
-  query: UseQueryResult<SecuenciaResponse, Error>;
+  mutation: ReturnType<typeof useMutation<SecuenciaResponse, Error, VerificarSecuenciaRequest, unknown>>;
   form: ReturnType<typeof useForm<z.infer<typeof SecuencialFormSchema>>>;
 }
 
@@ -44,7 +62,7 @@ export function SecuencialProvider({
     null
   );
   const queryClient = useQueryClient();
-  
+
   const form = useForm<z.infer<typeof SecuencialFormSchema>>({
     defaultValues: {
       column: undefined,
@@ -60,38 +78,29 @@ export function SecuencialProvider({
     },
     resolver: zodResolver(SecuencialFormSchema),
   });
-  
-  const query = useQuery({
-    queryKey: ["results-sequence", formData],
-    queryFn: async () => {
-      const exc_type = getExceptionType(columnType);
-      console.log("Enviando data:  ", formData);
 
-      if (exc_type === "") {
-        toast.error("Seleccione una columna válida");
-      }
-
-      const response = await axios.post(
-        `${API_HOST}/exceptions/db/${connection.id}/sequence/${exc_type}`,
-        formData,
-        { withCredentials: true }
-      );
-
-      return response.data as SecuenciaResponse;
-    },
-    enabled: !!formData,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
+  const mutation = useMutation(
+    {
+      mutationFn: (formData: VerificarSecuenciaRequest) => {
+        return postSecuenciaRequest(formData, columnType, connection.id);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["resultados"],
+        });
+      },
+    }
+  );
 
   function clearResults() {
     setFormData(null);
-    queryClient.removeQueries({queryKey: ["results-sequence", formData]});
+    queryClient.removeQueries({ queryKey: ["results-sequence", formData] });
   }
 
   function auditException(formData: VerificarSecuenciaRequest, type: string) {
     setFormData(formData);
     setColumnType(type);
+    mutation.mutate(formData);
   }
 
   return (
@@ -101,8 +110,8 @@ export function SecuencialProvider({
         setColumnType,
         auditException,
         clearResults,
-        query,
-        form
+        mutation,
+        form,
       }}
     >
       {children}

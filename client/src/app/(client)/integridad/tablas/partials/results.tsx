@@ -7,9 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 export default function ResultTableException() {
     const exception = useTableException()
-    const { data, isLoading, isError } = exception.query
+    const { data, isPending, isError } = exception.mutation
 
-    if (isLoading) {
+    if (isPending) {
         return <p>Loading...</p>
     }
 

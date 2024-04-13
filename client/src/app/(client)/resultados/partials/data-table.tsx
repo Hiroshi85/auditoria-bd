@@ -27,20 +27,18 @@ import { Label } from "@/components/ui/label"
 import { EXCEPCIONES } from "@/constants/expeciones"
 import { Combobox } from "./combobox"
 import { Connection } from "@/types/connection"
-import { getTablesOfConnection } from "@/server/tables"
+import { getTablesOfConnection } from "@/services/connections"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     connections: Connection[]
-    token: string
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
     connections,
-    token
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -48,7 +46,7 @@ export function DataTable<TData, TValue>({
     )
     const [tables, setTables] = useState<string[]>([])
     const fetchTables = async (connectionId: number) => {
-        const res = await getTablesOfConnection({ connectionId, token })
+        const res = await getTablesOfConnection(connectionId)
         setTables(res)
         setIsTablaFieldDisabled(false)
     }

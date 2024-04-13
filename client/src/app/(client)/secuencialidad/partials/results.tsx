@@ -19,16 +19,16 @@ import { useSearchParams } from "next/navigation";
 
 export default function SeqExceptionResults() {
   const params = useSearchParams()
-  
+
   const table = params.get('table')
-  const { query, form } = useSecuencia();
-  const { data, isLoading, isError } = query;
+  const { mutation, form } = useSecuencia();
+  const { data, isError, isPending } = mutation;
 
   function getTabColor(array: any[]) {
     return array.length > 0 && "text-red-600";
   }
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <ResultContainer>
         <Spinner className="mx-auto" />

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   createContext,
@@ -7,10 +7,8 @@ import {
 } from "react";
 import { useConnectionDatabase } from "@/providers/connection";
 import {
-  useQuery,
   useMutation,
   useQueryClient,
-  UseQueryResult,
   UseMutationResult,
 } from "@tanstack/react-query";
 import {
@@ -27,8 +25,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 interface PersonalizadasProviderProps {
-  query: UseQueryResult<PersonalizadaResponse, Error>;
-  auditException: (formData: VerificarPersonalizadaRequest) => void;
+  query: UseMutationResult<PersonalizadaResponse, Error, VerificarPersonalizadaRequest, unknown>;
+  auditException: (data: VerificarPersonalizadaRequest) => void;
   clearResults: () => void;
   saveQuery: UseMutationResult<CustomQueriesResponse, Error, void, unknown>;
   deleteQuery: UseMutationResult<void, Error, number, unknown>;
@@ -51,43 +49,56 @@ export function PersonalizadasProvider({
   const [formData, setFormData] =
     useState<VerificarPersonalizadaRequest | null>(null);
   const queryClient = useQueryClient();
-  // const selectedQuery = useRef<CustomQueriesResponse | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<CustomQueriesResponse | null>(null);
 
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
     defaultValues: {
       table: "",
-      task_name: "",
+      name: "",
       query: "",
     },
     resolver: zodResolver(PersonalizadasFormSchema),
   });
 
-  const query = useQuery({
-    queryKey: ["results-custom", formData],
-    queryFn: async () => {
+  const query = useMutation<PersonalizadaResponse, Error, VerificarPersonalizadaRequest>({
+    mutationFn: async () => {
       const response = await axios.post(
         `${API_HOST}/exceptions/db/${connection.id}/custom`,
         formData,
         { withCredentials: true }
       );
-
-      return response.data as PersonalizadaResponse;
+      return response.data;
     },
-    enabled: !!formData,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["results-custom", "resultados"],
+      });
+    },
   });
 
-  const saveQuery = useMutation({
-    mutationFn: selectedQuery ? updateQueryFn : saveQueryFn,
-    onSuccess: () => {
+  const saveQuery = useMutation<CustomQueriesResponse, Error, void>({
+    mutationFn: async () => {
+      const response = await axios.post(
+        `${API_HOST}/exceptions/db/${connection.id}/custom/queries/save`,
+        {
+          table: formData!.table,
+          name: formData!.name,
+          query: formData!.query,
+          only_this_connection: true,
+        },
+        { withCredentials: true }
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
       toast.success(`Consulta ${selectedQuery === null ? "guardada" : "actualizada"}!`);
-      queryClient.invalidateQueries({ queryKey: ["custom-queries"] });
+      queryClient.invalidateQueries({
+        queryKey: ["custom-queries", "resultados"],
+      });
     },
   });
 
-  const deleteQuery = useMutation({
+  const deleteQuery = useMutation<void, Error, number>({
     mutationFn: async (id: number) => {
       await axios.delete(
         `${API_HOST}/exceptions/custom/queries/${id}/delete`,
@@ -96,49 +107,23 @@ export function PersonalizadasProvider({
     },
     onSuccess: () => {
       toast.success("Consulta eliminada!");
-      queryClient.invalidateQueries({ queryKey: ["custom-queries"] });
+      queryClient.invalidateQueries({
+        queryKey: ["custom-queries", "resultados"],
+      });
     },
-  
-  })
-
-  async function saveQueryFn() {
-    const response = await axios.post(
-      `${API_HOST}/exceptions/db/${connection.id}/custom/queries/save`,
-      {
-        table: form.getValues("table"),
-        name: form.getValues("task_name"),
-        query: form.getValues("query"),
-        only_this_connection: true,
-      },
-      { withCredentials: true }
-    );
-    return response.data as CustomQueriesResponse;
-  }
-
-  async function updateQueryFn() {
-    console.log("selectedQuery", selectedQuery);
-    const response = await axios.put(
-      `${API_HOST}/exceptions/db/${connection.id}/custom/queries/save`,
-      {
-        id: selectedQuery?.id,
-        table: form.getValues("table"),
-        name: form.getValues("task_name"),
-        query: form.getValues("query"),
-        only_this_connection: true,
-      },
-      { withCredentials: true }
-    );
-    return response.data as CustomQueriesResponse;
-  }
+  });
 
   function auditException(formData: VerificarPersonalizadaRequest) {
-    console.log("Enviando datos:  ", formData);
     setFormData(formData);
+    query.mutate(formData);
   }
 
   function clearResults() {
     setFormData(null);
-    queryClient.removeQueries({ queryKey: ["results-custom", formData] });
+    queryClient.invalidateQueries({
+      queryKey: ["results-custom", "resultados"],
+    });
+
   }
 
   return (
@@ -149,8 +134,8 @@ export function PersonalizadasProvider({
         deleteQuery,
         form,
         connection,
-        selectedQuery: selectedQuery,
-        setSelectedQuery: setSelectedQuery,
+        selectedQuery,
+        setSelectedQuery,
         auditException,
         clearResults,
       }}

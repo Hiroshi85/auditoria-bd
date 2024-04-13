@@ -9,10 +9,10 @@ import { Table2Icon } from "lucide-react";
 
 export default function CustomExceptionResults() {
   const { query } = usePersonalizadas();
-  const { data, isLoading, isError } = query;
+  const { data, isPending, isError } = query;
   const connection = useConnectionDatabase();
 
-  if (isLoading)
+  if (isPending)
     return (
       <ResultContainer>
         <Spinner />
