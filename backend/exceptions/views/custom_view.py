@@ -14,8 +14,12 @@ from sqlalchemy.exc import DBAPIError
 
 from ..models import CustomQueries
 
+from ..pagination.custom_exception.pagination import CustomPagination
+
 @api_view(['POST'])
 def index(request, id):
+    pagination_class = CustomPagination()
+
     serializer = CustomExceptionSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
@@ -61,6 +65,10 @@ def index(request, id):
     }
 
     save_results(response_dict, conn, TipoExcepcion.PERSONALIZADO, table, exception_was_raised)
+    
+    page = pagination_class.paginate_queryset(request=request, queryset=data)
+    if page is not None:
+        return pagination_class.get_paginated_response(page)
 
     return Response(response_dict, 200)
 

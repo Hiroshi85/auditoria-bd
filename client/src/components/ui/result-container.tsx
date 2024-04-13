@@ -11,7 +11,7 @@ export function ResultContainer({ children, className, type }: ResultsProps) {
         "flex flex-col bg-accent w-full rounded-lg p-4 border",
         type === "ok" && "border-green-500 bg-white",
         type === "danger" && "border-red-500 bg-red-100",
-        type === "error" && "border-red-500 bg-whit",
+        type === "error" && "border-red-500 bg-white",
         className
       )}
     >
