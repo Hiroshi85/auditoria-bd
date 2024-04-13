@@ -1,31 +1,25 @@
-"use server"
-
-import { API_COOKIES } from "@/constants/cookies";
 import { API_HOST } from "@/constants/server";
 import { ensureError } from "@/lib/errors";
-import { getToken } from "@/server/token";
 import { GetResultadosResponse } from "@/types/resultados";
+import axios from "axios";
 
 export async function getResultados(): Promise<GetResultadosResponse> {
 
     try {
-        const response = await fetch(`${API_HOST}/aud/results`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Cookie: `${API_COOKIES}=${getToken()?.value}`
+        const response = await axios.get(`${API_HOST}/aud/results`,
+            {
+                withCredentials: true
+            }
+        )
 
-            },
-        })
-
-        if (!response.ok) {
+        if (response.status > 200) {
             return {
                 error: response.statusText,
                 data: null
             }
         }
 
-        const json = await response.json()
+        const json = await response.data
 
         return {
             error: null,
