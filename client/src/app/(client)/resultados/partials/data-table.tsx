@@ -9,6 +9,7 @@ import {
     getSortedRowModel,
     ColumnFiltersState,
     getFilteredRowModel,
+    getPaginationRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -62,6 +63,7 @@ export function DataTable<TData, TValue>({
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
         state: {
             sorting,
             columnFilters
