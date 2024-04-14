@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 import React from 'react'
 import ResultadoSecuencialidad from './secuencialidad'
-import { ResultsSecuencial } from '@/types/resultados'
+import { ResultsCampos, ResultsSecuencial } from '@/types/resultados'
+import ResultadoCampos from './campos'
 const Resultado = () => {
     const params = useParams()
     const id = params.id as string
@@ -39,7 +40,9 @@ const Resultado = () => {
     if (tipoExcepcion === "Secuencial") {
         return <ResultadoSecuencialidad data={resultado.results as ResultsSecuencial} />
     }
-    if (tipoExcepcion === "De Campos") { }
+    if (tipoExcepcion === "De Campos") {
+        return <ResultadoCampos data={resultado.results as ResultsCampos} />
+    }
     if (tipoExcepcion === "De Tabla") { }
     if (tipoExcepcion === "Personalizado") { }
 
