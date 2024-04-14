@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { EyeIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import moment from 'moment'
+import Link from "next/link"
 
 
 export const columns: ColumnDef<Resultado>[] = [
@@ -119,11 +120,12 @@ export const columns: ColumnDef<Resultado>[] = [
                 <div
                     className="flex items-center justify-center gap-3"
                 >
-                    <button
+                    <Link
+                        href={`/resultados/${resultado.id}`}
                         className="rounded-full  p-1"
                     >
                         <EyeIcon className="text-gray-500" size={20} />
-                    </button>
+                    </Link>
                     <button
                         className="rounded-full  p-1"
                     >
