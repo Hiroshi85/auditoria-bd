@@ -94,22 +94,22 @@ const ResultadoSecuencialidad = (
                                 <TabsList className="w-full mb-4 space-x-2 bg-transparent">
                                     <TabsTrigger
                                         value="missing"
-                                        className={cn(getTabColor(data.missing))}
+                                        className={cn(getTabColor(data.missing.data))}
                                     >{`Registros faltantes ${data.num_missing}`}</TabsTrigger>
                                     <TabsTrigger
                                         value="repeated"
-                                        className={cn(getTabColor(data.duplicates))}
+                                        className={cn(getTabColor(data.duplicates.data))}
                                     >{`Registros repeditos ${data.num_duplicates}`}</TabsTrigger>
                                     <TabsTrigger
                                         value="errors"
-                                        className={cn(getTabColor(data.sequence_errors))}
+                                        className={cn(getTabColor(data.sequence_errors.data))}
                                     >{`Errores de secuencia ${data.num_sequence_errors}`}</TabsTrigger>
                                 </TabsList>
                                 <TabsContent
                                     value="missing"
                                     className="flex flex-wrap gap-x-8 gap-y-8"
                                 >
-                                    {data.missing.map((item, index) => {
+                                    {data.missing.data.map((item, index) => {
                                         return (
                                             <span key={item} className={"min-w-[60px]"}>
                                                 {item}
@@ -121,7 +121,7 @@ const ResultadoSecuencialidad = (
                                     value="repeated"
                                     className="flex flex-wrap gap-x-8 gap-y-8"
                                 >
-                                    {data.duplicates.map((item) => {
+                                    {data.duplicates.data.map((item) => {
                                         return (
                                             <span key={item} className={"min-w-[60px]"}>
                                                 {item}
@@ -142,7 +142,7 @@ const ResultadoSecuencialidad = (
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {data.sequence_errors.map((item, index) => {
+                                            {data.sequence_errors.data.map((item, index) => {
                                                 return (
                                                     <TableRow key={item.expected}>
                                                         <TableCell>{index + 1}</TableCell>

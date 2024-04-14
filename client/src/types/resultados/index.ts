@@ -1,3 +1,5 @@
+import { PaginatedData } from "../pagination"
+
 export type Resultado = {
     id: number
     table: string
@@ -27,14 +29,20 @@ export interface ResultsSecuencial {
     min: number
     max: number
     num_duplicates: number
-    duplicates: number[]
+    duplicates: PaginatedData & {
+        data: any[]
+    }
     num_missing: number
-    missing: number[]
+    missing: PaginatedData & {
+        data: any[]
+    },
     num_sequence_errors: number
-    sequence_errors: {
-        expected: number
-        found: number
-    }[]
+    sequence_errors: PaginatedData & {
+        data: {
+            expected: string,
+            found: string
+        }[]
+    }
 }
 
 export interface ResultsCampos {
