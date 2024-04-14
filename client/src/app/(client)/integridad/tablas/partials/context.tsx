@@ -1,18 +1,29 @@
-"use client"
+'use client';
 import { API_HOST } from "@/constants/server";
 import { useConnectionDatabase } from "@/providers/connection";
 import { TableExceptionRequest, TableExceptionResponse } from "@/types/excepciones/tablas";
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { createContext, useContext, useState } from "react";
 
-interface TableExceptionProviderProps {
-    auditException: (formData: any) => void;
-    clearResults: () => void;
-    query: UseQueryResult<TableExceptionResponse, Error>;
+// Función para enviar la petición POST
+async function postTableExceptionRequest(formData: TableExceptionRequest, connectionId: number): Promise<TableExceptionResponse> {
+    const response = await axios.post(
+        `${API_HOST}/exceptions/db/${connectionId}/tables`,
+        formData,
+        { withCredentials: true }
+    );
+
+    return response.data;
 }
 
-const TablaeExcepctionContext = createContext<TableExceptionProviderProps>(
+interface TableExceptionProviderProps {
+    auditException: (formData: TableExceptionRequest, type: string) => void;
+    mutation: UseMutationResult<TableExceptionResponse, unknown, TableExceptionRequest, unknown>;
+    clearResults: () => void;
+}
+
+const TableExceptionContext = createContext<TableExceptionProviderProps>(
     {} as TableExceptionProviderProps
 );
 
@@ -21,16 +32,28 @@ export default function TableExceptionProvider({
 }: {
     children: React.ReactNode
 }) {
-    const [formData, setFormData] = useState<TableExceptionResponse | null>(
+    const [formData, setFormData] = useState<TableExceptionRequest | null>(
         null
     );
+    const queryClient = useQueryClient();
+
     const connection = useConnectionDatabase();
 
-    function auditException(formData: any) {
+    const mutation = useMutation({
+        mutationFn: (formData: TableExceptionRequest) => postTableExceptionRequest(formData, connection.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['resultados']
+            });
+        }
+    });
+
+    function auditException(formData: TableExceptionRequest) {
         setFormData(formData);
         if (formData == null) {
-        }else {
-            query.refetch();
+            // Aquí puedes realizar alguna acción adicional si es necesario
+        } else {
+            mutation.mutate(formData);
         }
     }
 
@@ -38,35 +61,19 @@ export default function TableExceptionProvider({
         setFormData(null);
     }
 
-    const query = useQuery({
-        queryKey: ["results-tables", formData],
-        queryFn: async () => {
-            const response = await axios.post(
-                `${API_HOST}/exceptions/db/${connection.id}/tables`,
-                formData,
-                { withCredentials: true }
-            );
-
-            return response.data;
-        },
-        enabled: !!formData,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-    });
-
     return (
-        <TablaeExcepctionContext.Provider value={{
+        <TableExceptionContext.Provider value={{
+            mutation,
             auditException,
             clearResults,
-            query
         }}>
             {children}
-        </TablaeExcepctionContext.Provider>
+        </TableExceptionContext.Provider>
     )
 }
 
 export function useTableException() {
-    const context = useContext(TablaeExcepctionContext);
+    const context = useContext(TableExceptionContext);
 
     if (!context) {
         throw new Error(

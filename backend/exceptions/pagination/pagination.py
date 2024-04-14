@@ -1,14 +1,3 @@
-# custom pagination to large data with custom _exceptions
-#
-#    response_dict = {
-#        'result': 'ok',
-#        'table': table,
-#        'name': task_name,
-#        'query': str(query),
-#        'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-#        'num_rows': len(data),
-#        'data': resultados
-#    }
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -30,6 +19,7 @@ class CustomPagination(PageNumberPagination):
             # **response_dict,
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
+            'page_size': self.get_page_size(self.request),
             'count': self.page.paginator.count,
             'data': data,
         }

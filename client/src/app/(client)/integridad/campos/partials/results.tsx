@@ -9,15 +9,13 @@ import { Spinner } from "@/components/ui/spinner";
 import { Condicion } from "./conditions";
 import { obtenerStringDeCondicion } from "@/helpers/condiciones";
 
-interface Props {
-  response: VerificarIntegridadDeCamposResponse;
-}
+
 
 const IntegridadCamposResults = () => {
-  const { query } = useCamposContext();
-  const { data, isLoading, isError } = query;
+  const { mutation } = useCamposContext();
+  const { data, isPending, isError } = mutation;
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <ResultContainer className="grid place-content-center w-full py-5">
         <p className="text-accent text-center">

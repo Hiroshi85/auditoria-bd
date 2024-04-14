@@ -181,7 +181,7 @@ export default function IntegridadTablasForm({
                 </Button>
 
                 <div className="mt-3">
-                    <Button type="submit" disabled={exception.query.isLoading}>
+                    <Button type="submit" disabled={exception.mutation.isPending}>
                         <CircleArrowRightIcon className="w-4 h-4 mr-1" />
                         Guardar
                     </Button>
@@ -214,7 +214,7 @@ function ForeingData({
 
     const tableName = form.watch(`details.${index}.foreing_table`)
 
-    const query = useTable(tableName == "" ? null : tableName, id)
+    const mutation = useTable(tableName == "" ? null : tableName, id)
 
     return (
         <motion.div
@@ -242,7 +242,7 @@ function ForeingData({
                                     form.setValue(`details.${index}.foreing_column`, null)
                                 }
                                 form.setValue(`details.${index}.foreing_column`, "")
-    
+
                                 field.onChange(value)
                             }}
                             initValue={field.value}
@@ -259,7 +259,7 @@ function ForeingData({
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Columna</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value as string} disabled={query.isLoading || tableName == ""}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value as string} disabled={mutation.isPending || tableName == ""}>
                             <FormControl>
                                 <SelectTrigger className="w-[150px]">
                                     <SelectValue placeholder="Seleccione campo..." />
@@ -267,7 +267,7 @@ function ForeingData({
                             </FormControl>
                             <SelectContent>
                                 {
-                                    query.data?.columns.map((column) => (
+                                    mutation.data?.columns.map((column) => (
                                         <SelectItem value={column.name} key={column.name}>{column.name}</SelectItem>
                                     ))
                                 }

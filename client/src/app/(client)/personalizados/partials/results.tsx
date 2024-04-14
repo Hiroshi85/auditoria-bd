@@ -1,18 +1,19 @@
 "use client";
 import Spinner from "@/components/ui/spinner";
 import { usePersonalizadas } from "../personalizados.context";
-import { cn } from "@/lib/utils";
 import { ResultContainer } from "@/components/ui/result-container";
 import { DataTable } from "@/components/layout/table/table-details";
 import { useConnectionDatabase } from "@/providers/connection";
 import { Table2Icon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function CustomExceptionResults() {
-  const { query } = usePersonalizadas();
-  const { data, isLoading, isError } = query;
+  const { query, handlePreviousPage, handleNextPage } =
+    usePersonalizadas();
+  const { data, isPending, isError } = query;
   const connection = useConnectionDatabase();
 
-  if (isLoading)
+  if (isPending)
     return (
       <ResultContainer>
         <Spinner />
@@ -43,7 +44,9 @@ export default function CustomExceptionResults() {
           # {data.error_code} - {data.sql_error}
         </p>
         <h2 className="text-lg font-bold text-red-500">Query</h2>
-        <p className="w-full bg-white rounded-md px-4 py-2 font-mono text-muted-foreground">{data.query}</p>
+        <p className="w-full bg-white rounded-md px-4 py-2 font-mono text-muted-foreground">
+          {data.query}
+        </p>
       </div>
     </ResultContainer>
   ) : (
@@ -54,16 +57,34 @@ export default function CustomExceptionResults() {
           {data.table}
         </div>
         <div>
-          {data.num_rows} filas en total {/* limitado a , data.page_size*/}
+          {data.rows.count} filas en total limitado a {data.rows.page_size}
         </div>
       </header>
-      <DataTable
-        columns={data.headers.map((header: string) => ({
-          accessorKey: header,
-          header: header,
-        }))}
-        data={data.rows.data}
-      />
+      <section>
+        <DataTable
+          columns={data.headers.map((header: string) => ({
+            accessorKey: header,
+            header: header,
+          }))}
+          data={data.rows.data}
+        />
+      </section>
+      <footer>
+        <Button
+          variant={"outline"}
+          onClick={handlePreviousPage}
+          disabled={data.rows.previous === null}
+        >
+          Anterior
+        </Button>
+        <Button
+          variant={"outline"}
+          onClick={handleNextPage}
+          disabled={data.rows.next === null}
+        >
+          Siguiente
+        </Button>
+      </footer>
     </ResultContainer>
   );
 }

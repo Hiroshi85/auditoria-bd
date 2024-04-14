@@ -35,12 +35,12 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   const { auditException, clearResults, form, saveQuery } = usePersonalizadas();
   const params = useSearchParams();
   const table = params.get("table") ?? "";
-  
+
   const { id: connectionId } = useConnectionDatabase();
   const { data, isError, isLoading } = useTable(table, connectionId);
 
   form.setValue("table", table);
-  
+
   const tables = [table];
 
   if (isLoading) {
@@ -91,7 +91,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
     const request: VerificarPersonalizadaRequest = {
       table: table,
       query: data.query,
-      name: data.task_name,
+      name: data.name,
     };
     auditException(request);
   }
@@ -99,25 +99,25 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
-          <FormField
-            control={form.control}
-            name="task_name"
-            render={({ field }) => (
-              <FormItem className="max-w-[500px]">
-                <FormLabel>Nombre de la tarea</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Excepción personalizada 1"
-                    type="text"
-                    {...field}
-                  />
-                </FormControl>
-                <div className="min-h-[20px]">
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem className="max-w-[500px]">
+              <FormLabel>Nombre de la tarea</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Excepción personalizada 1"
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <div className="min-h-[20px]">
+                <FormMessage />
+              </div>
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="query"
@@ -126,7 +126,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
               <div className="flex gap-4">
                 <FormLabel className="flex items-center">Consulta</FormLabel>
                 <ColumnSuggestions form={form} columns={data?.columns} />
-                <EnterPromtp form={form}  />
+                <EnterPromtp form={form} />
               </div>
               <FormControl>
                 <div className="grid w-full gap-1.5">
@@ -160,7 +160,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
         <div className="flex gap-4">
           <Button type="submit">Ejecutar</Button>
           <Button type="button" className="w-fit" onClick={
-            () => saveQuery.mutate()
+            () => saveQuery.mutate(form.getValues() as VerificarPersonalizadaRequest)
           }>
             <SaveIcon size={16} />
           </Button>

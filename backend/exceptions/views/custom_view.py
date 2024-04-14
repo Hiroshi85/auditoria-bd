@@ -60,7 +60,7 @@ def index(request, id):
         'name': task_name,
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'num_rows': len(data),
+        # 'num_rows': len(data),
         'headers': list(headers),
         'rows': paginate_results(paginator_class=pagination_class, request=request, data=data)
     }
