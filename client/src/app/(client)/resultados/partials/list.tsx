@@ -12,8 +12,6 @@ const ResultadosList = () => {
     const resultadosQuery = useQuery({
         queryKey: ["resultados"],
         queryFn: getResultados,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
     });
 
     const connectionsQuery = useQuery({
