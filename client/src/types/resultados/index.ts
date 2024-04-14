@@ -83,10 +83,13 @@ export interface ResultsPersonalizadas {
     name: string
     query: string
     timestamp: string
-    num_rows: number
-    data: {
-        headers: string[]
-        rows: {
+    headers: string[]
+    rows: {
+        next: string
+        previous: any
+        page_size: number
+        count: number
+        data: {
             [key: string]: string | number | boolean | null
         }[]
     }
