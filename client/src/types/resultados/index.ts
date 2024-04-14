@@ -52,7 +52,7 @@ export interface ResultsCampos {
     num_rows_exceptions: number
     conditions: {
         [key: string]: {
-            condicion: string
+            condicion: "Where" | "No Nulo" | "Único"
             condicion_id: number
             condicion_where_id: number
             valor_uno: string
