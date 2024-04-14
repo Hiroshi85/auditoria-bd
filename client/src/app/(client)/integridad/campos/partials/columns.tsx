@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-type Row = { [key: string]: string | number | null }
+type Row = { [key: string]: string | number | null | boolean }
 export const columns = (json: Row[]): ColumnDef<Row>[] => {
 
     const keys = Object.keys(json[0])
