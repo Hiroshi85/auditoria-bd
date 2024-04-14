@@ -3,7 +3,8 @@ import { PaginatedData } from "@/types/pagination"
 export type VerificarPersonalizadaRequest = {
     table: string,
     name: string,
-    query: string
+    query: string,
+    url?: string
 }
 
 export type PersonalizadaErrorResponse = {

@@ -65,7 +65,7 @@ export default function CustomQueries() {
                   onClickCapture={() => {
                     setSelectedQuery(query);
                     form.setValue("query", query.query);
-                    form.setValue("task_name", query.name);
+                    form.setValue("name", query.name);
                   }}
                   className="flex justify-between items-center cursor-pointer min-h-[52px]"
                 >

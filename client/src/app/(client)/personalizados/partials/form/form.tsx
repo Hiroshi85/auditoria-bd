@@ -160,7 +160,7 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
         <div className="flex gap-4">
           <Button type="submit">Ejecutar</Button>
           <Button type="button" className="w-fit" onClick={
-            () => saveQuery.mutate()
+            () => saveQuery.mutate(form.getValues() as VerificarPersonalizadaRequest)
           }>
             <SaveIcon size={16} />
           </Button>
