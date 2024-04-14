@@ -7,7 +7,7 @@ from ..utils.enums.tipo_excepcion import TipoExcepcion
 from ..utils.campos.condiciones_bool import definir_condicion_general
 from ..utils.campos.build_condiciones_header import build_condiciones_header
 from datetime import datetime
-from ..utils.row_results import rows_to_new_dict, datetime_value_to_str_in_results
+from ..utils.row_results import rows_to_new_dict, sanitize_objects_in_rows
 
 @api_view(['POST'])
 def obtain_valores(request, id):
@@ -74,7 +74,7 @@ def obtain_valores(request, id):
     exception_was_raised = cantidad > 0
 
     if(exception_was_raised):
-        datetime_value_to_str_in_results(resultados)
+        sanitize_objects_in_rows(resultados)
 
     response_dict = {
         'database': db_name,

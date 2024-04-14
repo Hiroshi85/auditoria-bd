@@ -1,4 +1,5 @@
 from datetime import datetime, date, time
+from decimal import Decimal
 
 def rows_to_new_dict(result_db):
     resultados = []
@@ -8,11 +9,11 @@ def rows_to_new_dict(result_db):
 
     return resultados
 
-def datetime_value_to_str_in_results(results):
+def sanitize_objects_in_rows(results):
     first_result = results[0]
     for val in first_result.keys():
         valor = first_result[val]
-
+        
         if(type(valor) is date):
             for res in results:
                 res[val] = valor.strftime("%Y-%m-%d")
@@ -24,3 +25,7 @@ def datetime_value_to_str_in_results(results):
         elif(type(valor) is datetime):
             for res in results:
                 res[val] = valor.strftime("%Y-%m-%d %H:%M:%S")
+
+        elif(type(valor) is Decimal):
+            for res in results:
+                res[val] = float(valor)
