@@ -16,6 +16,7 @@ from ..models import CustomQueries
 
 from ..pagination.pagination import CustomPagination
 from ..utils.pagination import paginate_results
+from ..utils.row_results import rows_to_new_dict, datetime_value_to_str_in_results
 
 @api_view(['POST'])
 def index(request, id):
@@ -38,7 +39,7 @@ def index(request, id):
         try:
             result = connection.execute(query)
             headers = result.keys()
-            data = result.mappings().all()
+            data = rows_to_new_dict(result)
         except DBAPIError as e:
             return Response({
                 'result': "error",
@@ -49,6 +50,9 @@ def index(request, id):
             })
 
     exception_was_raised = len(data) > 0
+    
+    if(exception_was_raised):
+        datetime_value_to_str_in_results(data)
 
     response_dict = {
         'result': 'ok',

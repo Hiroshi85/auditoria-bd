@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from sqlalchemy import Date, not_, or_, func, case, select
+from sqlalchemy import not_, or_, func, case, select
 from auditoria_bd_api.utils import conexiones, table_info, results_operations
 from rest_framework.decorators import api_view
 from ..utils.enums.tipo_excepcion import TipoExcepcion
