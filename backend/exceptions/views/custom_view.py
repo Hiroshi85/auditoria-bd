@@ -16,7 +16,7 @@ from ..models import CustomQueries
 
 from ..pagination.pagination import CustomPagination
 from ..utils.pagination import paginate_results
-from ..utils.row_results import rows_to_new_dict, sanitize_objects_in_rows
+from ..utils.row_results import rows_to_new_dict
 
 @api_view(['POST'])
 def index(request, id):
@@ -51,8 +51,8 @@ def index(request, id):
 
     exception_was_raised = len(data) > 0
     
-    if(exception_was_raised):
-        data = sanitize_objects_in_rows(data)
+    # if(exception_was_raised):
+    #     data = sanitize_objects_in_rows(data)
 
     response_dict = {
         'result': 'ok',
