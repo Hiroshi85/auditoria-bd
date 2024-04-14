@@ -49,7 +49,7 @@ def get_result_by_id(request, id):
         'database': result.connection.name,
         'table': result.table,
         'created_at': result.created_at,
-        'results': ast.literal_eval(result.results),
+        'results': result.results,
         'exception_ocurred': 1 if result.exception_ocurred else 0,
         'exception_id': result.exception_type.id,
         'exception_description': result.exception_type.description

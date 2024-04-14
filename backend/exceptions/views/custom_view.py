@@ -52,7 +52,7 @@ def index(request, id):
     exception_was_raised = len(data) > 0
     
     if(exception_was_raised):
-        sanitize_objects_in_rows(data)
+        data = sanitize_objects_in_rows(data)
 
     response_dict = {
         'result': 'ok',
@@ -60,7 +60,6 @@ def index(request, id):
         'name': task_name,
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        # 'num_rows': len(data),
         'headers': list(headers),
         'rows': paginate_results(paginator_class=pagination_class, request=request, data=data)
     }
