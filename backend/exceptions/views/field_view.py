@@ -7,6 +7,7 @@ from ..utils.enums.tipo_excepcion import TipoExcepcion
 from ..utils.campos.condiciones_bool import definir_condicion_general
 from ..utils.campos.build_condiciones_header import build_condiciones_header
 from datetime import datetime
+from ..utils.row_results import rows_to_new_dict, datetime_value_to_str_in_results
 
 @api_view(['POST'])
 def obtain_valores(request, id):
@@ -44,9 +45,6 @@ def obtain_valores(request, id):
     #Para where
     condiciones_where = [objeto['condicion'] for objeto in condiciones]
 
-    #Para where
-    condiciones_where = [objeto['condicion'] for objeto in condiciones]
-
     # Para select
     campos_select = list(tabla.primary_key.columns) + [tabla.c[objeto] for objeto in condiciones_header.keys()]
 
@@ -68,11 +66,15 @@ def obtain_valores(request, id):
         result = connection.execute(query_final)
         fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        resultados = result.mappings().all()
+        resultados = rows_to_new_dict(result)
+        
         cantidad = len(resultados)
 
     db_name = db.url.database
     exception_was_raised = cantidad > 0
+
+    if(exception_was_raised):
+        datetime_value_to_str_in_results(resultados)
 
     response_dict = {
         'database': db_name,

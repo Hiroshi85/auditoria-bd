@@ -1,8 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
+from ..pagination.pagination import CustomPagination
 from exceptions.utils.enums.tipo_excepcion import TipoExcepcion
 from ..utils.secuenciales import *
+from ..utils.pagination import paginate_results
 from ..serializers import *
 
 from auditoria_bd_api.utils.conexiones import get_connection_by_id
@@ -10,6 +11,7 @@ from auditoria_bd_api.utils.results_operations import save_results
 import datetime
 
 import pandas as pd
+
 
 @api_view(['POST'])
 def integer_sequence_exception(request, id):
@@ -44,9 +46,11 @@ def integer_sequence_exception(request, id):
         sequence=sequence,
         min_value=min_value,
         max_value=max_value,
-        conn=conn)
+        conn=conn, request=request)
 
 # region alphanumeric execptions
+
+
 @api_view(['POST'])
 def alphanumeric_sequence_exception(request, id):
     serializer = StringSequencialSerializer(data=request.data)
@@ -69,17 +73,18 @@ def alphanumeric_sequence_exception(request, id):
 
     letters, digits = get_letters(example), get_number(example)
 
-    # si no hay letras, no estricto para evitar errores cuando se incrementan los dígitos 
+    # si no hay letras, no estricto para evitar errores cuando se incrementan los dígitos
     if letters == '':
         valid_values = df[df.iloc[:, 0].str.match(f'^\d+$', na=False)]
     else:
-        valid_values= df[df.iloc[:, 0].str.match(f'^{letters}\d{"{"+str(len(digits))+"}"}+$', na=False)]
-    
+        valid_values = df[df.iloc[:, 0].str.match(
+            f'^{letters}\d{"{"+str(len(digits))+"}"}+$', na=False)]
+
     if valid_values.empty:
         min_found, max_found = get_min_max_values({}, df)
         return get_exception_response(table=table_name,
                                       column=column_name,
-                                      database_name=db.engine.url.database, 
+                                      database_name=db.engine.url.database,
                                       error_result="No se encontraron valores válidos que coincidan con el ejemplo de secuencia.",
                                       min_value=min_found,
                                       max_value=max_found)
@@ -90,14 +95,16 @@ def alphanumeric_sequence_exception(request, id):
         min_value = valid_values.min().values[0]
         max_val_str = letters + str(len(df)).zfill(len(digits))
         max_value = max_val_str
-    
-    min_value, max_value = body.get('min', min_value), body.get('max', max_value)
-    
-    alphanumeric_sequence = [f'{letters}{str(val).zfill(len(digits))}'
-                                 for val in range(int(get_number(min_value)), int(get_number(max_value)) + 1, step)]
 
-    missing, duplicates, sequence = check_sequence_exception(df, alphanumeric_sequence)
-    
+    min_value, max_value = body.get(
+        'min', min_value), body.get('max', max_value)
+
+    alphanumeric_sequence = [f'{letters}{str(val).zfill(len(digits))}'
+                             for val in range(int(get_number(min_value)), int(get_number(max_value)) + 1, step)]
+
+    missing, duplicates, sequence = check_sequence_exception(
+        df, alphanumeric_sequence)
+
     return get_exception_response(
         table=table_name,
         column=column_name,
@@ -107,9 +114,12 @@ def alphanumeric_sequence_exception(request, id):
         sequence=sequence,
         min_value=min_value,
         max_value=max_value,
-        conn = conn)
+        conn=conn,
+        request=request)
 
 # region date exceptions
+
+
 @api_view(['POST'])
 def date_sequence_exception(request, id):
     serializer = DateSequencialSerializer(data=request.data)
@@ -126,8 +136,8 @@ def date_sequence_exception(request, id):
     if df.empty:
         return get_exception_response(table=table_name,
                                       column=column_name,
-                                      database_name=db.engine.url.database, 
-                                      error_result="No se encontraron valores en la columna seleccionada", 
+                                      database_name=db.engine.url.database,
+                                      error_result="No se encontraron valores en la columna seleccionada",
                                       conn=conn)
 
     if type(df.iloc[0, 0]) == pd.Timestamp:
@@ -155,9 +165,12 @@ def date_sequence_exception(request, id):
         sequence=sequence,
         min_value=min_value,
         max_value=max_value,
-        conn=conn)
+        conn=conn,
+        request=request)
 
 # region exception response
+
+
 def get_exception_response(
         table,
         column,
@@ -168,7 +181,8 @@ def get_exception_response(
         min_value="",
         max_value="",
         error_result="",
-        conn = None
+        conn=None,
+        request=None
 ):
     if error_result != "":
         return Response({
@@ -201,13 +215,24 @@ def get_exception_response(
             'result': 'exception',
             **response_json,
             'num_duplicates': len(duplicates),
-            'duplicates': duplicates.values.flatten().tolist(),
+            'duplicates': paginate_results(CustomPagination(
+                page_query_param='duplicates', page_size_query_param='page_size_duplicates'),
+                request, duplicates.values.flatten().tolist()),
             'num_missing': len(missing),
-            'missing': missing,
+            'missing': paginate_results(CustomPagination(
+                page_query_param='missing', page_size_query_param='page_size_missing'
+            ), request, missing),
             'num_sequence_errors': len(sequence),
-            'sequence_errors': sequence,
+            'sequence_errors': paginate_results(CustomPagination(
+                page_query_param='sequence', page_size_query_param='page_size_sequence'
+            ), request, sequence)
         }
-    
-    save_results(final_response_json, conn, TipoExcepcion.SECUENCIAL, table, exception_was_raised)
-    
+        print(final_response_json)
+
+    save_results(final_response_json, conn,
+                 TipoExcepcion.SECUENCIAL, table, exception_was_raised)
+
     return Response(final_response_json, status=200)
+
+
+

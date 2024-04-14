@@ -1,3 +1,5 @@
+import { PaginatedData } from "@/types/pagination"
+
 export type VerificarPersonalizadaRequest = {
     table: string,
     name: string,
@@ -19,9 +21,9 @@ export type PersonalizadaOKResponse = {
     timestamp: string
     table: string
     num_rows: number
-    data: {
-        headers: [],
-        rows: []
+    headers: string[]
+    rows: PaginatedData & {
+        data: any[]
     }
 }
 

@@ -1,3 +1,5 @@
+import { PaginatedData } from "@/types/pagination"
+
 export interface VerificarSecuenciaRequest {
     table: string,
     column: string,
@@ -19,14 +21,20 @@ export type SecuenciaExceptionResponse = {
     min: string,
     max: string,
     num_duplicates: number,
-    duplicates: []
+    duplicates: PaginatedData & {
+        data: any[]
+    }
     num_missing: number,
-    missing: string[],
+    missing: PaginatedData & {
+        data: any[]
+    },
     num_sequence_errors: number,
-    sequence_errors: {
-        expected: string,
-        found: string
-    }[]
+    sequence_errors: PaginatedData & {
+        data: {
+            expected: string,
+            found: string
+        }[]
+    }
 }
 
 export type SecuenciaOkResponse = {

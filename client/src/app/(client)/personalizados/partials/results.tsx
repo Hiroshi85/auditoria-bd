@@ -58,11 +58,11 @@ export default function CustomExceptionResults() {
         </div>
       </header>
       <DataTable
-        columns={data.data.headers.map((header: string) => ({
+        columns={data.headers.map((header: string) => ({
           accessorKey: header,
           header: header,
         }))}
-        data={data.data.rows}
+        data={data.rows.data}
       />
     </ResultContainer>
   );

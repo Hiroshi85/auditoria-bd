@@ -14,8 +14,14 @@ from sqlalchemy.exc import DBAPIError
 
 from ..models import CustomQueries
 
+from ..pagination.pagination import CustomPagination
+from ..utils.pagination import paginate_results
+from ..utils.row_results import rows_to_new_dict, datetime_value_to_str_in_results
+
 @api_view(['POST'])
 def index(request, id):
+    pagination_class = CustomPagination()
+
     serializer = CustomExceptionSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
@@ -33,7 +39,7 @@ def index(request, id):
         try:
             result = connection.execute(query)
             headers = result.keys()
-            data = result.mappings().all()
+            data = rows_to_new_dict(result)
         except DBAPIError as e:
             return Response({
                 'result': "error",
@@ -43,12 +49,10 @@ def index(request, id):
                 'instance_error': type(e.orig).__name__,
             })
 
-    resultados = {
-        'headers': list(headers),
-        'rows': data
-    }
-
     exception_was_raised = len(data) > 0
+    
+    if(exception_was_raised):
+        datetime_value_to_str_in_results(data)
 
     response_dict = {
         'result': 'ok',
@@ -57,11 +61,12 @@ def index(request, id):
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'num_rows': len(data),
-        'data': resultados
+        'headers': list(headers),
+        'rows': paginate_results(paginator_class=pagination_class, request=request, data=data)
     }
 
     save_results(response_dict, conn, TipoExcepcion.PERSONALIZADO, table, exception_was_raised)
-
+    
     return Response(response_dict, 200)
 
 @api_view(['GET'])
