@@ -17,7 +17,7 @@ class DatabaseConnection(models.Model):
 
 class Result(models.Model):
     table = models.CharField(max_length=256)
-    results = models.TextField()
+    results = models.JSONField()
     connection = models.ForeignKey('DatabaseConnection', on_delete=models.CASCADE)
     exception_type = models.ForeignKey('exceptions.ExceptionType', on_delete=models.CASCADE)
     exception_ocurred = models.BooleanField(default=False)

@@ -16,7 +16,7 @@ from ..models import CustomQueries
 
 from ..pagination.pagination import CustomPagination
 from ..utils.pagination import paginate_results
-from ..utils.row_results import rows_to_new_dict, sanitize_objects_in_rows
+from ..utils.row_results import rows_to_new_dict
 
 @api_view(['POST'])
 def index(request, id):
@@ -51,8 +51,8 @@ def index(request, id):
 
     exception_was_raised = len(data) > 0
     
-    if(exception_was_raised):
-        sanitize_objects_in_rows(data)
+    # if(exception_was_raised):
+    #     data = sanitize_objects_in_rows(data)
 
     response_dict = {
         'result': 'ok',
@@ -60,7 +60,6 @@ def index(request, id):
         'name': task_name,
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        # 'num_rows': len(data),
         'headers': list(headers),
         'rows': paginate_results(paginator_class=pagination_class, request=request, data=data)
     }
