@@ -18,7 +18,7 @@ async function postTableExceptionRequest(formData: TableExceptionRequest, connec
 }
 
 interface TableExceptionProviderProps {
-    auditException: (formData: TableExceptionRequest, type: string) => void;
+    auditException: (formData: TableExceptionRequest) => void;
     mutation: UseMutationResult<TableExceptionResponse, unknown, TableExceptionRequest, unknown>;
     clearResults: () => void;
 }

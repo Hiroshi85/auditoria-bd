@@ -18,57 +18,53 @@ def index(request, id):
     result_table = []
     exception_was_raised = False
 
-    for columna in columnas:
+    for index, columna in enumerate(columnas):
         columns_name = columna.get('column_name', None)
-        condition = columna.get('condition', None)
         foreing_table = columna.get('foreing_table', None)
         foreing_column = columna.get('foreing_column', None)
 
-        if condition == "PK": 
-            pass
-        elif condition == "FK":
-            column_result = {"column": columns_name, "foreing_table": foreing_table, "foreing_column" : foreing_column, "results": []}
+        column_result = {"column": columns_name, "foreing_table": foreing_table, "foreing_column" : foreing_column, "results": []}
 
-            foreing_table_meta = table_info.get_reflected_table(db, foreing_table)
-            
-            primary_key_columns = tabla.primary_key.columns
+        foreing_table_meta = table_info.get_reflected_table(db, foreing_table)
+        
+        primary_key_columns = tabla.primary_key.columns
 
-            # Search for rows with null values in the foreign key column
-            if len(primary_key_columns) > 1:
-                columns_table_foreign_key = func.concat(*[tabla.c[column.name] for column in primary_key_columns]).label('primary_key')
-            else: 
-                columns_table_foreign_key = tabla.c[primary_key_columns[0].name].label('primary_key')
+        # Search for rows with null values in the foreign key column
+        if len(primary_key_columns) > 1:
+            columns_table_foreign_key = func.concat(*[tabla.c[column.name] for column in primary_key_columns]).label('primary_key')
+        else: 
+            columns_table_foreign_key = tabla.c[primary_key_columns[0].name].label('primary_key')
 
 
-            query_null_foreing_key = tabla.select().with_only_columns(columns_table_foreign_key).where(tabla.c[columns_name].is_(None))
+        query_null_foreing_key = tabla.select().with_only_columns(columns_table_foreign_key).where(tabla.c[columns_name].is_(None))
 
-            result = connection.execute(query_null_foreing_key)
+        result = connection.execute(query_null_foreing_key)
 
-            null_results = result.mappings().all()
+        null_results = result.mappings().all()
 
-            for row in null_results:
-                column_result["results"].append({"primary_key": row["primary_key"], "foreign_key": None, "table_foreign_key": None})
+        for row in null_results:
+            column_result["results"].append({"primary_key": row["primary_key"], "foreign_key": None, "table_foreign_key": None})
 
 
-            # Search for rows that do not have a corresponding value in the foreign table
-            query_id_foreing_key = foreing_table_meta.select().with_only_columns(foreing_table_meta.c[foreing_column]).distinct()
-            
-            query_search_foreing_key = tabla.select().with_only_columns(columns_table_foreign_key, tabla.c[columns_name].label("foreign_key")).where(tabla.c[columns_name].isnot(None)).where(tabla.c[columns_name].not_in(query_id_foreing_key))
+        # Search for rows that do not have a corresponding value in the foreign table
+        query_id_foreing_key = foreing_table_meta.select().with_only_columns(foreing_table_meta.c[foreing_column]).distinct()
+        
+        query_search_foreing_key = tabla.select().with_only_columns(columns_table_foreign_key, tabla.c[columns_name].label("foreign_key")).where(tabla.c[columns_name].isnot(None)).where(tabla.c[columns_name].not_in(query_id_foreing_key))
 
-            result2 = connection.execute(query_search_foreing_key)
+        result2 = connection.execute(query_search_foreing_key)
 
-            not_found_results = result2.mappings().all()
+        not_found_results = result2.mappings().all()
 
-            for row in not_found_results:
-                column_result["results"].append({"primary_key": row["primary_key"], "foreign_key": row["foreign_key"], "table_foreign_key": None})
+        for row in not_found_results:
+            column_result["results"].append({"primary_key": row["primary_key"], "foreign_key": row["foreign_key"], "table_foreign_key": None})
 
-            if len(column_result["results"]) > 0:
-                exception_was_raised = True
+        if len(column_result["results"]) > 0:
+            exception_was_raised = True
 
-            result_table.append(column_result)
+        result_table.append(column_result)
 
-        else:
-            raise exceptions.APIException('Condición no controlada', code=400)
+        if index == 20:
+            break
         
     connection.close()
 
