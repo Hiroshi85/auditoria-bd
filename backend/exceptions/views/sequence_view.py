@@ -215,10 +215,21 @@ def get_exception_response(
             'sequence_errors': sequence
         }
 
-    save_results(final_response_json, conn,
+    try:
+        res = save_results(final_response_json, conn,
                  TipoExcepcion.SECUENCIAL, table, exception_was_raised)
+    except:
+        return Response({
+            'result': "error",
+            'message': "No se pudo guardar el resultado en la base de datos.",
+            'min': min_value,
+            'max': max_value
+        }, status=500)
 
-    return Response(final_response_json, status=200)
+    return Response({
+        'result': final_response_json['result'],
+        'exception_id': res.id
+    }, status=200)
 
 
 
