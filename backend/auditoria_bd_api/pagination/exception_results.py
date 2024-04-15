@@ -20,5 +20,6 @@ class ExceptionResultPagination(PageNumberPagination):
             'previous': self.get_previous_link(),
             'page_size': self.get_page_size(self.request),
             'count': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages,
             'data': data,
         }
