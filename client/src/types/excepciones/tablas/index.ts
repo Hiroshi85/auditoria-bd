@@ -24,7 +24,6 @@ export interface TableExceptionRequest {
   
   export interface Detail {
     column_name: string
-    condition: string
     foreing_table: string
     foreing_column: string
   }
