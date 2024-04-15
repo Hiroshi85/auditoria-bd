@@ -14,14 +14,10 @@ from sqlalchemy.exc import DBAPIError
 
 from ..models import CustomQueries
 
-from ..pagination.pagination import CustomPagination
-from ..utils.pagination import paginate_results
 from ..utils.row_results import rows_to_new_dict
 
 @api_view(['POST'])
 def index(request, id):
-    pagination_class = CustomPagination()
-
     serializer = CustomExceptionSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
@@ -51,9 +47,6 @@ def index(request, id):
 
     exception_was_raised = len(data) > 0
     
-    # if(exception_was_raised):
-    #     data = sanitize_objects_in_rows(data)
-
     response_dict = {
         'result': 'ok',
         'table': table,
@@ -61,12 +54,21 @@ def index(request, id):
         'query': str(query),
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'headers': list(headers),
-        'rows': paginate_results(paginator_class=pagination_class, request=request, data=data)
+        'rows': data
     }
 
-    save_results(response_dict, conn, TipoExcepcion.PERSONALIZADO, table, exception_was_raised)
+    try: 
+        res = save_results(response_dict, conn, TipoExcepcion.PERSONALIZADO, table, exception_was_raised)
+    except:
+        return Response({
+            'result': 'error',
+            'message': 'Error al guardar la excepción en la base de datos'
+        }, 500)
     
-    return Response(response_dict, 200)
+    return Response({
+        'result': 'ok',
+        'exception_id': res.id,
+    }, 200)
 
 @api_view(['GET'])
 def get_queries_by_user_id(request, id):

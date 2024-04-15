@@ -1,7 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
 
-class CustomPagination(PageNumberPagination):
+class ExceptionResultPagination(PageNumberPagination):
     page_size = 25
     max_page_size = 500
 
