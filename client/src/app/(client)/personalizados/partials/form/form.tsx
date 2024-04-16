@@ -28,7 +28,7 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import { usePersonalizadas } from "../../personalizados.context";
 import { VerificarPersonalizadaRequest } from "@/types/excepciones/personalizadas";
 
-import { SaveIcon, Paintbrush } from "lucide-react"
+import { SaveIcon, Paintbrush } from "lucide-react";
 import EnterPromtp from "./prompt-select";
 
 export default function CustomExceptionForm({ engine }: { engine: string }) {
@@ -159,9 +159,28 @@ export default function CustomExceptionForm({ engine }: { engine: string }) {
 
         <div className="flex gap-4">
           <Button type="submit">Ejecutar</Button>
-          <Button type="button" className="w-fit" onClick={
-            () => saveQuery.mutate(form.getValues() as VerificarPersonalizadaRequest)
-          }>
+          <Button
+            type="button"
+            className="w-fit"
+            onClick={() => {
+              const validatedFormValues = PersonalizadasFormSchema.safeParse(
+                form.getValues()
+              );
+              if (validatedFormValues.success)
+                saveQuery.mutate(
+                  form.getValues() as VerificarPersonalizadaRequest
+                );
+              else {
+                form.clearErrors();
+                validatedFormValues.error.errors.forEach((error) => {
+                  form.setError(error.path[0] as keyof z.infer<typeof PersonalizadasFormSchema>, {
+                    type: "manual",
+                    message: error.message,
+                  });
+                });
+              }
+            }}
+          >
             <SaveIcon size={16} />
           </Button>
           <Button

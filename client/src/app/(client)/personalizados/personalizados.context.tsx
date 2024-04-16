@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useConnectionDatabase } from "@/providers/connection";
 import {
   useMutation,
@@ -12,7 +12,6 @@ import {
   PersonalizadaResponse,
   VerificarPersonalizadaRequest,
   CustomQueriesResponse,
-  PersonalizadaResult,
 } from "@/types/excepciones/personalizadas";
 import axios from "axios";
 import { API_HOST } from "@/constants/server";
@@ -30,6 +29,7 @@ interface PersonalizadasProviderProps {
     unknown
   >;
   auditException: (data: VerificarPersonalizadaRequest) => void;
+  // Results methods
   clearResults: () => void;
   saveQuery: UseMutationResult<
     CustomQueriesResponse,
@@ -37,17 +37,14 @@ interface PersonalizadasProviderProps {
     VerificarPersonalizadaRequest,
     unknown
   >;
+  resultId: string | null;
+  setResultId: React.Dispatch<React.SetStateAction<string | null>>;  
+  //
   deleteQuery: UseMutationResult<void, Error, number, unknown>;
   form: ReturnType<typeof useForm<z.infer<typeof PersonalizadasFormSchema>>>;
   selectedQuery: CustomQueriesResponse | null;
-  setSelectedQuery: React.Dispatch<
-    React.SetStateAction<CustomQueriesResponse | null>
-  >;
+  setSelectedQuery: React.Dispatch<React.SetStateAction<CustomQueriesResponse | null>>;
   connection: ReturnType<typeof useConnectionDatabase>;
-  // ***** Navigation functions
-  handleNextPage: () => void;
-  handlePreviousPage: () => void;
-  // handleGoToPage: (page: number) => void;
 }
 
 const PersonalizadasContext = createContext<PersonalizadasProviderProps>(
@@ -66,6 +63,7 @@ export function PersonalizadasProvider({
 
   const [resultId, setResultId] = useState<string | null>(null);
 
+
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
     defaultValues: {
       table: "",
@@ -80,7 +78,7 @@ export function PersonalizadasProvider({
     PersonalizadaResponse,
     Error,
     VerificarPersonalizadaRequest
-  >({
+  >({ 
     mutationFn: async ({ table, name, query }) => {
       const response = await axios.post(
         `${API_HOST}/exceptions/db/${connection.id}/custom`,
@@ -96,14 +94,24 @@ export function PersonalizadasProvider({
     },
   });
 
+  useEffect(() => {
+    if (executeException.data) {
+      if(executeException.data.result === 'ok'){
+        if (executeException.data.exception_id)
+         setResultId(executeException.data.exception_id.toString());
+      }
+    console.log("executeException", executeException.data);
+    }
+  }, [executeException.data])
+
+
   function auditException(formData: VerificarPersonalizadaRequest) {
     executeException.mutate(formData);
   }
 
   function clearResults() {
-    queryClient.invalidateQueries({
-      queryKey: ["resultado", 383],
-    });
+    executeException.reset();
+    setResultId(null);
   }
 
   // region Queries CRUD
@@ -163,42 +171,6 @@ export function PersonalizadasProvider({
     },
   });
 
-  // region Navigation
-  function handleNextPage() {
-    // request with page params
-    // if (query.data?.data) {
-    //   if (!query.data.rows.next) return;
-    //   // mutate same query with next page :
-    //   /*
-    //     next: http://localhost:8000/exceptions/db/3/custom?p=3
-    //   */
-    //   const nextPageUrl = query.data.rows.next;
-    //   query.mutate({
-    //     ...(form.getValues() as VerificarPersonalizadaRequest),
-    //     url: nextPageUrl,
-    //   });
-    //   console.log("next page", query.data.rows.next);
-    // }
-  }
-
-  function handlePreviousPage() {
-    // request with page params
-    // if (query.data && query.data.result === "ok") {
-    //   if (query.data.rows.previous === null) return;
-    //   const previousPageUrl = query.data.rows.previous;
-    //   query.mutate({
-    //     ...(form.getValues() as VerificarPersonalizadaRequest),
-    //     url: previousPageUrl,
-    //   });
-    // }
-  }
-
-  // function handleGoToPage(page: number) {
-  //   // request with page params
-  //   if (query.data && query.data.result === "ok")
-  //     console.log("go to page", page);
-  // }
-  //endregion
   return (
     <PersonalizadasContext.Provider
       value={{
@@ -208,12 +180,11 @@ export function PersonalizadasProvider({
         form,
         connection,
         selectedQuery,
+        resultId,
+        setResultId,
         setSelectedQuery,
         auditException,
         clearResults,
-        handleNextPage,
-        handlePreviousPage,
-        // handleGoToPage,
       }}
     >
       {children}

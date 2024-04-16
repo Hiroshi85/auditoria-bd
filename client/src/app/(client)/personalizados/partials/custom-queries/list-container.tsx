@@ -62,27 +62,38 @@ export default function CustomQueries() {
                   key={query.id}
                   value={query.name}
                   aria-label={`Toggle ${query.id}`}
-                  onClickCapture={() => {
-                    setSelectedQuery(query);
-                    form.setValue("query", query.query);
-                    form.setValue("name", query.name);
-                  }}
-                  className="flex justify-between items-center cursor-pointer min-h-[52px]"
+                  className="flex justify-between items-center cursor-pointer max-w-[400px] p-0 my-2"
                 >
-                  <span className="text-ellipsis text-wrap">{query.name}</span>
-                  <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    role="option"
+                    className="grow break-words text-wrap w-full text-start text-xs "
+                    variant={"ghost"}
+                    onClick={() => {
+                      form.clearErrors();
+                      setSelectedQuery(query);
+                      form.setValue("query", query.query);
+                      form.setValue("name", query.name);
+                    }}
+                  >
+                    {query.name}
+                  </Button>
+                  <div className="relative flex flex-col justify-center items-center">
                     {selectedQuery?.id === query.id && (
                       <Button
                         type="button"
-                        variant={"ghost"}
-                        className="p-0"
+                        variant={"link"}
+                        className="p-0 absolute -bottom-2 -right-0 text-red-500 z-10"
                         onClick={() => setSelectedQuery(null)}
                       >
-                        <XCircle size={20}/>
+                        <XCircle size={18} />
                       </Button>
                     )}
-                    <DialogTrigger>
-                        <Trash size={20} />
+                    <DialogTrigger
+                      className="absolute top-auto -right-8 z-10"
+                      onClick={() => setSelectedQuery(query)}
+                    >
+                      <Trash size={18} />
                     </DialogTrigger>
                   </div>
                 </CommandItem>
@@ -114,13 +125,18 @@ export default function CustomQueries() {
                 deleteQuery.mutate(selectedQuery?.id);
                 setSelectedQuery(null);
                 setOpenDialog(false);
+                form.reset();
               }
             }}
           >
             Eliminar
           </Button>
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSelectedQuery(null)}
+            >
               Cancelar
             </Button>
           </DialogClose>
