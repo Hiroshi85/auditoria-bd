@@ -33,6 +33,7 @@ cd ../backend/
 
 # Iniciar el servidor de desarrollo de Django REST Framework dentro del entorno virtual
 echo "Iniciando el servidor de desarrollo de Django REST Framework..."
+python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver &
 

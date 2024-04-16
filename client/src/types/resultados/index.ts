@@ -53,7 +53,7 @@ export interface ResultsCampos {
     num_rows_exceptions: number
     conditions: {
         [key: string]: {
-            condicion: string
+            condicion: "Where" | "No Nulo" | "Único"
             condicion_id: number
             condicion_where_id: number
             valor_uno: string
@@ -84,10 +84,9 @@ export interface ResultsPersonalizadas {
     name: string
     query: string
     timestamp: string
-    num_rows: number
-    data: {
-        headers: string[]
-        rows: {
+    headers: string[]
+    rows: PaginatedData & {
+        data: {
             [key: string]: string | number | boolean | null
         }[]
     }
@@ -103,7 +102,7 @@ export type GetResultadoResponse = {
         database: string
         table: string
         created_at: string
-        results: ResultsCampos | ResultsSecuencial | ResultsTablas | PersonalizadaResult
+        results: ResultsCampos | ResultsSecuencial | ResultsTablas | ResultsPersonalizadas
         exception_ocurred: number
         exception_id: 1 | 2 | 3 | 4
         exception_description: "Secuencial" | "De Campos" | "De Tabla" | "Personalizado"

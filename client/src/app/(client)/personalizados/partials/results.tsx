@@ -6,7 +6,7 @@ import { useConnectionDatabase } from "@/providers/connection";
 import { useQuery } from "@tanstack/react-query";
 import { getResultado } from "@/services/resultados";
 import { PersonalizadaResult } from "@/types/excepciones/personalizadas";
-import ResultadoPersonalizada from "../../resultados/[id]/partials/personalizada";
+import ResultadoPersonalizada from "./personalizada";
 
 export default function CustomExceptionResults() {
   const { executeException } = usePersonalizadas();

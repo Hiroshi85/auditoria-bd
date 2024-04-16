@@ -19,7 +19,7 @@ const ResultadoSecuencialidad = (
     { data }: Props
 ) => {
     return (
-        <div>
+        <div className='container mx-auto'>
             {data.result === "error" ? (
                 <ResultContainer type="error" className="text-red txt-md">
                     <p className="text-destructive font-semibold">{"nada"}</p>
