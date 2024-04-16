@@ -6,11 +6,13 @@ import {
   useMutation,
   useQueryClient,
   UseMutationResult,
+  useQuery,
 } from "@tanstack/react-query";
 import {
   PersonalizadaResponse,
   VerificarPersonalizadaRequest,
   CustomQueriesResponse,
+  PersonalizadaResult,
 } from "@/types/excepciones/personalizadas";
 import axios from "axios";
 import { API_HOST } from "@/constants/server";
@@ -21,7 +23,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 interface PersonalizadasProviderProps {
-  query: UseMutationResult<
+  executeException: UseMutationResult<
     PersonalizadaResponse,
     Error,
     VerificarPersonalizadaRequest,
@@ -58,11 +60,11 @@ export function PersonalizadasProvider({
   children: React.ReactNode;
 }) {
   const connection = useConnectionDatabase();
-  // const [formData, setFormData] =
-  //   useState<VerificarPersonalizadaRequest | null>(null);
   const queryClient = useQueryClient();
   const [selectedQuery, setSelectedQuery] =
     useState<CustomQueriesResponse | null>(null);
+
+  const [resultId, setResultId] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
     defaultValues: {
@@ -73,55 +75,80 @@ export function PersonalizadasProvider({
     resolver: zodResolver(PersonalizadasFormSchema),
   });
 
-  const query = useMutation<
+  // region SAVE RESULT
+  const executeException = useMutation<
     PersonalizadaResponse,
-    Error,
-    VerificarPersonalizadaRequest
-  >({
-    mutationFn: async ({ table, name, query, url }) => {
-      const response = await axios.post(
-        url || `${API_HOST}/exceptions/db/${connection.id}/custom`,
-        { table, name, query },
-        { withCredentials: true }
-      );
-      console.log(url);
-      return response.data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["results-custom", "resultados"],
-      });
-    },
-  });
-
-  const saveQuery = useMutation<
-    CustomQueriesResponse,
     Error,
     VerificarPersonalizadaRequest
   >({
     mutationFn: async ({ table, name, query }) => {
       const response = await axios.post(
-        `${API_HOST}/exceptions/db/${connection.id}/custom/queries/save`,
-        {
-          table: table,
-          name: name,
-          query: query,
-          only_this_connection: true,
-        },
+        `${API_HOST}/exceptions/db/${connection.id}/custom`,
+        { table, name, query },
         { withCredentials: true }
       );
       return response.data;
     },
     onSuccess: (data) => {
-      toast.success(
-        `Consulta ${selectedQuery === null ? "guardada" : "actualizada"}!`
-      );
       queryClient.invalidateQueries({
-        queryKey: ["custom-queries"],
+        queryKey: ["results-custom", "save-result"],
       });
     },
   });
 
+  function auditException(formData: VerificarPersonalizadaRequest) {
+    executeException.mutate(formData);
+  }
+
+  function clearResults() {
+    queryClient.invalidateQueries({
+      queryKey: ["resultado", 383],
+    });
+  }
+
+  // region Queries CRUD
+  const saveQuery = useMutation<
+    CustomQueriesResponse,
+    Error,
+    VerificarPersonalizadaRequest
+  >({
+    mutationFn: selectedQuery ? updateQueryFn : saveQueryFn,
+    onSuccess: () => {
+      toast.success(
+        `Consulta ${selectedQuery === null ? "guardada" : "actualizada"}!`
+      );
+      queryClient.invalidateQueries({ queryKey: ["custom-queries"] });
+    },
+  });
+  async function saveQueryFn() {
+    const response = await axios.post(
+      `${API_HOST}/exceptions/db/${connection.id}/custom/queries/save`,
+      {
+        table: form.getValues("table"),
+        name: form.getValues("name"),
+        query: form.getValues("query"),
+        only_this_connection: true,
+      },
+      { withCredentials: true }
+    );
+    return response.data as CustomQueriesResponse;
+  }
+
+  async function updateQueryFn() {
+    console.log("selectedQuery", selectedQuery);
+    const response = await axios.put(
+      `${API_HOST}/exceptions/db/${connection.id}/custom/queries/save`,
+      {
+        id: selectedQuery?.id,
+        table: form.getValues("table"),
+        name: form.getValues("name"),
+        query: form.getValues("query"),
+        only_this_connection: true,
+      },
+      { withCredentials: true }
+    );
+    return response.data as CustomQueriesResponse;
+  }
   const deleteQuery = useMutation<void, Error, number>({
     mutationFn: async (id: number) => {
       await axios.delete(`${API_HOST}/exceptions/custom/queries/${id}/delete`, {
@@ -136,45 +163,34 @@ export function PersonalizadasProvider({
     },
   });
 
-  function auditException(formData: VerificarPersonalizadaRequest) {
-    // setFormData(formData);
-    query.mutate(formData);
-  }
-
-  function clearResults() {
-    // setFormData(null);
-    query.reset();
-  }
-
   // region Navigation
   function handleNextPage() {
     // request with page params
-    if (query.data && query.data.result === "ok") {
-      if (!query.data.rows.next) return;
-
-      // mutate same query with next page :
-      /*
-        next: http://localhost:8000/exceptions/db/3/custom?p=3
-      */
-      const nextPageUrl = query.data.rows.next;
-      query.mutate({
-        ...(form.getValues() as VerificarPersonalizadaRequest),
-        url: nextPageUrl,
-      });
-      console.log("next page", query.data.rows.next);
-    }
+    // if (query.data?.data) {
+    //   if (!query.data.rows.next) return;
+    //   // mutate same query with next page :
+    //   /*
+    //     next: http://localhost:8000/exceptions/db/3/custom?p=3
+    //   */
+    //   const nextPageUrl = query.data.rows.next;
+    //   query.mutate({
+    //     ...(form.getValues() as VerificarPersonalizadaRequest),
+    //     url: nextPageUrl,
+    //   });
+    //   console.log("next page", query.data.rows.next);
+    // }
   }
 
   function handlePreviousPage() {
     // request with page params
-    if (query.data && query.data.result === "ok") {
-      if (query.data.rows.previous === null) return;
-      const previousPageUrl = query.data.rows.previous;
-      query.mutate({
-        ...(form.getValues() as VerificarPersonalizadaRequest),
-        url: previousPageUrl,
-      });
-    }
+    // if (query.data && query.data.result === "ok") {
+    //   if (query.data.rows.previous === null) return;
+    //   const previousPageUrl = query.data.rows.previous;
+    //   query.mutate({
+    //     ...(form.getValues() as VerificarPersonalizadaRequest),
+    //     url: previousPageUrl,
+    //   });
+    // }
   }
 
   // function handleGoToPage(page: number) {
@@ -186,7 +202,7 @@ export function PersonalizadasProvider({
   return (
     <PersonalizadasContext.Provider
       value={{
-        query,
+        executeException,
         saveQuery,
         deleteQuery,
         form,

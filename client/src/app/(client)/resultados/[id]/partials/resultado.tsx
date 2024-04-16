@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import React from 'react'
 import ResultadoSecuencialidad from './secuencialidad'
 import { ResultsSecuencial } from '@/types/resultados'
+import ResultadoPersonalizada from './personalizada'
+import { PersonalizadaResult } from '@/types/excepciones/personalizadas'
 const Resultado = () => {
     const params = useParams()
     const id = params.id as string
@@ -41,7 +43,9 @@ const Resultado = () => {
     }
     if (tipoExcepcion === "De Campos") { }
     if (tipoExcepcion === "De Tabla") { }
-    if (tipoExcepcion === "Personalizado") { }
+    if (tipoExcepcion === "Personalizado") { 
+        return <ResultadoPersonalizada data={resultado.results as PersonalizadaResult} />
+    }
 
 }
 

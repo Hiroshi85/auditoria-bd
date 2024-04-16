@@ -1,3 +1,4 @@
+import { PersonalizadaResult } from "../excepciones/personalizadas"
 import { PaginatedData } from "../pagination"
 
 export type Resultado = {
@@ -102,7 +103,7 @@ export type GetResultadoResponse = {
         database: string
         table: string
         created_at: string
-        results: ResultsCampos | ResultsSecuencial | ResultsTablas | ResultsPersonalizadas
+        results: ResultsCampos | ResultsSecuencial | ResultsTablas | PersonalizadaResult
         exception_ocurred: number
         exception_id: 1 | 2 | 3 | 4
         exception_description: "Secuencial" | "De Campos" | "De Tabla" | "Personalizado"
