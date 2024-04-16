@@ -80,7 +80,6 @@ export default function CustomExceptionResults() {
       if (resultado.data && resultado.data.data)
         return (
           <ResultadoPersonalizado
-            id = {resultado.data.data.exception_id}
             data={resultado.data.data.results as ResultsPersonalizadas}
           />
         );

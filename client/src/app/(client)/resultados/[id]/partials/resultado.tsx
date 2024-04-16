@@ -60,7 +60,7 @@ const Resultado = () => {
         return <ResultadoTablas data={resultado.results as ResultsTablas} />
     }
     if (tipoExcepcion === "Personalizado") {
-        return <ResultadoPersonalizado id={resultado.exception_id} data={resultado.results as ResultsPersonalizadas} />
+        return <ResultadoPersonalizado data={resultado.results as ResultsPersonalizadas} />
     }
 
 }

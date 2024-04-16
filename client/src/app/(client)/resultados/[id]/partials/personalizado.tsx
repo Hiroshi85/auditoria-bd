@@ -9,12 +9,11 @@ import React from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
 type Props = {
-    id: number //exception id
     data: ResultsPersonalizadas
 }
 
 const ResultadoPersonalizado = (
-    { id, data }: Props
+    { data }: Props
 ) => {
     const router = useRouter()
     const pathname = usePathname()
