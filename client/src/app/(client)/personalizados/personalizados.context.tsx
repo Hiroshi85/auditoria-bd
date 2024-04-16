@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useConnectionDatabase } from "@/providers/connection";
 import {
   useMutation,
@@ -30,6 +30,7 @@ interface PersonalizadasProviderProps {
     unknown
   >;
   auditException: (data: VerificarPersonalizadaRequest) => void;
+  // Results methods
   clearResults: () => void;
   saveQuery: UseMutationResult<
     CustomQueriesResponse,
@@ -37,12 +38,13 @@ interface PersonalizadasProviderProps {
     VerificarPersonalizadaRequest,
     unknown
   >;
+  resultId: string | null;
+  setResultId: React.Dispatch<React.SetStateAction<string | null>>;  
+  //
   deleteQuery: UseMutationResult<void, Error, number, unknown>;
   form: ReturnType<typeof useForm<z.infer<typeof PersonalizadasFormSchema>>>;
   selectedQuery: CustomQueriesResponse | null;
-  setSelectedQuery: React.Dispatch<
-    React.SetStateAction<CustomQueriesResponse | null>
-  >;
+  setSelectedQuery: React.Dispatch<React.SetStateAction<CustomQueriesResponse | null>>;
   connection: ReturnType<typeof useConnectionDatabase>;
   // ***** Navigation functions
   handleNextPage: () => void;
@@ -66,6 +68,7 @@ export function PersonalizadasProvider({
 
   const [resultId, setResultId] = useState<string | null>(null);
 
+
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
     defaultValues: {
       table: "",
@@ -80,7 +83,7 @@ export function PersonalizadasProvider({
     PersonalizadaResponse,
     Error,
     VerificarPersonalizadaRequest
-  >({
+  >({ 
     mutationFn: async ({ table, name, query }) => {
       const response = await axios.post(
         `${API_HOST}/exceptions/db/${connection.id}/custom`,
@@ -96,14 +99,24 @@ export function PersonalizadasProvider({
     },
   });
 
+  useEffect(() => {
+    if (executeException.data) {
+      if(executeException.data.result === 'ok'){
+        if (executeException.data.exception_id)
+         setResultId(executeException.data.exception_id.toString());
+      }
+    console.log("executeException", executeException.data);
+    }
+  }, [executeException.data])
+
+
   function auditException(formData: VerificarPersonalizadaRequest) {
     executeException.mutate(formData);
   }
 
   function clearResults() {
-    queryClient.invalidateQueries({
-      queryKey: ["resultado", 383],
-    });
+    executeException.reset();
+    setResultId(null);
   }
 
   // region Queries CRUD
@@ -208,6 +221,8 @@ export function PersonalizadasProvider({
         form,
         connection,
         selectedQuery,
+        resultId,
+        setResultId,
         setSelectedQuery,
         auditException,
         clearResults,

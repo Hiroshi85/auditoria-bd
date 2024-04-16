@@ -63,26 +63,29 @@ export default function CustomQueries() {
                   value={query.name}
                   aria-label={`Toggle ${query.id}`}
                   onClickCapture={() => {
+                    form.clearErrors();
                     setSelectedQuery(query);
                     form.setValue("query", query.query);
                     form.setValue("name", query.name);
                   }}
-                  className="flex justify-between items-center cursor-pointer min-h-[52px]"
+                  className="flex grow justify-between items-center cursor-pointer min-h-[52px] max-w-[400px]"
                 >
-                  <span className="text-ellipsis text-wrap">{query.name}</span>
-                  <div className="flex items-center gap-2">
+                  <p className="grow break-words text-wrap max-w-[350px]">
+                    {query.name}
+                  </p>
+                  <div className="relative flex flex-col justify-center items-center">
                     {selectedQuery?.id === query.id && (
                       <Button
                         type="button"
-                        variant={"ghost"}
-                        className="p-0"
+                        variant={"link"}
+                        className="p-0 absolute -bottom-2 -right-8 text-red-500 z-10"
                         onClick={() => setSelectedQuery(null)}
                       >
-                        <XCircle size={20}/>
+                        <XCircle size={20} />
                       </Button>
                     )}
-                    <DialogTrigger>
-                        <Trash size={20} />
+                    <DialogTrigger className="absolute top-0 -right-8 z-10">
+                      <Trash size={20} />
                     </DialogTrigger>
                   </div>
                 </CommandItem>
@@ -120,7 +123,11 @@ export default function CustomQueries() {
             Eliminar
           </Button>
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSelectedQuery(null)}
+            >
               Cancelar
             </Button>
           </DialogClose>
