@@ -3,6 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useTableException } from "./context"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import Alertas from "@/components/alertas"
+import { Badge } from "@/components/ui/badge"
 
 
 export default function ResultTableException() {
@@ -33,6 +35,21 @@ export default function ResultTableException() {
                         <p className="text-lg"><span className="font-semibold">Tabla: </span>{data.table}</p>
                     </div>
 
+                    <div>
+                        <h2 className="text-xl font-bold bg-primary rounded-lg py-2 px-2 text-white relative">
+                            Detalles del análisis
+                            <Badge
+                                variant={data.results.length > 0 ? "destructive" : "outline"}
+                                className="text-white absolute right-2 top-3"
+                            >
+                                {data.results.length > 0
+                                    ? "Falla en la integridad"
+                                    : "No falla en la integridad"}
+                            </Badge>
+                        </h2>
+                        {data.results.length > 0 && <Alertas tipoExcepcion="De Tabla" />
+                        }
+                    </div>
                     <div>
                         {
                             data.results.map((detail, index) => (
