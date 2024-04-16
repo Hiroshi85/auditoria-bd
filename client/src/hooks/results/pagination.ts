@@ -1,6 +1,4 @@
-import { useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 
 function usePagination() {
   
@@ -8,11 +6,10 @@ function usePagination() {
   const pathname = usePathname();
 
   const pageSearchParams = useSearchParams();
-  const queryClient = useQueryClient();
 
   const table = pageSearchParams.get("table");
 
- 
+  // region Siguiente - Previo
   function handleNextPrevPage(next: string | null) {
       if (!next) return;
       const nextParams = get_query_params(next);
@@ -27,8 +24,23 @@ function usePagination() {
     return newParams.toString();
   }
 
+  // region Construct queries
+
+  function setQuery(page_query : string, value: string) {
+    // page_query = "missing_page", page = 2
+    
+    const newParams = new URLSearchParams(pageSearchParams.toString());
+    if (newParams.has(page_query)) {
+      value !== "" ? newParams.set(page_query, value) : newParams.delete(page_query)
+    }else {
+      value!== "" && newParams.append(page_query, value)
+    }
+    router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
+  }
+
   return {
-    handleNextPrevPage
+    handleNextPrevPage,
+    setQuery
   };
 }
 
