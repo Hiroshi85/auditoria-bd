@@ -1,10 +1,12 @@
-import { PaginatedData } from "@/types/pagination"
+import { SaveExceptionSuccess } from "@/types/excepciones"
+
+export * from "./queries"
+export * from './custom-response'
 
 export type VerificarPersonalizadaRequest = {
     table: string,
     name: string,
     query: string,
-    url?: string
 }
 
 export type PersonalizadaErrorResponse = {
@@ -15,36 +17,5 @@ export type PersonalizadaErrorResponse = {
     instance_error: string
 }
 
+export type PersonalizadaResponse = SaveExceptionSuccess | PersonalizadaErrorResponse 
 
-export type PersonalizadaOKResponse = {
-    result: "ok"
-    query: string
-    timestamp: string
-    table: string
-    num_rows: number
-    headers: string[]
-    rows: PaginatedData & {
-        data: any[]
-    }
-}
-
-export type PersonalizadaResponse = PersonalizadaErrorResponse | PersonalizadaOKResponse
-
-export type CustomQueriesResponse = {
-    id: number
-    name: string
-    query: string
-    table: string
-    created_at: string
-    updated_at: string
-    connection: number
-    only_this_connection: boolean
-}
-
-export type CustomQueriesRequest = {
-    id?: number
-    table: string
-    name: string
-    query: string
-    only_this_connection: boolean
-}

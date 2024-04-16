@@ -1,4 +1,7 @@
-import { PaginatedData } from "@/types/pagination"
+import { SecuenciaExceptionResponse, SecuenciaOkResponse } from "./exception-response"
+import { SaveExceptionSuccess } from "@/types/excepciones"
+
+export * from './exception-response'
 
 export interface VerificarSecuenciaRequest {
     table: string,
@@ -12,41 +15,8 @@ export interface VerificarSecuenciaRequest {
     frequency?: "D" | "W" | "ME" | "MS" | "YE" | "YS" | undefined
 }
 
-export type SecuenciaExceptionResponse = {
-    result: "exception",
-    table: string,
-    column: string,
-    database: string,
-    datetime_analysis: string,
-    min: string,
-    max: string,
-    num_duplicates: number,
-    duplicates: PaginatedData & {
-        data: any[]
-    }
-    num_missing: number,
-    missing: PaginatedData & {
-        data: any[]
-    },
-    num_sequence_errors: number,
-    sequence_errors: PaginatedData & {
-        data: {
-            expected: string,
-            found: string
-        }[]
-    }
-}
 
-export type SecuenciaOkResponse = {
-    result: "ok",
-    table: string,
-    column: string,
-    database: string,
-    datetime_analysis: string,
-    min: string,
-    max: string,
-}
-
+// No necesita guardarse , se mantiene 
 export type SecuenciaErrorResponse = {
     result: "error",
     message: string,
@@ -54,4 +24,7 @@ export type SecuenciaErrorResponse = {
     max: string
 }
 
-export type SecuenciaResponse = SecuenciaExceptionResponse | SecuenciaOkResponse | SecuenciaErrorResponse
+export type SecuenciaResult = SecuenciaOkResponse | SecuenciaExceptionResponse
+
+// Respuesta al guardar Excepción después de ejecutar
+export type SecuenciaResponse = SaveExceptionSuccess | SecuenciaErrorResponse
