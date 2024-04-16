@@ -77,10 +77,11 @@ export default function CustomExceptionResults() {
           </ResultContainer>
         );
 
-      if (resultado.data)
+      if (resultado.data && resultado.data.data)
         return (
           <ResultadoPersonalizado
-            data={resultado.data.data?.results as ResultsPersonalizadas}
+            id = {resultado.data.data.exception_id}
+            data={resultado.data.data.results as ResultsPersonalizadas}
           />
         );
     } else {

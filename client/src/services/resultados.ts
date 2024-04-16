@@ -35,9 +35,9 @@ export async function getResultados(): Promise<GetResultadosResponse> {
     }
 }
 
-export async function getResultado(id: string): Promise<GetResultadoResponse> {
+export async function getResultado(id: string, params?: string): Promise<GetResultadoResponse> {
     try {
-        const response = await axios.get(`${API_HOST}/aud/results/${id}`,
+        const response = await axios.get(`${API_HOST}/aud/results/${id}${params ? '?' + params : ''}`,
             {
                 withCredentials: true
             }
