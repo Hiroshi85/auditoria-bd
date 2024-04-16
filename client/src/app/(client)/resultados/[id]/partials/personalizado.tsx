@@ -3,43 +3,37 @@ import { DataTable } from '@/components/layout/table/table-details'
 import { Button } from '@/components/ui/button'
 import { ResultContainer } from '@/components/ui/result-container'
 import { ResultsPersonalizadas } from '@/types/resultados'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { PaginationState } from '@tanstack/react-table'
+import { useQueryClient } from '@tanstack/react-query'
 import { Table2Icon } from 'lucide-react'
 import React from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+
 type Props = {
+    id: number //exception id
     data: ResultsPersonalizadas
 }
+
 const ResultadoPersonalizado = (
-    { data }: Props
+    { id, data }: Props
 ) => {
-    const [pagination, setPagination] = React.useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: 10,
-    })
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const queryClient = useQueryClient()
 
-    const dataQuery = useQuery({
-        queryKey: ['data', pagination],
-        queryFn: () => {
-
-        },
-        placeholderData: keepPreviousData, // don't have 0 rows flash while changing pages/loading next page
-    })
-    const handlePreviousPage = () => {
-        setPagination((prev) => ({
-            ...prev,
-            pageIndex: prev.pageIndex - 1,
-        }))
-
-
+    const handlePreviousPage = (previous: string | null) => {
+        if(!previous)
+            return
+        const prevPage = new URL(previous).search
+        router.replace(`${pathname}${prevPage}`, {scroll: false})
     }
 
-    const handleNextPage = () => {
-        console.log('handleNextPage')
-        setPagination((prev) => ({
-            ...prev,
-            pageIndex: prev.pageIndex + 1,
-        }))
+    const handleNextPage = (next : string | null) => {
+        if (!next)
+            return
+        console.log('NEXT PAGE: ', next)
+        const nextPage = new URL(next).search
+        router.replace(`${pathname}${nextPage}`, {scroll: false})
     }
 
     return (
@@ -79,14 +73,14 @@ const ResultadoPersonalizado = (
                 <footer>
                     <Button
                         variant={"outline"}
-                        onClick={handlePreviousPage}
+                        onClick={() => handlePreviousPage(data.rows.previous)}
                         disabled={data.rows.previous === null}
                     >
                         Anterior
                     </Button>
                     <Button
                         variant={"outline"}
-                        onClick={handleNextPage}
+                        onClick={() => handleNextPage(data.rows.next)}
                         disabled={data.rows.next === null}
                     >
                         Siguiente
