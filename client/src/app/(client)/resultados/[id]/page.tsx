@@ -9,6 +9,8 @@ export const metadata: Metadata = {
 
 export default function ResultadoPage() {
     return (
-        <Resultado />
+        <section className='container'>
+            <Resultado />
+        </section>
     )
 }

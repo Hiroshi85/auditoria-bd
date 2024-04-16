@@ -5,7 +5,6 @@ import { useSecuencia } from "../secuencia.context";
 import { ResultContainer } from "@/components/ui/result-container";
 import { useQuery } from "@tanstack/react-query";
 import { getResultado } from "@/services/resultados";
-import { useEffect } from "react";
 import { ResultsSecuencial } from "@/types/resultados";
 import ResultadoSecuencialidad from "../../resultados/[id]/partials/secuencialidad";
 import { InfoIcon } from "lucide-react";
@@ -21,10 +20,6 @@ export default function SeqExceptionResults() {
     refetchOnWindowFocus: false,
     enabled: !!resultId,
   });
-
-  useEffect(() => {
-    console.log("resultId component reloaded", resultId);
-  }, [resultId]);
 
   if (isPending) {
     return (
@@ -90,10 +85,17 @@ export default function SeqExceptionResults() {
       );
     }
     if (resultado.data)
-      return (
-        <ResultadoSecuencialidad
-          data={resultado.data.data?.results as ResultsSecuencial}
-        />
+      return resultId ? (
+        <div className="px-0 mx-0">
+          <ResultadoSecuencialidad
+            data={resultado.data.data?.results as ResultsSecuencial}
+          />
+        </div>
+      ) : (
+        <ResultContainer>
+          <h1>No se pudo recuperar el resultado</h1>
+          <p>{resultado.data.error}</p>
+        </ResultContainer>
       );
   }
 }

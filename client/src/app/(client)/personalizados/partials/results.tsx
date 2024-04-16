@@ -5,8 +5,6 @@ import { ResultContainer } from "@/components/ui/result-container";
 import { useConnectionDatabase } from "@/providers/connection";
 import { useQuery } from "@tanstack/react-query";
 import { getResultado } from "@/services/resultados";
-import { PersonalizadaResult } from "@/types/excepciones/personalizadas";
-import { useEffect } from "react";
 import ResultadoPersonalizado from "../../resultados/[id]/partials/personalizado";
 import { ResultsPersonalizadas } from "@/types/resultados";
 
@@ -21,10 +19,6 @@ export default function CustomExceptionResults() {
     enabled: !!resultId,
   });
   const connection = useConnectionDatabase();
-
-  useEffect(() => {
-    console.log("resultId", resultId);
-  }, [resultId]);
 
   if (isPending)
     return (
@@ -92,7 +86,7 @@ export default function CustomExceptionResults() {
     } else {
       return (
         <ResultContainer type="danger">
-          La consulta realizada es demasiado grande para ser guardada almacenada
+          La consulta realizada es demasiado grande para ser almacenada
           en la base de datos
         </ResultContainer>
       );
