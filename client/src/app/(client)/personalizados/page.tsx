@@ -19,24 +19,21 @@ export default async function Page({ searchParams }: Props) {
 
   return (
     <PersonalizadasProvider>
-      <section className="container space-y-5">
-        <section className="grid grid-cols-3">
+      <section className="space-y-5 container">
+        <article className="grid grid-cols-3">
           <header className="col-span-2 space-y-2">
-              <h1 className="text-3xl font-bold">Excepciones personalizadas</h1>
-              <h2 className="text-xl">{`Tabla ${table}`}</h2>
+            <h1 className="text-3xl font-bold">Excepciones personalizadas</h1>
+            <h2 className="text-xl">{`Tabla ${table}`}</h2>
 
-              <CustomExceptionForm engine={lastConnection?.engine} />
+            <CustomExceptionForm engine={lastConnection?.engine} />
           </header>
 
           <aside className="mb-12">
             <CustomQueries />
           </aside>
-        </section>
-
-        <article className="flex flex-col">
-          <h2 className="text-xl font-bold">Resultados</h2>
-          <CustomExceptionResults />
         </article>
+
+        <CustomExceptionResults />
       </section>
     </PersonalizadasProvider>
   );

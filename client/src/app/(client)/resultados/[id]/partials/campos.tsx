@@ -13,7 +13,7 @@ const ResultadoCampos = (
     { data }: Props
 ) => {
     return (
-        <section className="container mx-auto flex flex-col gap-3 w-full my-5">
+        <section className="mx-auto flex flex-col gap-3 w-full my-5">
             {/* {JSON.stringify(data)} */}
             <h3 className="text-xl font-medium">Resultados</h3>
             <ResultContainer

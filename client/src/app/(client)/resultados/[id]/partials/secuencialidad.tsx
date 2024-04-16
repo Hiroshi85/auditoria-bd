@@ -19,7 +19,7 @@ const ResultadoSecuencialidad = (
     { data }: Props
 ) => {
     return (
-        <div className='container mx-auto'>
+        <div className='mx-auto'>
             {data.result === "error" ? (
                 <ResultContainer type="error" className="text-red txt-md">
                     <p className="text-destructive font-semibold">{"nada"}</p>
@@ -95,15 +95,15 @@ const ResultadoSecuencialidad = (
                                     <TabsTrigger
                                         value="missing"
                                         className={cn(getTabColor(data.missing.data))}
-                                    >{`Registros faltantes ${data.num_missing}`}</TabsTrigger>
+                                    >{`Registros faltantes ${data.missing.count}`}</TabsTrigger>
                                     <TabsTrigger
                                         value="repeated"
                                         className={cn(getTabColor(data.duplicates.data))}
-                                    >{`Registros repeditos ${data.num_duplicates}`}</TabsTrigger>
+                                    >{`Registros repeditos ${data.duplicates.count}`}</TabsTrigger>
                                     <TabsTrigger
                                         value="errors"
                                         className={cn(getTabColor(data.sequence_errors.data))}
-                                    >{`Errores de secuencia ${data.num_sequence_errors}`}</TabsTrigger>
+                                    >{`Errores de secuencia ${data.sequence_errors.count}`}</TabsTrigger>
                                 </TabsList>
                                 <TabsContent
                                     value="missing"

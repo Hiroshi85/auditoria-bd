@@ -12,7 +12,7 @@ const ResultadoTablas = (
     return (
         <AnimatePresence>
             <motion.div
-                className='container mx-auto'
+                className='mx-auto'
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
             >

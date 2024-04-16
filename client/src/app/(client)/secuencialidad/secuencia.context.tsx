@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { API_HOST } from "@/constants/server";
 import { getExceptionType } from "@/helpers/exc-secuenciales/tipos";
@@ -14,14 +14,18 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import axios from "axios";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { SecuencialFormSchema } from "./partials/form/schema";
 import { z } from "zod";
 
 // Función para enviar la petición POST
-async function postSecuenciaRequest(formData: VerificarSecuenciaRequest, columnType: string, connectionId: number) {
+async function postSecuenciaRequest(
+  formData: VerificarSecuenciaRequest,
+  columnType: string,
+  connectionId: number
+) {
   const exc_type = getExceptionType(columnType);
 
   if (exc_type === "") {
@@ -43,8 +47,17 @@ interface SecuenciaProviderProps {
   setColumnType: (type: string) => void;
   clearResults: () => void;
   selectedType: string | null;
-  mutation: ReturnType<typeof useMutation<SecuenciaResponse, Error, VerificarSecuenciaRequest, unknown>>;
+  mutation: ReturnType<
+    typeof useMutation<
+      SecuenciaResponse,
+      Error,
+      VerificarSecuenciaRequest,
+      unknown
+    >
+  >;
   form: ReturnType<typeof useForm<z.infer<typeof SecuencialFormSchema>>>;
+  resultId: string | null;
+  setResultId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const SecuenciaContext = createContext<SecuenciaProviderProps>(
@@ -56,6 +69,7 @@ export function SecuencialProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const [resultId, setResultId] = useState<string | null>(null);
   const [columnType, setColumnType] = useState("");
   const connection = useConnectionDatabase();
   const [formData, setFormData] = useState<VerificarSecuenciaRequest | null>(
@@ -79,18 +93,22 @@ export function SecuencialProvider({
     resolver: zodResolver(SecuencialFormSchema),
   });
 
-  const mutation = useMutation(
-    {
-      mutationFn: (formData: VerificarSecuenciaRequest) => {
-        return postSecuenciaRequest(formData, columnType, connection.id);
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["resultados"],
-        });
-      },
+  const mutation = useMutation({
+    mutationFn: (formData: VerificarSecuenciaRequest) => {
+      return postSecuenciaRequest(formData, columnType, connection.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["resultados"],
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (mutation.data && (mutation.data.result === "exception" || mutation.data.result === "ok")) {
+      setResultId(mutation.data.exception_id.toString());
     }
-  );
+  }, [mutation.data]);
 
   function clearResults() {
     setFormData(null);
@@ -112,6 +130,8 @@ export function SecuencialProvider({
         clearResults,
         mutation,
         form,
+        resultId,
+        setResultId,
       }}
     >
       {children}

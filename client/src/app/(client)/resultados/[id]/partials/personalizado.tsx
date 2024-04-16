@@ -43,7 +43,7 @@ const ResultadoPersonalizado = (
     }
 
     return (
-        <div className='container mx-auto'>
+        <div className='mx-auto'>
             <div className='my-5'>
                 <h2 className="text-xl font-semibold">Resultados</h2>
                 <div>
