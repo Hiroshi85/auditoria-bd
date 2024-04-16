@@ -20,6 +20,7 @@ import { PersonalizadasFormSchema } from "./partials/form/form-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 interface PersonalizadasProviderProps {
   executeException: UseMutationResult<
@@ -62,7 +63,6 @@ export function PersonalizadasProvider({
     useState<CustomQueriesResponse | null>(null);
 
   const [resultId, setResultId] = useState<string | null>(null);
-
 
   const form = useForm<z.infer<typeof PersonalizadasFormSchema>>({
     defaultValues: {

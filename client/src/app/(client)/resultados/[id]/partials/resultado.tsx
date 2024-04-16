@@ -15,8 +15,7 @@ const Resultado = () => {
     const searchParams = useSearchParams()
     
     const currentQuery = searchParams.toString()
-    console.log('currentQuery', currentQuery)
-    
+    console.log("Current query result component ",currentQuery)
 
     const { data, isError, error, isLoading } = useQuery({
         queryKey: ["resultado", id],
@@ -28,6 +27,7 @@ const Resultado = () => {
     useEffect(() => {
         queryClient.invalidateQueries({queryKey: ["resultado", id]})
     }, [currentQuery])
+
 
     if (isLoading) {
         return (

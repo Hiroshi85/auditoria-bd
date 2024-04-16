@@ -3,21 +3,32 @@ import Spinner from "@/components/ui/spinner";
 import { usePersonalizadas } from "../personalizados.context";
 import { ResultContainer } from "@/components/ui/result-container";
 import { useConnectionDatabase } from "@/providers/connection";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getResultado } from "@/services/resultados";
 import ResultadoPersonalizado from "../../resultados/[id]/partials/personalizado";
 import { ResultsPersonalizadas } from "@/types/resultados";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function CustomExceptionResults() {
   const { executeException, resultId, setResultId } = usePersonalizadas();
   const { data, isPending, isError } = executeException;
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient()
+
   const resultado = useQuery({
     queryKey: ["resultado", resultId],
-    queryFn: () => (resultId ? getResultado(resultId) : null),
+    queryFn: () =>
+      resultId ? getResultado(resultId, searchParams.toString()) : null,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     enabled: !!resultId,
   });
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["resultado", resultId] });
+  }, [searchParams]);
+
   const connection = useConnectionDatabase();
 
   if (isPending)
@@ -86,8 +97,8 @@ export default function CustomExceptionResults() {
     } else {
       return (
         <ResultContainer type="danger">
-          La consulta realizada es demasiado grande para ser almacenada
-          en la base de datos
+          La consulta realizada es demasiado grande para ser almacenada en la
+          base de datos
         </ResultContainer>
       );
     }

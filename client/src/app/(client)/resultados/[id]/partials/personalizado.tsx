@@ -3,10 +3,13 @@ import { DataTable } from '@/components/layout/table/table-details'
 import { Button } from '@/components/ui/button'
 import { ResultContainer } from '@/components/ui/result-container'
 import { ResultsPersonalizadas } from '@/types/resultados'
-import { useQueryClient } from '@tanstack/react-query'
 import { Table2Icon } from 'lucide-react'
 import React from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { revalidatePath } from 'next/cache'
+import nextAppLoader from 'next/dist/build/webpack/loaders/next-app-loader'
+import usePagination from '@/hooks/results/pagination'
 
 type Props = {
     data: ResultsPersonalizadas
@@ -15,25 +18,7 @@ type Props = {
 const ResultadoPersonalizado = (
     { data }: Props
 ) => {
-    const router = useRouter()
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
-    const queryClient = useQueryClient()
-
-    const handlePreviousPage = (previous: string | null) => {
-        if(!previous)
-            return
-        const prevPage = new URL(previous).search
-        router.replace(`${pathname}${prevPage}`, {scroll: false})
-    }
-
-    const handleNextPage = (next : string | null) => {
-        if (!next)
-            return
-        console.log('NEXT PAGE: ', next)
-        const nextPage = new URL(next).search
-        router.replace(`${pathname}${nextPage}`, {scroll: false})
-    }
+    const { handleNextPrevPage } = usePagination()
 
     return (
         <div className='mx-auto'>
@@ -72,14 +57,14 @@ const ResultadoPersonalizado = (
                 <footer>
                     <Button
                         variant={"outline"}
-                        onClick={() => handlePreviousPage(data.rows.previous)}
+                        onClick={() => handleNextPrevPage(data.rows.previous)}
                         disabled={data.rows.previous === null}
                     >
                         Anterior
                     </Button>
                     <Button
                         variant={"outline"}
-                        onClick={() => handleNextPage(data.rows.next)}
+                        onClick={() => handleNextPrevPage(data.rows.next)}
                         disabled={data.rows.next === null}
                     >
                         Siguiente
