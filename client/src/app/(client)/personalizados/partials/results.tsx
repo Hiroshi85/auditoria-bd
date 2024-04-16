@@ -6,8 +6,9 @@ import { useConnectionDatabase } from "@/providers/connection";
 import { useQuery } from "@tanstack/react-query";
 import { getResultado } from "@/services/resultados";
 import { PersonalizadaResult } from "@/types/excepciones/personalizadas";
-import ResultadoPersonalizada from "../../resultados/[id]/partials/personalizada";
 import { useEffect } from "react";
+import ResultadoPersonalizado from "../../resultados/[id]/partials/personalizado";
+import { ResultsPersonalizadas } from "@/types/resultados";
 
 export default function CustomExceptionResults() {
   const { executeException, resultId, setResultId } = usePersonalizadas();
@@ -84,8 +85,8 @@ export default function CustomExceptionResults() {
 
       if (resultado.data)
         return (
-          <ResultadoPersonalizada
-            data={resultado.data.data?.results as PersonalizadaResult}
+          <ResultadoPersonalizado
+            data={resultado.data.data?.results as ResultsPersonalizadas}
           />
         );
     } else {

@@ -12,7 +12,6 @@ import {
   PersonalizadaResponse,
   VerificarPersonalizadaRequest,
   CustomQueriesResponse,
-  PersonalizadaResult,
 } from "@/types/excepciones/personalizadas";
 import axios from "axios";
 import { API_HOST } from "@/constants/server";
@@ -46,10 +45,6 @@ interface PersonalizadasProviderProps {
   selectedQuery: CustomQueriesResponse | null;
   setSelectedQuery: React.Dispatch<React.SetStateAction<CustomQueriesResponse | null>>;
   connection: ReturnType<typeof useConnectionDatabase>;
-  // ***** Navigation functions
-  handleNextPage: () => void;
-  handlePreviousPage: () => void;
-  // handleGoToPage: (page: number) => void;
 }
 
 const PersonalizadasContext = createContext<PersonalizadasProviderProps>(
@@ -176,42 +171,6 @@ export function PersonalizadasProvider({
     },
   });
 
-  // region Navigation
-  function handleNextPage() {
-    // request with page params
-    // if (query.data?.data) {
-    //   if (!query.data.rows.next) return;
-    //   // mutate same query with next page :
-    //   /*
-    //     next: http://localhost:8000/exceptions/db/3/custom?p=3
-    //   */
-    //   const nextPageUrl = query.data.rows.next;
-    //   query.mutate({
-    //     ...(form.getValues() as VerificarPersonalizadaRequest),
-    //     url: nextPageUrl,
-    //   });
-    //   console.log("next page", query.data.rows.next);
-    // }
-  }
-
-  function handlePreviousPage() {
-    // request with page params
-    // if (query.data && query.data.result === "ok") {
-    //   if (query.data.rows.previous === null) return;
-    //   const previousPageUrl = query.data.rows.previous;
-    //   query.mutate({
-    //     ...(form.getValues() as VerificarPersonalizadaRequest),
-    //     url: previousPageUrl,
-    //   });
-    // }
-  }
-
-  // function handleGoToPage(page: number) {
-  //   // request with page params
-  //   if (query.data && query.data.result === "ok")
-  //     console.log("go to page", page);
-  // }
-  //endregion
   return (
     <PersonalizadasContext.Provider
       value={{
@@ -226,9 +185,6 @@ export function PersonalizadasProvider({
         setSelectedQuery,
         auditException,
         clearResults,
-        handleNextPage,
-        handlePreviousPage,
-        // handleGoToPage,
       }}
     >
       {children}
