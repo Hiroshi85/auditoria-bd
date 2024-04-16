@@ -6,6 +6,8 @@ import { columns } from '@/app/(client)/integridad/campos/partials/columns'
 import React from 'react'
 import { Condicion } from '@/app/(client)/integridad/campos/partials/conditions';
 import { obtenerStringDeCondicion } from '@/helpers/condiciones';
+import { Badge } from '@/components/ui/badge';
+import Alertas from '@/components/alertas';
 type Props = {
     data: ResultsCampos
 }
@@ -54,6 +56,21 @@ const ResultadoCampos = (
                             }
                             )}
                     </div>
+                </div>
+                <div>
+                    <h2 className="text-xl font-bold bg-primary rounded-lg py-2 px-2 text-white relative">
+                        Detalles del análisis
+                        <Badge
+                            variant={data && data.num_rows_exceptions > 0 ? "destructive" : "outline"}
+                            className="text-white absolute right-2 top-3"
+                        >
+                            {data.num_rows_exceptions > 0
+                                ? "Campos no integros"
+                                : "Campos integros"}
+                        </Badge>
+                    </h2>
+                    {data.num_rows_exceptions > 0 && <Alertas tipoExcepcion="De Campos" />
+                    }
                 </div>
                 {data && data.num_rows_exceptions > 0 && (
                     <>

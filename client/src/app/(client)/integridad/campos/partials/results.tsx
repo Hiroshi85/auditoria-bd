@@ -8,6 +8,8 @@ import { ResultContainer } from "@/components/ui/result-container";
 import { Spinner } from "@/components/ui/spinner";
 import { Condicion } from "./conditions";
 import { obtenerStringDeCondicion } from "@/helpers/condiciones";
+import { Badge } from "@/components/ui/badge";
+import Alertas from "@/components/alertas";
 
 
 
@@ -95,6 +97,21 @@ const IntegridadCamposResults = () => {
               }
               )}
           </div>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold bg-primary rounded-lg py-2 px-2 text-white relative">
+            Detalles del análisis
+            <Badge
+              variant={data && data.data && data.data.num_rows_exceptions > 0 ? "destructive" : "outline"}
+              className="text-white absolute right-2 top-3"
+            >
+              {data.data && data.data.num_rows_exceptions > 0
+                ? "Campos no integros"
+                : "Campos integros"}
+            </Badge>
+          </h2>
+          {data.data && data.data.num_rows_exceptions > 0 && <Alertas tipoExcepcion="De Campos" />
+          }
         </div>
         {data.data && data.data.num_rows_exceptions > 0 && (
           <>

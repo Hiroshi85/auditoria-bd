@@ -1,4 +1,5 @@
 "use client";
+import Alertas from "@/components/alertas";
 import { Badge } from "@/components/ui/badge";
 import {
   Pagination,
@@ -95,7 +96,8 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                     : "Secuencia incorrecta"}
                 </Badge>
               </h2>
-
+              {data.result !== "ok" && <Alertas tipoExcepcion="Secuencial" />
+              }
               <div className="px-2 mt-2">
                 <p>
                   <strong>Valor mínimo:</strong> {data.min}
