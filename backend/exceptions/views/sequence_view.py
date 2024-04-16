@@ -1,9 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from ..pagination.pagination import CustomPagination
+
 from exceptions.utils.enums.tipo_excepcion import TipoExcepcion
 from ..utils.secuenciales import *
-from ..utils.pagination import paginate_results
 from ..serializers import *
 
 from auditoria_bd_api.utils.conexiones import get_connection_by_id
@@ -46,7 +45,7 @@ def integer_sequence_exception(request, id):
         sequence=sequence,
         min_value=min_value,
         max_value=max_value,
-        conn=conn, request=request)
+        conn=conn)
 
 # region alphanumeric execptions
 
@@ -114,8 +113,7 @@ def alphanumeric_sequence_exception(request, id):
         sequence=sequence,
         min_value=min_value,
         max_value=max_value,
-        conn=conn,
-        request=request)
+        conn=conn)
 
 # region date exceptions
 
@@ -165,8 +163,7 @@ def date_sequence_exception(request, id):
         sequence=sequence,
         min_value=min_value,
         max_value=max_value,
-        conn=conn,
-        request=request)
+        conn=conn)
 
 # region exception response
 
@@ -182,7 +179,6 @@ def get_exception_response(
         max_value="",
         error_result="",
         conn=None,
-        request=None
 ):
     if error_result != "":
         return Response({
@@ -214,25 +210,26 @@ def get_exception_response(
         final_response_json = {
             'result': 'exception',
             **response_json,
-            'num_duplicates': len(duplicates),
-            'duplicates': paginate_results(CustomPagination(
-                page_query_param='duplicates', page_size_query_param='page_size_duplicates'),
-                request, duplicates.values.flatten().tolist()),
-            'num_missing': len(missing),
-            'missing': paginate_results(CustomPagination(
-                page_query_param='missing', page_size_query_param='page_size_missing'
-            ), request, missing),
-            'num_sequence_errors': len(sequence),
-            'sequence_errors': paginate_results(CustomPagination(
-                page_query_param='sequence', page_size_query_param='page_size_sequence'
-            ), request, sequence)
+            'duplicates':duplicates.values.flatten().tolist(),
+            'missing': missing,
+            'sequence_errors': sequence
         }
-        print(final_response_json)
 
-    save_results(final_response_json, conn,
+    try:
+        res = save_results(final_response_json, conn,
                  TipoExcepcion.SECUENCIAL, table, exception_was_raised)
+    except:
+        return Response({
+            'result': "error",
+            'message': "No se pudo guardar el resultado en la base de datos.",
+            'min': min_value,
+            'max': max_value
+        }, status=500)
 
-    return Response(final_response_json, status=200)
+    return Response({
+        'result': final_response_json['result'],
+        'exception_id': res.id
+    }, status=200)
 
 
 

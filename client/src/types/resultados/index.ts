@@ -1,3 +1,4 @@
+import { PersonalizadaResult } from "../excepciones/personalizadas"
 import { PaginatedData } from "../pagination"
 
 export type Resultado = {
@@ -84,11 +85,7 @@ export interface ResultsPersonalizadas {
     query: string
     timestamp: string
     headers: string[]
-    rows: {
-        next: string
-        previous: any
-        page_size: number
-        count: number
+    rows: PaginatedData & {
         data: {
             [key: string]: string | number | boolean | null
         }[]
