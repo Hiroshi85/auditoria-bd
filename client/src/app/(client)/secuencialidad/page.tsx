@@ -16,20 +16,22 @@ export default function Page({ searchParams }: Props) {
 
   return (
     <SecuencialProvider>
-      <section className="container space-y-5">
-        <header>
+      <section className="space-y-5">
+        <header className="container">
           <h1 className="text-3xl font-bold">
             Excepción de registros secuenciales
           </h1>
           <h2 className="text-xl">{`Tabla ${table}`}</h2>
         </header>
 
-        <article>
+        <article className="container">
           <SecuencialidadForm table={table} />
         </article>
 
         <article className="flex flex-col">
-          <h2 className="text-xl font-bold">Resultados</h2>
+          <div className="container">
+            <h2 className="text-xl font-bold">Resultados</h2>
+          </div>
           <SeqExceptionResults />
         </article>
       </section>

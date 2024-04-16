@@ -19,6 +19,7 @@ const ResultadoSecuencialidad = (
     { data }: Props
 ) => {
     return (
+        // esto no va aquí porque esto no se guarda como resultado de excepción
         <div className='container mx-auto'>
             {data.result === "error" ? (
                 <ResultContainer type="error" className="text-red txt-md">
