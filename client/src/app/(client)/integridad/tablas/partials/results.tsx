@@ -23,6 +23,8 @@ export default function ResultTableException() {
         return <p>Here will be the results</p>
     }
 
+    console.log(data)
+
     return (
         <AnimatePresence>
             <motion.div
@@ -39,15 +41,15 @@ export default function ResultTableException() {
                         <h2 className="text-xl font-bold bg-primary rounded-lg py-2 px-2 text-white relative">
                             Detalles del análisis
                             <Badge
-                                variant={data.results.length > 0 ? "destructive" : "outline"}
+                                variant={data.results[0].results.length > 0 ? "destructive" : "outline"}
                                 className="text-white absolute right-2 top-3"
                             >
-                                {data.results.length > 0
+                                {data.results[0].results.length > 0
                                     ? "Falla en la integridad"
                                     : "No falla en la integridad"}
                             </Badge>
                         </h2>
-                        {data.results.length > 0 && <Alertas tipoExcepcion="De Tabla" />
+                        {data.results[0].results.length > 0 && <Alertas tipoExcepcion="De Tabla" />
                         }
                     </div>
                     <div>
