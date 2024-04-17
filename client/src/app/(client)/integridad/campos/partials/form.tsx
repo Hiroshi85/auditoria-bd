@@ -436,7 +436,7 @@ const IntegridadCamposForm = () => {
                                                     </FormControl>
                                                     <SelectContent
                                                         className="w-full">
-                                                        {CONDICIONES.map((column) => (
+                                                        {CONDICIONES.filter((column) => (column.id != 2)).map((column) => (
                                                             <SelectItem key={column.name}
                                                                 value={column.name}>{column.name}</SelectItem>
                                                         ))}
