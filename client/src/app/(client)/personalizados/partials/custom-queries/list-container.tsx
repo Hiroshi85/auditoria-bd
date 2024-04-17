@@ -53,7 +53,7 @@ export default function CustomQueries() {
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <Command>
         <CommandInput placeholder="Buscar consultas personalizadas" />
-        <CommandList>
+        <CommandList style={{ scrollbarWidth: 'thin', scrollbarGutter: 'stable'}}>
           <CommandEmpty>No se encontraron resultados.</CommandEmpty>
           <CommandGroup>
             {query.data?.map((query) => {
@@ -90,7 +90,7 @@ export default function CustomQueries() {
                       </Button>
                     )}
                     <DialogTrigger
-                      className="absolute top-auto -right-8 z-10"
+                      className="absolute top-auto -right-6 z-10"
                       onClick={() => setSelectedQuery(query)}
                     >
                       <Trash size={18} />
