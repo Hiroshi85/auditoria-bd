@@ -1,0 +1,55 @@
+version: '3.8'
+networks:
+  mynetwork:
+    driver: bridge
+services:
+  db: 
+    networks:
+      - mynetwork
+    container_name: mysql
+    image: mysql:8
+    restart: always
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test_pass
+      MYSQL_HOST: ''
+  
+  backend-django:
+    container_name: backend-django
+    networks:
+      - mynetwork
+    build: backend/.
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_NAME=test_db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_HOST=db
+      - DB_PORT=3306
+      - SECRET_KEY_VALUE_AAA=NtGMijDRG5zBAiark0XpBxNOJDdCjmER3--yEuZgOj8=
+      - OPEN_AI_KEY=sk-...
+    depends_on:
+      - db
+
+  client:
+    networks:
+      - mynetwork
+    container_name: client-nextjs
+    build: client/.
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=secret
+      - SERVER_HOST=http://localhost:8000
+volumes:
+  data:
