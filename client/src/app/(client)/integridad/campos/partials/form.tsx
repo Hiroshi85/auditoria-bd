@@ -276,23 +276,27 @@ const IntegridadCamposForm = () => {
     }
 
     const resetearAlCambiarColumna = (index: number) => {
-        form.setValue(`columnas.${index}.condicion`, "")
-        form.setValue(`columnas.${index}.condicion_id`, 0)
-        form.setValue(`columnas.${index}.where.condicion_id`, 0)
-        form.setValue(`columnas.${index}.where.nombre`, "")
-        form.setValue(`columnas.${index}.where.valor_uno`, "")
-        form.setValue(`columnas.${index}.where.valor_dos`, "")
-        form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, 0)
-        form.setValue(`columnas.${index}.where.longitud.nombre`, "")
+        form.resetField(`columnas.${index}.condicion`)
+        form.resetField(`columnas.${index}.condicion_id`)
+        form.resetField(`columnas.${index}.where.condicion_id`)
+        form.resetField(`columnas.${index}.where.nombre`)
+        form.resetField(`columnas.${index}.where.valor_uno`)
+        form.resetField(`columnas.${index}.where.valor_dos`)
+        form.resetField(`columnas.${index}.where.longitud.longitud_condicion_id`)
+        form.resetField(`columnas.${index}.where.longitud.nombre`)
+        form.clearErrors();
     }
 
     const resetearAlCambiarCondicion = (index: number) => {
-        form.setValue(`columnas.${index}.where.condicion_id`, 0)
-        form.setValue(`columnas.${index}.where.nombre`, "")
-        form.setValue(`columnas.${index}.where.valor_uno`, "")
-        form.setValue(`columnas.${index}.where.valor_dos`, "")
-        form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, 0)
-        form.setValue(`columnas.${index}.where.longitud.nombre`, "")
+
+        form.resetField(`columnas.${index}.where.condicion_id`)
+        form.resetField(`columnas.${index}.where.nombre`)
+        form.resetField(`columnas.${index}.where.valor_uno`)
+        form.resetField(`columnas.${index}.where.valor_dos`)
+        form.resetField(`columnas.${index}.where.longitud.longitud_condicion_id`)
+        form.resetField(`columnas.${index}.where.longitud.nombre`)
+
+        form.clearErrors();
     }
 
     const setWhereCondicionIdGivenName = (name: string, index: number) => {
@@ -301,10 +305,11 @@ const IntegridadCamposForm = () => {
         form.setValue(`columnas.${index}.where.condicion_id`, condicion_id)
     }
     const resetearAlCambiarCondicionWhere = (index: number) => {
-        form.setValue(`columnas.${index}.where.valor_uno`, "")
-        form.setValue(`columnas.${index}.where.valor_dos`, "")
-        form.setValue(`columnas.${index}.where.longitud.longitud_condicion_id`, 0)
-        form.setValue(`columnas.${index}.where.longitud.nombre`, "")
+        form.resetField(`columnas.${index}.where.valor_uno`)
+        form.resetField(`columnas.${index}.where.valor_dos`)
+        form.resetField(`columnas.${index}.where.longitud.longitud_condicion_id`)
+        form.resetField(`columnas.${index}.where.longitud.nombre`)
+        form.clearErrors();
     }
 
     const setWhereLongitudCondicionIdGivenName = (name: string, index: number) => {
@@ -350,7 +355,7 @@ const IntegridadCamposForm = () => {
 
 
     async function onSubmit(data: z.infer<typeof schema>) {
-        const requestData : VerificarIntegridadDeCamposRequest = {
+        const requestData: VerificarIntegridadDeCamposRequest = {
             columnas: data.columnas,
             table,
             connectionId
@@ -359,307 +364,306 @@ const IntegridadCamposForm = () => {
     }
 
     return (
-    <section>
-        <h1 className="text-xl font-bold">Excepción de integridad de campos</h1>
-        <h2 className="text-lg">Tabla {table}</h2>
-
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 flex flex-col">
-                {form.formState.errors.columnas && <p className="text-red-500">{form.formState.errors.columnas.message}</p>}
-                {fields.map((item, index) => (
-                    <div key={item.id} className="flex items-start justify-start gap-x-2 py-2">
-                         <Button type="button" onClick={() => remove(index)} className="mt-[24px]"><TrashIcon /></Button>
-                         {form.formState.errors.columnas?.[index] && <p className="text-red-500">{form.formState.errors.columnas?.[index]?.message}</p>}
-                        <div className="gap-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-                            <div className="">
-                                <FormField
-                                    control={form.control}
-                                    name={`columnas.${index}.nombre`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <div className="flex items-center justify-between">
-                                                <FormLabel>Columna</FormLabel>
-                                                <span className="text-[0.6rem] font-medium px-2 bg-emerald-200 rounded-full h-[15px]">{watchColumns[index].tipo_de_dato}</span>
-                                            </div>
-                                            <Select
-                                                value={field.value}
-                                                name={field.name}
-                                                onValueChange={(value) => {
-                                                    resetearAlCambiarColumna(index)
-                                                    field.onChange(value)
-                                                    setTipoDeDato(value, index)
-                                                }}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue onBlur={field.onBlur} ref={field.ref} placeholder="Seleccione campo" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {columns.map((column) => (
-                                                        <SelectItem key={column.name} value={column.name}>{column.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <div className="">
-                                <FormField
-                                    control={form.control}
-                                    name={`columnas.${index}.condicion`}
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-col">
-                                            <FormLabel>Condicion</FormLabel>
-                                            <Select
-                                                value={field.value}
-                                                name={field.name}
-                                                onValueChange={(value) => {
-                                                    field.onChange(value)
-                                                    resetearAlCambiarCondicion(index)
-                                                    setCondicionIdGivenName(value, index)
-
-                                                }}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue onBlur={field.onBlur} ref={field.ref}
-                                                            placeholder="Seleccione condicion" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent
-                                                    className="w-full">
-                                                    {CONDICIONES.map((column) => (
-                                                        <SelectItem key={column.name}
-                                                            value={column.name}>{column.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            {
-                                watchColumns[index]?.condicion === 'Where' && (
-                                    <div className="">
-                                        <FormField
-                                            control={form.control}
-                                            name={`columnas.${index}.where.nombre`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>Condicion</FormLabel>
-                                                    <Select
-                                                        name={field.value}
-                                                        value={field.value}
-                                                        disabled={watchColumns[index]?.nombre === ""}
-                                                        onValueChange={(value) => {
-                                                            field.onChange(value)
-                                                            resetearAlCambiarCondicionWhere(index)
-                                                            setWhereCondicionIdGivenName(value, index)
-                                                        }}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue onBlur={field.onBlur} ref={field.ref}
-                                                                    placeholder="Seleccione condicion" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent
-                                                            className="w-full">
-                                                            {getWhereCondiciones(watchColumns[index]?.nombre, index).map((column) => (
-                                                                <SelectItem key={column.name}
-                                                                    value={column.name}>{column.title}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )
-                            }
-                            {
-                                watchColumns[index]?.where.nombre === 'longitud' && (
-                                    <div className="">
-                                        <FormField
-                                            control={form.control}
-                                            name={`columnas.${index}.where.longitud.nombre`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>Condicion</FormLabel>
-                                                    <Select
-                                                        name={field.value}
-                                                        value={field.value}
-                                                        disabled={watchColumns[index]?.where.nombre !== "longitud"}
-                                                        onValueChange={(value) => {
-                                                            field.onChange(value)
-                                                            setWhereLongitudCondicionIdGivenName(value, index)
-                                                        }}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue onBlur={field.onBlur} ref={field.ref}
-                                                                    placeholder="Seleccione condicion" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent
-                                                            className="w-full">
-                                                            {obtenerCondicionesDeLongitud().map((column) => (
-                                                                <SelectItem key={column.name}
-                                                                    value={column.name}>{column.title}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )
-                            }
-                            {
-                                (watchColumns[index]?.condicion === 'Where') &&
-                                (
-                                    (watchColumns[index]?.where.nombre !== ''
-                                        && watchColumns[index]?.where.nombre !== 'longitud'
-                                        && watchColumns[index]?.where.nombre !== 'diaSemana'
-                                        && watchColumns[index]?.where.nombre !== 'mes'
-                                        && watchColumns[index]?.where.nombre !== 'año'
-                                    )
-                                    ||
-
-                                    (watchColumns[index]?.where.nombre == 'longitud' && watchColumns[index]?.where.longitud.nombre !== '')
-                                ) &&
-                                (
-                                    <div className="">
-                                        <FormField
-                                            control={form.control}
-                                            name={`columnas.${index}.where.valor_uno`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>Valor</FormLabel>
-                                                    <FormControl                                                    >
-                                                        <Input
-                                                            type={obtenerTipoDeInputSegunTipoDeDato(watchColumns[index]?.tipo, watchColumns[index]?.where.nombre)}
-                                                            {...field}
-                                                            onChange={(e) => {
-                                                                field.onChange(e.target.value)
-                                                            }
-                                                            }
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )
-                            }
-                            {
-                                (watchColumns[index]?.condicion === 'Where') &&
-                                (
-                                    (watchColumns[index]?.where.nombre === 'diaSemana'
-                                        || watchColumns[index]?.where.nombre === 'mes'
-                                        || watchColumns[index]?.where.nombre === 'año'
-                                    )
-                                ) &&
-                                (
-                                    <div className="">
-                                        <FormField
-                                            control={form.control}
-                                            name={`columnas.${index}.where.valor_uno`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>Valor</FormLabel>
-                                                    <Select
-                                                        name={field.value}
-                                                        value={field.value}
-                                                        onValueChange={(value) => {
-                                                            field.onChange(value)
-                                                        }}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue onBlur={field.onBlur} ref={field.ref}
-                                                                    placeholder="Seleccione" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent
-                                                            className="w-full">
-                                                            {obtenerOpcionesDeTiempoEspecial(watchColumns[index]?.where.nombre).map((column) => (
-                                                                <SelectItem key={column.id}
-                                                                    value={String(column.id)}>{column.nombre}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )
-                            }
-                            {
-                                (watchColumns[index]?.condicion === 'Where') &&
-                                (
-                                    watchColumns[index]?.where.nombre == 'entre'
-                                    ||
-                                    watchColumns[index]?.where.longitud.nombre == 'entre'
-                                    ||
-                                    watchColumns[index]?.where.nombre == 'entreFechas'
-                                    ||
-                                    watchColumns[index]?.where.nombre == 'rangoHoras'
-                                )
-                                &&
-                                (
-                                    <div className="">
-                                        <FormField
-                                            control={form.control}
-                                            name={`columnas.${index}.where.valor_dos`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-col">
-                                                    <FormLabel>Valor</FormLabel>
+        <section>
+            <h1 className="text-xl font-bold">Excepción de integridad de campos</h1>
+            <h2 className="text-lg">Tabla {table}</h2>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 flex flex-col">
+                    {form.formState.errors.columnas && <p className="text-red-500">{form.formState.errors.columnas.message}</p>}
+                    {fields.map((item, index) => (
+                        <div key={item.id} className="flex items-start justify-start gap-x-2 py-2">
+                            <Button type="button" onClick={() => remove(index)} className="mt-[24px]"><TrashIcon /></Button>
+                            {form.formState.errors.columnas?.[index] && <p className="text-red-500">{form.formState.errors.columnas?.[index]?.message}</p>}
+                            <div className="gap-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name={`columnas.${index}.nombre`}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center justify-between">
+                                                    <FormLabel>Columna</FormLabel>
+                                                    <span className="text-[0.6rem] font-medium px-2 bg-emerald-200 rounded-full h-[15px]">{watchColumns[index].tipo_de_dato}</span>
+                                                </div>
+                                                <Select
+                                                    value={field.value}
+                                                    name={field.name}
+                                                    onValueChange={(value) => {
+                                                        resetearAlCambiarColumna(index)
+                                                        field.onChange(value)
+                                                        setTipoDeDato(value, index)
+                                                    }}
+                                                >
                                                     <FormControl>
-                                                        <Input
-                                                            type={obtenerTipoDeInputSegunTipoDeDato(watchColumns[index]?.tipo, watchColumns[index]?.where.nombre)}
-                                                            {...field}
-                                                            onChange={(e) => {
-                                                                field.onChange(e.target.value)
-                                                            }}
-                                                        />
+                                                        <SelectTrigger>
+                                                            <SelectValue onBlur={field.onBlur} ref={field.ref} placeholder="Seleccione campo" />
+                                                        </SelectTrigger>
                                                     </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                )
-                            }
+                                                    <SelectContent>
+                                                        {columns.map((column) => (
+                                                            <SelectItem key={column.name} value={column.name}>{column.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="">
+                                    <FormField
+                                        control={form.control}
+                                        name={`columnas.${index}.condicion`}
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel>Condicion</FormLabel>
+                                                <Select
+                                                    value={field.value}
+                                                    name={field.name}
+                                                    onValueChange={(value) => {
+                                                        field.onChange(value)
+                                                        resetearAlCambiarCondicion(index)
+                                                        setCondicionIdGivenName(value, index)
+
+                                                    }}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue onBlur={field.onBlur} ref={field.ref}
+                                                                placeholder="Seleccione condicion" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent
+                                                        className="w-full">
+                                                        {CONDICIONES.map((column) => (
+                                                            <SelectItem key={column.name}
+                                                                value={column.name}>{column.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                {
+                                    watchColumns[index]?.condicion === 'Where' && (
+                                        <div className="">
+                                            <FormField
+                                                control={form.control}
+                                                name={`columnas.${index}.where.nombre`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>Condicion</FormLabel>
+                                                        <Select
+                                                            name={field.value}
+                                                            value={field.value}
+                                                            disabled={watchColumns[index]?.nombre === ""}
+                                                            onValueChange={(value) => {
+                                                                field.onChange(value)
+                                                                resetearAlCambiarCondicionWhere(index)
+                                                                setWhereCondicionIdGivenName(value, index)
+                                                            }}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue onBlur={field.onBlur} ref={field.ref}
+                                                                        placeholder="Seleccione condicion" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent
+                                                                className="w-full">
+                                                                {getWhereCondiciones(watchColumns[index]?.nombre, index).map((column) => (
+                                                                    <SelectItem key={column.name}
+                                                                        value={column.name}>{column.title}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )
+                                }
+                                {
+                                    watchColumns[index]?.where.nombre === 'longitud' && (
+                                        <div className="">
+                                            <FormField
+                                                control={form.control}
+                                                name={`columnas.${index}.where.longitud.nombre`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>Condicion</FormLabel>
+                                                        <Select
+                                                            name={field.value}
+                                                            value={field.value}
+                                                            disabled={watchColumns[index]?.where.nombre !== "longitud"}
+                                                            onValueChange={(value) => {
+                                                                field.onChange(value)
+                                                                setWhereLongitudCondicionIdGivenName(value, index)
+                                                            }}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue onBlur={field.onBlur} ref={field.ref}
+                                                                        placeholder="Seleccione condicion" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent
+                                                                className="w-full">
+                                                                {obtenerCondicionesDeLongitud().map((column) => (
+                                                                    <SelectItem key={column.name}
+                                                                        value={column.name}>{column.title}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )
+                                }
+                                {
+                                    (watchColumns[index]?.condicion === 'Where') &&
+                                    (
+                                        (watchColumns[index]?.where.nombre !== ''
+                                            && watchColumns[index]?.where.nombre !== 'longitud'
+                                            && watchColumns[index]?.where.nombre !== 'diaSemana'
+                                            && watchColumns[index]?.where.nombre !== 'mes'
+                                            && watchColumns[index]?.where.nombre !== 'año'
+                                        )
+                                        ||
+
+                                        (watchColumns[index]?.where.nombre == 'longitud' && watchColumns[index]?.where.longitud.nombre !== '')
+                                    ) &&
+                                    (
+                                        <div className="">
+                                            <FormField
+                                                control={form.control}
+                                                name={`columnas.${index}.where.valor_uno`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>Valor</FormLabel>
+                                                        <FormControl                                                    >
+                                                            <Input
+                                                                type={obtenerTipoDeInputSegunTipoDeDato(watchColumns[index]?.tipo, watchColumns[index]?.where.nombre)}
+                                                                {...field}
+                                                                onChange={(e) => {
+                                                                    field.onChange(e.target.value)
+                                                                }
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )
+                                }
+                                {
+                                    (watchColumns[index]?.condicion === 'Where') &&
+                                    (
+                                        (watchColumns[index]?.where.nombre === 'diaSemana'
+                                            || watchColumns[index]?.where.nombre === 'mes'
+                                            || watchColumns[index]?.where.nombre === 'año'
+                                        )
+                                    ) &&
+                                    (
+                                        <div className="">
+                                            <FormField
+                                                control={form.control}
+                                                name={`columnas.${index}.where.valor_uno`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>Valor</FormLabel>
+                                                        <Select
+                                                            name={field.value}
+                                                            value={field.value}
+                                                            onValueChange={(value) => {
+                                                                field.onChange(value)
+                                                            }}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue onBlur={field.onBlur} ref={field.ref}
+                                                                        placeholder="Seleccione" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent
+                                                                className="w-full">
+                                                                {obtenerOpcionesDeTiempoEspecial(watchColumns[index]?.where.nombre).map((column) => (
+                                                                    <SelectItem key={column.id}
+                                                                        value={String(column.id)}>{column.nombre}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )
+                                }
+                                {
+                                    (watchColumns[index]?.condicion === 'Where') &&
+                                    (
+                                        watchColumns[index]?.where.nombre == 'entre'
+                                        ||
+                                        watchColumns[index]?.where.longitud.nombre == 'entre'
+                                        ||
+                                        watchColumns[index]?.where.nombre == 'entreFechas'
+                                        ||
+                                        watchColumns[index]?.where.nombre == 'rangoHoras'
+                                    )
+                                    &&
+                                    (
+                                        <div className="">
+                                            <FormField
+                                                control={form.control}
+                                                name={`columnas.${index}.where.valor_dos`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-col">
+                                                        <FormLabel>Valor</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type={obtenerTipoDeInputSegunTipoDeDato(watchColumns[index]?.tipo, watchColumns[index]?.where.nombre)}
+                                                                {...field}
+                                                                onChange={(e) => {
+                                                                    field.onChange(e.target.value)
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    )
+                                }
+                            </div>
                         </div>
-                    </div>
-                ))}
-                <Button
-                    type="button"
-                    onClick={addNewField}
-                    className="w-12"
-                >
-                    <PlusIcon />
-                </Button>
+                    ))}
+                    <Button
+                        type="button"
+                        onClick={addNewField}
+                        className="w-12"
+                    >
+                        <PlusIcon />
+                    </Button>
 
-                <Button type="submit" className="mt-3 w-fit" disabled={form.formState.isSubmitting}>
-                    {
-                        form.formState.isSubmitting ? "Cargando..." : "Ejecutar"
-                    }
-                </Button>
+                    <Button type="submit" className="mt-3 w-fit" disabled={form.formState.isSubmitting}>
+                        {
+                            form.formState.isSubmitting ? "Cargando..." : "Ejecutar"
+                        }
+                    </Button>
 
-            </form>
-        </Form>
-    </section>)
+                </form>
+            </Form>
+        </section>)
 }
 
 export default IntegridadCamposForm
