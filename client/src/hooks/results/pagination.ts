@@ -1,3 +1,4 @@
+import { SearchParam } from "@/types/search-params";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 function usePagination() {
@@ -26,22 +27,26 @@ function usePagination() {
 
   // region Construct queries
 
-  function setQuery(page_query : string, value: string) {
+  function setSearchParams(params: SearchParam[]) {
     // page_query = "missing_page", page = 2
     
     const newParams = new URLSearchParams(pageSearchParams.toString());
-    if (newParams.has(page_query)) {
-      value !== "" ? newParams.set(page_query, value) : newParams.delete(page_query)
-    }else {
-      value!== "" && newParams.append(page_query, value)
-    }
+    
+    params.forEach(({ key, value }) => {
+      if (newParams.has(key)) {
+        value !== "" ? newParams.set(key, value) : newParams.delete(key)
+      }else {
+        value!== "" && newParams.append(key, value)
+      }
+    });
+
     router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
   }
 
   return {
     pageSearchParams,
     handleNextPrevPage,
-    setQuery
+    setSearchParams
   };
 }
 

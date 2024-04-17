@@ -24,7 +24,7 @@ export default function Paginacion({
     currentPage,
     page_query = "p"
   }: Props) {
-    const { handleNextPrevPage, setQuery } = usePagination();
+    const { handleNextPrevPage, setSearchParams } = usePagination();
     const pages_to_show = 10;
     const sRange =
       currentPage > total_pages - pages_to_show
@@ -53,7 +53,7 @@ export default function Paginacion({
                   <PaginationLink
                     className="cursor-pointer"
                     isActive={page === currentPage}
-                    onClick={() => setQuery(page_query, page.toString())}
+                    onClick={() => setSearchParams([{key: page_query, value: page.toString()}])}
                   >
                     {page}
                   </PaginationLink>
