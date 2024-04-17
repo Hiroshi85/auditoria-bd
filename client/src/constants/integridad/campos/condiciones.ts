@@ -20,10 +20,7 @@ export const CONDICIONES: CondicionType[] = [
         id: 1,
         name: 'No Nulo',
     },
-    {
-        id: 2,
-        name: 'Único'
-    },
+
     {
         id: 3,
         name: 'Where',
