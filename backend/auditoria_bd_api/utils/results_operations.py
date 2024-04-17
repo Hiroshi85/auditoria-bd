@@ -86,6 +86,7 @@ def filterDict (request, data, query_param, strict_query = 'strict'):
             else:
                 data = [row for row in data if any(search_param.lower() in str(value).lower() for value in row.values())]
         else: 
+            print("filtrando lista")
             if strict:
                 data = [row for row in data if str(search_param.lower()) == str(row).lower()]
             else:
