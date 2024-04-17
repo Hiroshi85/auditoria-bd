@@ -114,13 +114,11 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                     className={cn(getTabColor(data.sequence_errors.data))}
                   >{`Errores de secuencia ${data.sequence_errors.count}`}</TabsTrigger>
                 </TabsList>
-                <TabsContent
-                  value="missing"
-                  className="flex flex-col gap-2"
-                >
+                <TabsContent value="missing" className="flex flex-col gap-2">
                   <FiltroResultado
                     page_size_query="missing_page_size"
                     search_query="search_missing"
+                    strict_query="strict_missing"
                     registers_count={data.missing.count}
                   />
                   {data.missing.count > 0 ? (
@@ -146,12 +144,15 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                     </div>
                   )}
                 </TabsContent>
-                <TabsContent
-                  value="repeated"
-                  className="flex flex-wrap gap-x-8 gap-y-8"
-                >
+                <TabsContent value="repeated" className="flex flex-col ">
+                  <FiltroResultado
+                    page_size_query="missing_page_size"
+                    search_query="search_duplicates"
+                    strict_query="strict_duplicates"
+                    registers_count={data.missing.count}
+                  />
                   {data.duplicates.count > 0 ? (
-                    <>
+                    <div className="flex flex-wrap gap-8">
                       {data.duplicates.data.map((item) => {
                         return (
                           <span key={item} className={"min-w-[60px]"}>
@@ -166,7 +167,7 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                         currentPage={data.duplicates.current_page}
                         page_query="duplicates_page"
                       />
-                    </>
+                    </div>
                   ) : (
                     <div className="mx-auto text-muted-foreground">
                       No se encontraron registros repetidos
@@ -174,6 +175,12 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                   )}
                 </TabsContent>
                 <TabsContent value="errors">
+                  <FiltroResultado
+                    page_size_query="sequence_page_size"
+                    search_query="search_sequence"
+                    strict_query="strict_sequence"
+                    registers_count={data.missing.count}
+                  />
                   <Table className="w-full text-center mx-auto">
                     <TableCaption>
                       Fin de lista de errores de secuencia.

@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import usePagination from "@/hooks/results/pagination";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -19,13 +20,17 @@ interface Props {
   page_size_query?: string;
   search_query?: string;
   registers_count: number;
+  strict_query?: string;
 }
 function FiltroResultado({
   registers_count,
   page_size_query = "page_size",
   search_query = "search",
+  strict_query = "strict",
 }: Props) {
   const { setQuery } = usePagination();
+  const params = useSearchParams()
+
   const schema = z.object({
     page_size: z.coerce.number().min(1).max(500),
     search: z.string().optional(),
@@ -36,10 +41,11 @@ function FiltroResultado({
     defaultValues: {
       page_size: 25,
       search: "",
-      strict: false
     },
     resolver: zodResolver(schema),
   });
+
+
 
   const watchPageSize = form.watch("page_size");
 
@@ -72,7 +78,7 @@ function FiltroResultado({
   const watchStrict = form.watch("strict");
   useEffect(() => {
     if (watchStrict !== undefined)
-      setQuery("strict", watchStrict.toString());
+      setQuery(strict_query, watchStrict.toString());
   }, [watchStrict]);
 
   return (
