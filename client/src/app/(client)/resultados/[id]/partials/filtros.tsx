@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import usePagination from "@/hooks/results/pagination";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
@@ -29,7 +28,6 @@ function FiltroResultado({
   strict_query = "strict",
 }: Props) {
   const { setQuery } = usePagination();
-  const params = useSearchParams()
 
   const schema = z.object({
     page_size: z.coerce.number().min(1).max(500),

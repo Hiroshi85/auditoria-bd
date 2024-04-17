@@ -100,7 +100,6 @@ export function PersonalizadasProvider({
         if (executeException.data.exception_id)
          setResultId(executeException.data.exception_id.toString());
       }
-    console.log("executeException", executeException.data);
     }
   }, [executeException.data])
 
