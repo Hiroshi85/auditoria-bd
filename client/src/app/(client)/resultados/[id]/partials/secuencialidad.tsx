@@ -121,6 +121,7 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                     page_size_query="missing_page_size"
                     search_query="search_missing"
                     strict_query="strict_missing"
+                    page_query="missing_page"
                     registers_count={data.missing.count}
                   />
                   {data.missing.count > 0 ? (
@@ -148,9 +149,10 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                 </TabsContent>
                 <TabsContent value="repeated" className="flex flex-col ">
                   <FiltroResultado
-                    page_size_query="missing_page_size"
+                    page_size_query="duplicates_page_size"
                     search_query="search_duplicates"
                     strict_query="strict_duplicates"
+                    page_query="duplicates_page"
                     registers_count={data.missing.count}
                   />
                   {data.duplicates.count > 0 ? (
@@ -181,6 +183,7 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                     page_size_query="sequence_page_size"
                     search_query="search_sequence"
                     strict_query="strict_sequence"
+                    page_query="sequence_page"
                     registers_count={data.missing.count}
                   />
                   <Table className="w-full text-center mx-auto">

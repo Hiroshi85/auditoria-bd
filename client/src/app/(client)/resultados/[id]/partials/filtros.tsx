@@ -21,14 +21,16 @@ interface Props {
   search_query?: string;
   registers_count: number;
   strict_query?: string;
+  page_query?: string; // prevenir invalid page al filtrar los resultados
 }
 function FiltroResultado({
   registers_count,
+  page_query = "p",
   page_size_query = "page_size",
   search_query = "search",
   strict_query = "strict",
 }: Props) {
-  const { setQuery } = usePagination();
+  const { setSearchParams } = usePagination();
 
   const schema = z.object({
     page_size: z.coerce.number().min(1).max(500),
@@ -52,7 +54,11 @@ function FiltroResultado({
       console.log("Valid page size");
       form.clearErrors("page_size");
       const timeout = setTimeout(() => {
-        setQuery(page_size_query, watchPageSize.toString());
+        // Prevenir error invalid page
+        setSearchParams([
+          { key: page_size_query, value: watchPageSize.toString() },
+          { key: page_query, value: "1" },
+        ]);
       }, 1000);
       return () => clearTimeout(timeout);
     } else {
@@ -66,7 +72,10 @@ function FiltroResultado({
   useEffect(() => {
     if (watchSearch !== undefined) {
       const timeout = setTimeout(() => {
-        setQuery(search_query, watchSearch.toString());
+        setSearchParams([
+          { key: search_query, value: watchSearch },
+          { key: page_query, value: "1"}
+        ]);
       }, 1000);
       return () => clearTimeout(timeout);
     }
@@ -74,8 +83,12 @@ function FiltroResultado({
 
   const watchStrict = form.watch("strict");
   useEffect(() => {
-    if (watchStrict !== undefined)
-      setQuery(strict_query, watchStrict.toString());
+    if (watchStrict !== undefined) {
+      setSearchParams([
+        { key: strict_query, value: watchStrict.toString() },
+        { key: page_query, value: "1" }
+      ])
+    }
   }, [watchStrict]);
 
   return (
