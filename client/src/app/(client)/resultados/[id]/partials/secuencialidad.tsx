@@ -1,15 +1,7 @@
 "use client";
 import Alertas from "@/components/alertas";
 import { Badge } from "@/components/ui/badge";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+
 import { ResultContainer } from "@/components/ui/result-container";
 import {
   Table,
@@ -21,13 +13,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import usePagination from "@/hooks/results/pagination";
 import { cn } from "@/lib/utils";
 import { ResultsSecuencial } from "@/types/resultados";
 import { InfoIcon } from "lucide-react";
-import next from "next";
-import { pages } from "next/dist/build/templates/app-page";
 import React from "react";
+import Paginacion from "./paginacion";
+import FiltroResultado from "./filtros";
 
 function getTabColor(array: any[]) {
   return array.length > 0 && "text-red-600";
@@ -109,7 +100,7 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
             </div>
           </header>
           {data.result === "exception" && (
-            <main>
+            <main className="relative">
               <Tabs defaultValue="missing">
                 <TabsList className="w-full mb-4 space-x-2 bg-transparent">
                   <TabsTrigger
@@ -125,12 +116,15 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                     className={cn(getTabColor(data.sequence_errors.data))}
                   >{`Errores de secuencia ${data.sequence_errors.count}`}</TabsTrigger>
                 </TabsList>
-                <TabsContent
-                  value="missing"
-                  className="flex flex-wrap gap-x-8 gap-y-8"
-                >
+                <TabsContent value="missing" className="flex flex-col gap-2">
+                  <FiltroResultado
+                    page_size_query="missing_page_size"
+                    search_query="search_missing"
+                    strict_query="strict_missing"
+                    registers_count={data.missing.count}
+                  />
                   {data.missing.count > 0 ? (
-                    <>
+                    <div className="flex flex-wrap gap-8">
                       {data.missing.data.map((item, index) => {
                         return (
                           <span key={item} className={"min-w-[60px]"}>
@@ -143,18 +137,24 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                         prevUrl={data.missing.previous}
                         total_pages={data.missing.total_pages}
                         currentPage={data.missing.current_page}
+                        page_query="missing_page"
                       />
-                    </>
+                    </div>
                   ) : (
-                    <> ad</>
+                    <div>
+                      No se encontraron valores perdidos en la secuencia
+                    </div>
                   )}
                 </TabsContent>
-                <TabsContent
-                  value="repeated"
-                  className="flex flex-wrap gap-x-8 gap-y-8"
-                >
+                <TabsContent value="repeated" className="flex flex-col ">
+                  <FiltroResultado
+                    page_size_query="missing_page_size"
+                    search_query="search_duplicates"
+                    strict_query="strict_duplicates"
+                    registers_count={data.missing.count}
+                  />
                   {data.duplicates.count > 0 ? (
-                    <>
+                    <div className="flex flex-wrap gap-8">
                       {data.duplicates.data.map((item) => {
                         return (
                           <span key={item} className={"min-w-[60px]"}>
@@ -167,8 +167,9 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                         prevUrl={data.duplicates.previous}
                         total_pages={data.duplicates.total_pages}
                         currentPage={data.duplicates.current_page}
-                      />{" "}
-                    </>
+                        page_query="duplicates_page"
+                      />
+                    </div>
                   ) : (
                     <div className="mx-auto text-muted-foreground">
                       No se encontraron registros repetidos
@@ -176,43 +177,48 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
                   )}
                 </TabsContent>
                 <TabsContent value="errors">
-                  <Table className="w-fit text-center">
+                  <FiltroResultado
+                    page_size_query="sequence_page_size"
+                    search_query="search_sequence"
+                    strict_query="strict_sequence"
+                    registers_count={data.missing.count}
+                  />
+                  <Table className="w-full text-center mx-auto">
                     <TableCaption>
                       Fin de lista de errores de secuencia.
                     </TableCaption>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-80px">#</TableHead>
-                        <TableHead>Valor esperado</TableHead>
-                        <TableHead>Valor encontrado</TableHead>
+                        <TableHead className="text-center">#</TableHead>
+                        <TableHead className="text-center">
+                          Valor esperado
+                        </TableHead>
+                        <TableHead className="text-center">
+                          Valor encontrado
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.sequence_errors.count > 0 ? (
-                        <>
-                          {data.sequence_errors.data.map((item, index) => {
-                            return (
-                              <TableRow key={item.expected}>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>{item.expected}</TableCell>
-                                <TableCell>{item.found}</TableCell>
-                              </TableRow>
-                            );
-                          })}
-                          <Paginacion
-                            currentPage={data.sequence_errors.current_page}
-                            nextUrl={data.sequence_errors.next}
-                            prevUrl={data.sequence_errors.previous}
-                            total_pages={data.sequence_errors.total_pages}
-                          />
-                        </>
-                      ) : (
-                        <div className="mx-auto text-muted-foreground">
-                          No se encontraron registros repetidos
-                        </div>
-                      )}
+                      {data.sequence_errors.count > 0 &&
+                        data.sequence_errors.data.map((item, index) => {
+                          return (
+                            <TableRow key={item.expected}>
+                              <TableCell>{index + 1}</TableCell>
+                              <TableCell>{item.expected}</TableCell>
+                              <TableCell>{item.found}</TableCell>
+                            </TableRow>
+                          );
+                        })}
                     </TableBody>
                   </Table>
+
+                  <Paginacion
+                    currentPage={data.sequence_errors.current_page}
+                    nextUrl={data.sequence_errors.next}
+                    prevUrl={data.sequence_errors.previous}
+                    total_pages={data.sequence_errors.total_pages}
+                    page_query="sequence_page"
+                  />
                 </TabsContent>
               </Tabs>
             </main>
@@ -224,66 +230,3 @@ const ResultadoSecuencialidad = ({ data }: Props) => {
 };
 
 export default ResultadoSecuencialidad;
-
-export function Paginacion({
-  prevUrl,
-  nextUrl,
-  total_pages,
-  currentPage,
-}: {
-  prevUrl: string | null;
-  nextUrl: string | null;
-  total_pages: number;
-  currentPage: number;
-}) {
-  const { handleNextPrevPage } = usePagination();
-  const pages_to_show = 10;
-  const sRange =
-    currentPage > total_pages - pages_to_show
-      ? Math.max(1, total_pages - pages_to_show + 1)
-      : Math.max(1, currentPage, currentPage - pages_to_show);
-  const eRange = Math.min(total_pages, currentPage + pages_to_show);
-
-  return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            onClick={() => handleNextPrevPage(prevUrl)}
-            isActive={prevUrl !== null}
-          />
-        </PaginationItem>
-        {sRange > 1 && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-        )}
-        {Array.from({ length: eRange - sRange + 1 }, (_, i) => i + sRange).map(
-          (page) => {
-            return (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  className="cursor-pointer"
-                  isActive={page === currentPage}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            );
-          }
-        )}
-        {eRange < total_pages && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-        )}
-        <PaginationItem>
-          <PaginationNext
-            onClick={() => handleNextPrevPage(nextUrl)}
-            isActive={nextUrl !== null}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  );
-}

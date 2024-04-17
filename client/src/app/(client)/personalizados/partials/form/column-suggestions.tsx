@@ -53,7 +53,6 @@ export default function ColumnSuggestions({ form, columns }: Props) {
                       type="button"
                       className="flex justify-between items-center w-full h-full p-2"
                       onClick={() => {
-                        console.log("column", column);
                         form.setValue(
                           "query",
                           form.getValues("query") + column.name
