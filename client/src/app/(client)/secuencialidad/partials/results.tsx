@@ -3,23 +3,32 @@ import Spinner from "@/components/ui/spinner";
 import { useSecuencia } from "../secuencia.context";
 
 import { ResultContainer } from "@/components/ui/result-container";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getResultado } from "@/services/resultados";
 import { ResultsSecuencial } from "@/types/resultados";
 import ResultadoSecuencialidad from "../../resultados/[id]/partials/secuencialidad";
 import { InfoIcon } from "lucide-react";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function SeqExceptionResults() {
   const { mutation, resultId } = useSecuencia();
   const { data, isError, isPending } = mutation;
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
   const resultado = useQuery({
     queryKey: ["resultado", resultId],
-    queryFn: () => (resultId ? getResultado(resultId) : null),
+    queryFn: () => (resultId ? getResultado(resultId, searchParams.toString()) : null),
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     enabled: !!resultId,
   });
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["resultado", resultId] });
+  }, [searchParams]);
+
 
   if (isPending) {
     return (
