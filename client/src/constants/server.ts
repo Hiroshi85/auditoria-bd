@@ -1,1 +1,1 @@
-export const API_HOST = "http://localhost:8000"
+export const API_HOST = process.env.SERVER_HOST || 'http://localhost:8000';
